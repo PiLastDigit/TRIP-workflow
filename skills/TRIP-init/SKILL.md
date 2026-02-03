@@ -1,5 +1,8 @@
 ---
-description: "Initialize TRIP workflow in a new project - creates docs structure and generates ARCHI.md"
+name: TRIP-init
+description: Initialize TRIP workflow in a new project (creates docs structure and generates ARCHI.md)
+disable-model-invocation: true
+argument-hint: "name of the project to initialize"
 ---
 
 # TRIP Initialization Mode
@@ -15,13 +18,13 @@ TRIP is a structured development workflow with four phases:
 - **R**eview - Systematic code review
 - **T**est - Comprehensive testing
 
-Why call it TRIP instead of PIRT? Because that's what will be left to us while AI takes care of the rest 🍄
+Why call it TRIP instead of PIRT? Because why not
 
 ---
 
 ## Your Task
 
-Initialize the TRIP workflow for the project: $ARGUMENTS
+Initialize the TRIP workflow for the project: **$ARGUMENTS**
 
 If no project name provided, ask the user for the project name before proceeding.
 
@@ -36,10 +39,11 @@ docs/
 ├── 1-plans/              # Feature planning documents
 ├── 2-changelog/          # Version changelog files
 ├── 3-code-review/        # Code review documentation
-└── 4-unit-tests/         # Unit testing documentation
+├── 4-unit-tests/         # Unit testing documentation
+└── 6-memo/               # Miscellaneous notes and memos
 ```
 
-Note: `5-tuto/` and `X-memo/` folders are created conditionally in Phase 6 after the tutorial choice (memo number depends on whether tutorials are enabled).
+Note: `5-tuto/` folder is created conditionally in Phase 6 only if the user wants tutorial generation.
 
 Files (`ARCHI.md`, `ARCHI-rules.md`, `changelog_table.md`, `TESTING.md`) will be created in later phases after codebase analysis.
 
@@ -434,23 +438,28 @@ Summarize what was generated:
 
 ### Ask for Feedback
 
-Ask the user:
+**Use the `AskUserQuestion` tool** to present the user with a structured choice:
 
-> **"Please review the generated ARCHI.md. Do you have any comments, corrections, or additional sections you'd like me to add?"**
+- **Question**: "Please review the generated ARCHI.md. How would you like to proceed?"
+- **Options**:
+  1. **"Approved"** — ARCHI.md looks good, proceed to Phase 6
+  2. **"Request changes"** — I have corrections or modifications
+  3. **"Add sections"** — I'd like additional sections added
 
 ### Handle Feedback
 
-- **If user requests changes**: Make the requested modifications to ARCHI.md
-- **If user validates**: Proceed to Phase 6
-- **If user wants to add sections**: Add them and re-present for validation
+- **If "Approved"**: Proceed to Phase 6
+- **If "Request changes"**: Make the requested modifications, then re-present for validation using `AskUserQuestion` again
+- **If "Add sections"**: Add them, then re-present for validation using `AskUserQuestion` again
+- **If "Other" (custom input)**: Handle accordingly
 
 **Do NOT proceed to Phase 6 until the user explicitly approves the ARCHI.md.**
 
 ---
 
-## Phase 6: Update TRIP Commands
+## Phase 6: Update TRIP Skills
 
-After user validation, update the other TRIP command files based on the **actual codebase architecture** documented in ARCHI.md.
+After user validation, update the other TRIP skill files based on the **actual codebase architecture** documented in ARCHI.md.
 
 > **IMPORTANT**: The examples below are **recommendations and starting points**, not templates to copy blindly. Always tailor the content based on:
 >
@@ -458,26 +467,26 @@ After user validation, update the other TRIP command files based on the **actual
 > - The patterns and conventions documented in the validated ARCHI.md (Phase 5)
 > - The specific tools, frameworks, and practices used in **this** project
 
-### Files to Update in `.claude/commands/TRIP/`:
+### Skills to Update:
 
-1. **`1-Plan.md`** - Technical considerations, guidance sections
-2. **`2-Implement.md`** - Version file, week offset, tutorials
-3. **`3-Review.md`** - Review checklist adapted to actual architecture
-4. **`4-Test.md`** - Test commands, structure, priorities
-
----
-
-### 6.1 Universal Updates (ALL commands)
-
-**Project Name**: Replace the `[PROJECT_NAME]` placeholder with the actual project name in all four command files.
+1. **`TRIP-1-plan`** - Technical considerations, guidance sections
+2. **`TRIP-2-implement`** - Version file, week offset, tutorials
+3. **`TRIP-3-review`** - Review checklist adapted to actual architecture
+4. **`TRIP-4-test`** - Test commands, structure, priorities
 
 ---
 
-### 6.2 Update `1-Plan.md`
+### 6.1 Universal Updates (ALL skills)
+
+**Project Name**: Replace the `[PROJECT_NAME]` placeholder with the actual project name in all four skill files.
+
+---
+
+### 6.2 Update `TRIP-1-plan`
 
 **A. Technical Considerations Section**
 
-Replace the `[ADAPT_TO_PROJECT: ...]` marker in the Technical Considerations section with concerns **relevant to this specific codebase**. The examples below are starting points - adapt based on what ARCHI.md documents:
+Replace the `[ADAPT_TO_PROJECT]` markers in the Technical Considerations section with concerns **relevant to this specific codebase**. The examples below are starting points - adapt based on what ARCHI.md documents:
 
 - If the project uses specific patterns (e.g., a custom state management approach), include them
 - If certain concerns don't apply (e.g., no i18n in this project), omit them
@@ -608,19 +617,22 @@ _These are examples. Create guidance sections based on what's actually in ARCHI.
 
 **C. Custom Plan Sections**
 
-Ask the user:
+**Use the `AskUserQuestion` tool** to ask:
 
-> **"Are there any project-specific sections you want included in every plan? (e.g., 'Database Migrations', 'API Documentation', 'Hardware Requirements')"**
+- **Question**: "Are there any project-specific sections you want included in every plan?"
+- **Options**:
+  1. **"No custom sections"** — Standard plan sections are sufficient
+  2. **"Yes, add custom sections"** — I want to specify additional sections (provide details via "Other")
 
-If yes, add them to the plan template.
+If the user selects "Yes" or provides custom input, add the specified sections to the plan template.
 
 ---
 
-### 6.3 Update `2-Implement.md`
+### 6.3 Update `TRIP-2-implement`
 
 **A. Version File Location**
 
-Replace the `[VERSION_FILE]` placeholder in Step 2 with the actual version file path:
+Update Step 2 to reference the actual version file:
 
 - `package.json` for Node.js
 - `Cargo.toml` for Rust
@@ -628,65 +640,76 @@ Replace the `[VERSION_FILE]` placeholder in Step 2 with the actual version file 
 - `CMakeLists.txt` or `version.h` for C/C++
 - Or other location identified in Phase 2
 
-**B. Week Offset**
+**B. Week Anchor**
 
-The current calendar week becomes **Week 1** of the project.
+The week Init is run becomes **Week 1** of the project. Capture the anchor date (Monday of the current week) and update the week formula in `TRIP-2-implement`.
 
-Replace the `[WEEK_OFFSET_FORMULA]` placeholder with the actual formula. For example, if Init is run during calendar week 42:
+Run this to get the anchor date:
 
+```bash
+date -d "last monday" '+%Y-%m-%d'  # If today is Monday, use: date '+%Y-%m-%d'
 ```
-Calculate project week: Calendar week minus 41 = Project week. (Week 42 = Week 1)
-```
+
+Then replace the `[WEEK_ANCHOR_DATE]` placeholder in `TRIP-2-implement` Step 1 with the actual date. The formula counts elapsed weeks from that fixed date, so it works across year boundaries indefinitely.
 
 **C. Tutorial Generation**
 
-Ask the user:
+**Use the `AskUserQuestion` tool** to ask:
 
-> **"Do you want the Implement command to generate learning tutorials after each implementation? (y/n)"**
+- **Question**: "Do you want the Implement command to generate tutorials after each implementation (learn by doing)?"
+- **Options**:
+  1. **"Yes"** — Generate tutorials after each implementation
+  2. **"No"** — Skip tutorial generation
 
-**If NO**:
+**If "No"**:
 
-- Remove the `[TUTORIAL_STEP]` comment block entirely from `2-Implement.md`
+- Remove the `[TUTORIAL_STEP]` block entirely from `TRIP-2-implement`
 - Do NOT create the `docs/5-tuto/` folder
-- Create `docs/5-memo/` folder (memo takes slot 5)
+- No renumbering needed — the existing step numbers are already correct for this case
 
-**If YES**:
+**If "Yes"**:
 
 - Create the `docs/5-tuto/` folder
-- Create `docs/6-memo/` folder (memo takes slot 6)
-- Uncomment the `[TUTORIAL_STEP]` block in `2-Implement.md`
-- Ask follow-up questions to customize the tutorial generation:
+- **Use the `AskUserQuestion` tool** with multiple questions to customize tutorial generation:
 
-> **"To tailor the tutorials to your needs, please tell me:"**
->
-> 1. **What is your current programming level?**
->    - Beginner (learning fundamentals)
->    - Intermediate (comfortable with basics, learning advanced concepts)
->    - Advanced (experienced, interested in deep dives and edge cases)
-> 2. **What do you want to learn from these tutorials?**
->    - Language fundamentals (syntax, idioms, patterns)
->    - Framework/library specifics (React, Rust, etc.)
->    - Architecture & design patterns
->    - Performance & optimization
->    - Other: [let user specify]
-> 3. **What style do you prefer?**
->    - Concise (key points, minimal explanation)
->    - Balanced (explanations with examples)
->    - Verbose (detailed explanations, multiple examples, diagrams)
+  **Question 1** (header: "Level"): "What is your current programming level?"
+  - **Options**: "Beginner" (learning fundamentals), "Intermediate" (comfortable with basics, learning advanced), "Advanced" (experienced, deep dives and edge cases)
 
-Then replace the placeholders in the tutorial step with the user's answers:
+  **Question 2** (header: "Focus", multiSelect: true): "What do you want to learn from these tutorials?"
+  - **Options**: "Language fundamentals" (syntax, idioms, patterns), "Framework specifics" (React, Rust, etc.), "Architecture & patterns" (design patterns, system design), "Performance & optimization" (profiling, caching, efficiency)
 
-- `[USER_LEVEL]` → user's programming level
-- `[USER_LEARNING_FOCUS]` → what they want to learn
-- `[USER_PREFERRED_STYLE]` → concise/balanced/verbose
+  **Question 3** (header: "Style"): "What tutorial style do you prefer?"
+  - **Options**: "Concise" (key points, minimal explanation), "Balanced" (explanations with examples), "Verbose" (detailed explanations, multiple examples, diagrams)
+
+Then update the `[TUTORIAL_STEP]` block in `TRIP-2-implement` with the user's context:
+
+```markdown
+### Step 7: Tutorial
+
+Create `docs/5-tuto/tuto_x.y.z.md` explaining the core principle.
+
+**User context for tutorials**:
+
+- Level: [user's level]
+- Learning focus: [user's interests]
+- Style: [user's preferred style]
+
+[Add any specific instructions based on their choices]
+```
+
+**IMPORTANT — Renumber subsequent steps**: After uncommenting the Tutorial as Step 7, renumber the steps that follow:
+
+- Step 7: README Update → **Step 8**: README Update
+- Step 8: Commit → **Step 9**: Commit
+- Step 9: Tag → **Step 10**: Tag
 
 ---
 
-### 6.4 Update `3-Review.md`
+### 6.4 Update `TRIP-3-review`
 
 **A. Adapt Review Checklist**
 
-Replace the `[ADAPT_TO_PROJECT: ...]` comment block with checklist sections based on **what matters for this specific codebase** as documented in ARCHI.md. The examples below are starting points - include only what's relevant and add project-specific checks:
+Build the review checklist based on **what matters for this specific codebase** as documented in ARCHI.md. The examples below are starting points - include only what's relevant and add project-specific checks:
 
 **For Web Frontend** (example - adapt to actual patterns)
 
@@ -774,21 +797,40 @@ Replace the `[ADAPT_TO_PROJECT: ...]` comment block with checklist sections base
 
 _These are examples. Build the checklist from ARCHI.md - what patterns does this project use? What quality criteria matter here? What are the common pitfalls to check for?_
 
+**B. Remove Irrelevant Sections**
+
+Remove sections that don't apply to this project. Only keep checklist items that are meaningful for the actual codebase.
+
 ---
 
-### 6.5 Update `4-Test.md`
+### 6.5 Update `TRIP-4-test`
 
 **A. Test Commands**
 
-Replace the test command placeholders with the **actual test commands** used in this project:
+Replace the `[TEST_COMMAND_*]` placeholders with the **actual test commands** used in this project (from ARCHI.md or discovered during exploration):
 
-- `[TEST_COMMAND_ALL]` → command to run all tests (e.g., `npm test`, `cargo test`, `pytest`)
-- `[TEST_COMMAND_SPECIFIC]` → command to run a specific test file
-- `[TEST_COMMAND_COVERAGE]` → command to run tests with coverage
+```markdown
+### Commands
+
+\`\`\`bash
+
+# Run all tests
+
+[actual command, e.g., npm test, cargo test, pytest, make test]
+
+# Run specific test
+
+[actual command for single test]
+
+# With coverage
+
+[actual coverage command]
+\`\`\`
+```
 
 **B. Test Structure**
 
-Replace the `[ADAPT_TO_PROJECT: ...]` marker in the Test Structure section with actual test organization:
+Replace the `[ADAPT_TO_PROJECT]` marker with actual test organization:
 
 - Where tests are located
 - Naming conventions
@@ -796,7 +838,7 @@ Replace the `[ADAPT_TO_PROJECT: ...]` marker in the Test Structure section with 
 
 **C. Testing Priorities**
 
-Replace the `[ADAPT_TO_PROJECT: ...]` comment block in Testing Priorities with what's **actually tested in this project**. Examples:
+Adapt based on **what's actually tested in this project** and what the ARCHI.md documents about testing strategy. Examples:
 
 **For Embedded:**
 
@@ -976,24 +1018,24 @@ Update: Technology Stack, and any affected architectural sections
 
 ## Post-Initialization Checklist
 
-- [ ] Core `docs/` folders created (Phase 1): 1-plans, 2-changelog, 3-code-review, 4-unit-tests
+- [ ] Core `docs/` folders created (Phase 1): 1-plans, 2-changelog, 3-code-review, 4-unit-tests, 6-memo
 - [ ] Codebase thoroughly explored (Phase 2)
 - [ ] Current version identified (Phase 2)
 - [ ] Project type correctly classified (Phase 3)
 - [ ] ARCHI.md generated with appropriate sections (Phase 4)
 - [ ] Custom sections added where relevant (Phase 4)
 - [ ] **User reviewed and approved ARCHI.md** (Phase 5)
-- [ ] **TRIP commands updated** (Phase 6):
-  - [ ] `[PROJECT_NAME]` placeholder replaced in all commands
-  - [ ] `1-Plan.md`: `[ADAPT_TO_PROJECT]` markers replaced with actual technical considerations
-  - [ ] `1-Plan.md`: Guidance sections replaced with project-specific patterns
-  - [ ] `1-Plan.md`: Custom plan sections added (if user requested)
-  - [ ] `2-Implement.md`: `[VERSION_FILE]` placeholder replaced
-  - [ ] `2-Implement.md`: `[WEEK_OFFSET_FORMULA]` placeholder replaced
-  - [ ] `2-Implement.md`: Tutorial configured (if enabled: 5-tuto/ + 6-memo/ created, `[TUTORIAL_STEP]` uncommented + `[USER_*]` replaced; if disabled: 5-memo/ created, block removed)
-  - [ ] `3-Review.md`: `[ADAPT_TO_PROJECT]` comment block replaced with project-specific checklist
-  - [ ] `4-Test.md`: `[TEST_COMMAND_*]` placeholders replaced with actual commands
-  - [ ] `4-Test.md`: `[ADAPT_TO_PROJECT]` markers replaced with actual test structure/priorities
+- [ ] **TRIP skills updated** (Phase 6):
+  - [ ] `[PROJECT_NAME]` placeholder replaced in all skills
+  - [ ] `TRIP-1-plan`: `[ADAPT_TO_PROJECT]` markers replaced with actual technical considerations
+  - [ ] `TRIP-1-plan`: Guidance sections replaced with project-specific patterns
+  - [ ] `TRIP-1-plan`: Custom plan sections added (if user requested)
+  - [ ] `TRIP-2-implement`: `[VERSION_FILE]` placeholder replaced
+  - [ ] `TRIP-2-implement`: `[WEEK_ANCHOR_DATE]` placeholder replaced
+  - [ ] `TRIP-2-implement`: Tutorial preference configured (if enabled: 5-tuto/ folder created + user context; if disabled: `[TUTORIAL_STEP]` block removed)
+  - [ ] `TRIP-3-review`: `[ADAPT_TO_PROJECT]` markers replaced with project-specific checklist
+  - [ ] `TRIP-4-test`: `[TEST_COMMAND_*]` placeholders replaced with actual commands
+  - [ ] `TRIP-4-test`: `[ADAPT_TO_PROJECT]` markers replaced with actual test structure/priorities
 - [ ] changelog_table.md initialized with version+1 (Phase 7)
 - [ ] TESTING.md created, adapted to actual test setup (Phase 7)
 - [ ] ARCHI-rules.md created, referencing actual ARCHI sections (Phase 7)

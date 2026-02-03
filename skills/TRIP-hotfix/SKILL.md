@@ -1,12 +1,15 @@
 ---
-description: "Urgent fix bypassing full TRIP workflow - for production issues only"
+name: TRIP-hotfix
+description: Urgent fix bypassing full TRIP workflow
+disable-model-invocation: true
+argument-hint: "what is broken in production?"
 ---
 
 # Hotfix Mode
 
 You are now in **hotfix mode** - a streamlined workflow for urgent production fixes.
 
-> **Warning**: Only use this for genuine emergencies. For regular bugs, use the full TRIP workflow (`/TRIP:Plan` → `/TRIP:Implement`).
+> **Warning**: Only use this for genuine emergencies. For regular bugs, use the full TRIP workflow (`TRIP-1-plan` → `TRIP-2-implement`).
 
 ## Your Task
 
@@ -18,18 +21,14 @@ Hotfix: $ARGUMENTS
 
 Before proceeding, confirm this is a genuine hotfix:
 
-> **"Is this a production-critical issue that cannot wait for the normal TRIP workflow?"**
->
-> - Security vulnerability
-> - Data corruption/loss
-> - Service outage
-> - Critical user-facing bug
->
-> **(y/n)**
+**Use the `AskUserQuestion` tool** to confirm urgency:
 
-**If NO**: Redirect to `/TRIP:Plan` for proper workflow.
+- **Question**: "Is this a production-critical issue that cannot wait for the normal TRIP workflow?"
+- **Options**: "Yes — critical issue" (security vulnerability, data corruption, service outage, or critical user-facing bug), "No — regular bug" (redirect to `TRIP-1-plan` for proper workflow)
 
-**If YES**: Proceed with hotfix.
+**If "No"**: Redirect to `TRIP-1-plan` for proper workflow.
+
+**If "Yes"**: Proceed with hotfix.
 
 ---
 
@@ -131,11 +130,11 @@ After the immediate crisis is resolved:
 
 Compared to full TRIP:
 
-- ❌ Interactive discovery questions
-- ❌ Formal plan document
-- ❌ Full code review checklist
-- ❌ Tutorial generation
-- ❌ ARCHI.md update (unless architecture changed)
-- ❌ README update (unless relevant)
+- No interactive discovery questions
+- No formal plan document
+- No full code review checklist
+- No tutorial generation
+- No ARCHI.md update (unless architecture changed)
+- No README update (unless relevant)
 
 These are acceptable trade-offs for genuine emergencies only.

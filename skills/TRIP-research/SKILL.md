@@ -1,5 +1,8 @@
 ---
-description: "Exploratory research or spike - investigation without production code"
+name: TRIP-research
+description: Exploratory research or spike - investigation without production code
+disable-model-invocation: true
+argument-hint: "what do you want to investigate?"
 ---
 
 # Research Mode
@@ -20,6 +23,8 @@ Use this for:
 Research: $ARGUMENTS
 
 ---
+
+## Step 0: Read fully @docs/ARCHI.md
 
 ## Step 1: Define Scope
 
@@ -48,9 +53,10 @@ Based on the complexity of the question(s), suggest an appropriate thinking leve
 | **think harder** | Deep investigation, multiple tradeoffs    | "What's the best approach for X given constraints A, B, C?" |
 | **ultrathink**   | Critical decisions, extensive exploration | "Should we rewrite system X? What are all implications?"    |
 
-Ask the user:
+**Use the `AskUserQuestion` tool** to confirm the thinking level:
 
-> **"Based on this research scope, I suggest using `[level]` thinking. Does that seem appropriate, or would you prefer a different level?"**
+- **Question**: "Based on this research scope, I suggest using `[level]` thinking. Does that seem appropriate?"
+- **Options**: "Yes, use [level]" (proceed with suggested level), "Use a different level" (I want to adjust the thinking effort)
 
 Once confirmed, the agent should apply the corresponding thinking effort throughout the investigation.
 
@@ -88,19 +94,19 @@ Create a lightweight research plan (not a full TRIP plan):
 
 ## Step 3: Confirm & Start
 
-Present the research plan summary to the user:
+Present the research plan summary to the user, then **use the `AskUserQuestion` tool** with two questions:
 
-> **"Here's the research plan:"**
->
-> - **Question(s)**: [Primary question]
-> - **Approach**: [Brief summary of investigation steps]
-> - **Compute Level**: [level]
->
-> **"Ready to start research? (y/n)"**
+**Question 1** (header: "Start"):
+- **Question**: "Research plan ready — Question: [primary question], Approach: [brief summary], Compute: [level]. Ready to start?"
+- **Options**: "Yes, start research" (proceed with investigation), "Adjust the plan" (I have changes to the research scope or approach)
 
-**If NO**: Adjust the plan based on user feedback.
+**Question 2** (header: "Output"):
+- **Question**: "How do you want the findings delivered?"
+- **Options**: "Chat only" (respond directly in the conversation), "Write a memo" (create a file in `docs/6-memo/`)
 
-**If YES**: Proceed with investigation.
+**If "Adjust"**: Modify the plan based on user feedback, then re-present using `AskUserQuestion`.
+
+**If "Yes"**: Proceed with investigation. Remember the output preference for Step 5.
 
 ---
 
@@ -139,7 +145,25 @@ Conduct the research:
 
 ---
 
-## Step 5: Document Findings
+## Step 5: Present Findings
+
+### If "Chat only" was selected
+
+Present the findings directly in the conversation, structured as:
+
+1. **Summary** (2-3 sentences)
+2. **Key Findings** (numbered list)
+3. **Recommendations** (what to do, rationale, alternatives)
+4. **Open Questions** (if any)
+
+Then **use the `AskUserQuestion` tool**:
+
+- **Question**: "Research complete. What would you like to do next?"
+- **Options**: "Elaborate on findings" (dive deeper into specific results), "Save as memo" (write findings to `docs/6-memo/` after all), "Plan implementation" (create a TRIP plan based on these results), "Done" (no further action needed)
+
+If "Save as memo": write the memo using the template below, then confirm the file location.
+
+### If "Write a memo" was selected
 
 Create findings document in `docs/6-memo/`:
 
@@ -149,7 +173,6 @@ Create findings document in `docs/6-memo/`:
 # Research: [Topic]
 
 **Date**: DD-MM-YYYY
-**Time Spent**: [X hours]
 **Author**: [Name]
 
 ## Summary
@@ -201,44 +224,33 @@ Create findings document in `docs/6-memo/`:
 - [Links to documentation, articles, etc.]
 ```
 
----
+Then **use the `AskUserQuestion` tool**:
 
-## Step 6: Present Findings
-
-Summarize for the user:
-
-> **"Research complete. Here's what I found:"**
->
-> **Question**: [What we investigated]
-> **Answer**: [Key finding]
-> **Recommendation**: [What to do next]
-> **Confidence**: [High/Medium/Low]
->
-> **Full findings documented at**: `docs/6-memo/research_[topic]_[date].md`
->
-> **"Would you like me to elaborate on any finding, or proceed to plan implementation based on these results?"**
+- **Question**: "Research documented at `docs/6-memo/research_[date]_[topic].md`. What would you like to do next?"
+- **Options**: "Elaborate on findings" (dive deeper into specific results), "Plan implementation" (create a TRIP plan based on these results), "Done" (no further action needed)
 
 ---
 
 ## What This Workflow Produces
 
-- ✅ Documented findings in `docs/6-memo/`
-- ✅ Clear recommendations
-- ✅ Basis for future TRIP planning
+- Clear recommendations
+- Basis for future TRIP planning
+- Optionally: documented findings in `docs/6-memo/`
 
 ## What This Workflow Does NOT Produce
 
-- ❌ Production code
-- ❌ Version bump
-- ❌ Changelog entry
-- ❌ Commits to main
+- No production code
+- No version bump
+- No changelog entry
+- No commits to main
 
 ---
 
 ## Transition to Implementation
 
-If research concludes that implementation should proceed:
+If research concludes that implementation should proceed, **use the `AskUserQuestion` tool**:
 
-> **"Based on this research, would you like me to create a TRIP plan for implementation?"**
+- **Question**: "Based on this research, would you like me to create a TRIP plan for implementation?"
+- **Options**: "Yes, create a plan" (use findings to inform `TRIP-1-plan`), "Not yet" (I'll decide later)
 
-If yes, use findings to inform `/TRIP:Plan`.
+If yes, use findings to inform `TRIP-1-plan`.

@@ -1,5 +1,7 @@
 ---
-description: "Compact ARCHI.md when it exceeds recommended size - smart compression without losing relevance"
+name: TRIP-compact
+description: Compact ARCHI.md when it exceeds recommended size - smart compression without losing relevance
+disable-model-invocation: true
 ---
 
 # ARCHI Compaction Mode
@@ -8,7 +10,7 @@ You are now in **compaction mode** - intelligently reducing ARCHI.md size while 
 
 ## Why Compact?
 
-ARCHI.md should not exceed **~20k tokens** (~10% of context window). A bloated ARCHI:
+ARCHI.md should not exceed _~20k tokens_. A bloated ARCHI:
 
 - Consumes tokens that could be used for actual work
 - Slows down every command that reads it
@@ -23,26 +25,32 @@ Compact: @docs/ARCHI.md
 
 ## Step 1: Assess Current State
 
-Read the full ARCHI.md and evaluate:
+First, measure the actual token count using the bundled script:
 
-1. **Estimate current size** (rough token count)
-2. **Identify bloat sources**:
+```bash
+bash .claude/skills/TRIP-compact/count-tokens.sh docs/ARCHI.md
+```
+
+Then read the full ARCHI.md and evaluate:
+
+1. **Identify bloat sources**:
    - Verbose explanations where concise would suffice
    - Redundant information repeated across sections
    - Implementation details that belong in code comments, not architecture docs
    - Overly detailed file listings
    - Excessive examples
 
-Report to user:
+**If token count > 20,000**, report the assessment to the user, then **use the `AskUserQuestion` tool**:
 
-> **"ARCHI.md assessment:"**
->
-> - **Estimated size**: ~[X]k tokens
-> - **Target size**: ~20k tokens (10% of context)
-> - **Reduction needed**: ~[Y]%
-> - **Main bloat sources identified**: [list top 3-5]
->
-> **"Ready to proceed with compaction? (y/n)"**
+- **Question**: "ARCHI.md is at ~[X] tokens (target: ~10,000-15,000). Main bloat sources: [list top 3-5]. Proceed with compaction?"
+- **Options**: "Yes, compact" (proceed with compaction strategies), "No, leave as-is" (stop here)
+
+**If token count <= 20,000**, report to the user, then **use the `AskUserQuestion` tool**:
+
+- **Question**: "ARCHI.md is at ~[X] tokens — within acceptable range. Would you still like to compact it further?"
+- **Options**: "Yes, compact anyway" (proceed with compaction), "No, it's fine" (stop here)
+
+If "No" in either case, stop here.
 
 ---
 
@@ -170,23 +178,18 @@ After compaction, verify:
 
 ---
 
-## Step 5: Present Changes
+## Step 5: Measure & Present Changes
 
-Show the user:
+Run the script again on the compacted file:
 
-> **"Compaction complete:"**
->
-> - **Before**: ~[X]k tokens
-> - **After**: ~[Y]k tokens
-> - **Reduction**: [Z]%
->
-> **Changes made:**
->
-> - [Summary of what was compressed]
-> - [What was removed]
-> - [What was restructured]
->
-> **"Please review the compacted ARCHI.md. Any sections that lost too much detail?"**
+```bash
+bash .claude/skills/TRIP-compact/count-tokens.sh docs/ARCHI.md
+```
+
+Present the compaction results to the user, then **use the `AskUserQuestion` tool**:
+
+- **Question**: "Compaction complete: ~[X] → ~[Y] tokens ([Z]% reduction). Changes: [brief summary]. How does the compacted ARCHI.md look?"
+- **Options**: "Looks good" (compaction is complete), "Restore some detail" (specific sections need more detail), "Too aggressive" (undo and try lighter compaction)
 
 ---
 
@@ -197,7 +200,7 @@ If user identifies sections that need more detail:
 - Restore specific details for those sections
 - Compensate by further compressing less critical sections
 
-If still over 20k tokens after smart compression:
+If still over 15k tokens after smart compression:
 
 - Consider splitting into ARCHI.md (core) + ARCHI-detailed.md (deep dives)
 - Only the core file is read by default
@@ -215,7 +218,7 @@ If still over 20k tokens after smart compression:
 
 ---
 
-## When to Run This Command
+## When to Run This Skill
 
 - ARCHI.md feels sluggish to read
 - You notice redundant information

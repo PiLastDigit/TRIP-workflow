@@ -1,5 +1,7 @@
 ---
-description: "Implement a feature following project standards"
+name: TRIP-2-implement
+description: Implement a feature following TRIP plan
+argument-hint: "plan file or feature to implement"
 ---
 
 # Implementation Mode
@@ -34,11 +36,12 @@ Consider a dedicated branch if the task involves:
 
 ### Ask the User
 
-> **"This implementation involves [brief scope assessment]. Would you like me to create a dedicated branch for this work?"**
->
-> **Suggested branch name:** `feat/[short-description]` or `fix/[short-description]`
->
-> **(y/n)**
+**Use the `AskUserQuestion` tool** to ask:
+
+- **Question**: "This implementation involves [brief scope assessment]. Would you like me to create a dedicated branch?"
+- **Options**:
+  1. **"Yes, create branch"** — Suggested name: `feat/[short-description]` or `fix/[short-description]`
+  2. **"No, stay on current branch"** — Continue on the current branch
 
 ### If YES
 
@@ -74,19 +77,21 @@ Proceed with the implementation following the plan or the task description.
 After completing the implementation:
 
 - Cross the corresponding checkboxes in the plan todo list (if any)
-- Then ask: **"Is everything COMPLETE? (y/n)"**
+- Then **use the `AskUserQuestion` tool** to ask:
+  - **Question**: "Is the implementation complete?"
+  - **Options**: "Yes, everything is complete" (proceed to post-implementation steps), "No, there are remaining items" (continue working)
 
-**ONLY after user confirms with YES/y**, proceed with these steps:
+**ONLY after user selects "Yes"**, proceed with these steps:
 
 ### Step 1: Get Current Date/Week
 
 Run this command to get date and project week:
 
 ```bash
-date '+%d-%m-%Y %H:%M' && date '+%W'
+date '+%d-%m-%Y %H:%M' && echo "Project week: $(( ( $(date +%s) - $(date -d '[WEEK_ANCHOR_DATE]' +%s) ) / 604800 + 1 ))"
 ```
 
-Calculate project week: [WEEK_OFFSET_FORMULA]
+Use the project week in all subsequent steps.
 
 ### Step 2: Version Update
 
@@ -128,12 +133,15 @@ Also add a summary entry in the Changelog Summary section.
 
 1. Read fully @docs/ARCHI-rules.md
 2. Update @docs/ARCHI.md following the rules
+3. Run `bash .claude/skills/TRIP-compact/count-tokens.sh docs/ARCHI.md` to check token count
 
 <!-- [TUTORIAL_STEP]
 ### Step 7: Tutorial
+
 Create `docs/5-tuto/tuto_x.y.z.md` explaining the core principle.
 
 **User context for tutorials**:
+
 - Level: [USER_LEVEL]
 - Learning focus: [USER_LEARNING_FOCUS]
 - Style: [USER_PREFERRED_STYLE]
@@ -146,9 +154,16 @@ Also update relevant sections whenever needed.
 
 ---
 
-After completing all documentation steps, ask: **"Ready for commit? (y/n)"**
+**Warning: If ARCHI.md exceeds ~20,000 tokens**, warn the user:
 
-**ONLY after user confirms with YES/y**, proceed:
+> "ARCHI.md is at ~X tokens. Consider running `TRIP-compact` to reduce it before committing."
+
+After completing all documentation steps, **use the `AskUserQuestion` tool** to ask:
+
+- **Question**: "All documentation steps are complete. Ready to commit?"
+- **Options**: "Yes, commit now" (proceed with git commit and tag), "Not yet" (review changes first)
+
+**ONLY after user selects "Yes"**, proceed:
 
 ### Step 8: Commit
 

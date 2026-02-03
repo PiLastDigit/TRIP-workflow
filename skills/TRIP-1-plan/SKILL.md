@@ -1,5 +1,7 @@
 ---
-description: "Plan a new feature following project standards"
+name: TRIP-1-plan
+description: Plan a new feature following project standards
+argument-hint: "describe the feature you want to build"
 ---
 
 # Planning Mode
@@ -24,39 +26,32 @@ Plan the following feature: $ARGUMENTS
 
 ### 1.1 Initial Understanding
 
-After reading the feature request, summarize your understanding in 2-3 sentences and ask clarifying questions:
+After reading the feature request, summarize your understanding in 2-3 sentences, then **use the `AskUserQuestion` tool** to present clarifying questions with structured options.
 
-> **"Here's what I understand: [your summary]"**
->
-> **"Before I create the plan, I have a few questions:"**
->
-> 1. [Question about scope/boundaries]
-> 2. [Question about expected behavior]
-> 3. [Question about edge cases or constraints]
-
-Focus questions on:
+Frame questions around:
 
 - **Scope**: What's included vs excluded?
 - **Behavior**: How should it work from the user's perspective?
 - **Constraints**: Any technical limitations, deadlines, or dependencies?
 - **Priority**: What's most important if trade-offs are needed?
 
+For each question, provide 2-4 concrete options based on your analysis of the codebase and the feature request. Always let the user provide custom input via the built-in "Other" option.
+
 ### 1.2 Iterate Until Clear
 
 After user answers, either:
 
-- **Ask follow-up questions** if new ambiguities emerged
-- **Propose an approach** and ask for confirmation
-
-> **"Based on your answers, I'm thinking the approach would be: [brief description]"**
->
-> **"Does this align with what you have in mind? Anything to adjust?"**
+- **Ask follow-up questions** using the `AskUserQuestion` tool if new ambiguities emerged
+- **Propose an approach** and **use the `AskUserQuestion` tool** to confirm:
+  - **Question**: "Based on your answers, I'm thinking the approach would be: [brief description]. Does this align with what you have in mind?"
+  - **Options**: "Yes, proceed" (approach looks good), "Adjust" (I have modifications to suggest)
 
 ### 1.3 Confirm Before Planning
 
-Only proceed to Step 2 when the user confirms the understanding is correct.
+Only proceed to Step 2 when the user confirms the understanding is correct. **Use the `AskUserQuestion` tool** for final confirmation:
 
-> **"Great, I have a clear picture now. I'll create the plan document."**
+- **Question**: "I believe I have a clear picture now. Ready to create the plan document?"
+- **Options**: "Yes, create the plan" (understanding is correct), "One more thing" (I have additional input before you proceed)
 
 **Minimum: 1 round of questions. Maximum: 3 rounds** (if still unclear after 3 rounds, summarize what you know and proceed with noted assumptions).
 
@@ -69,7 +64,7 @@ Once understanding is confirmed, create the plan document.
 ### File Naming
 
 Depending on the feature (major, minor, patch), propose a new version using SemVer (x.y.z) and create:
-`docs/1-plans/[version]_[feature-name].plan.md`
+`docs/1-plans/F_[version]_[feature-name].plan.md`
 
 ### Required Sections
 
@@ -110,7 +105,7 @@ Depending on the feature (major, minor, patch), propose a new version using SemV
 
 ## Technical Considerations
 
-[ADAPT_TO_PROJECT: List the technical concerns relevant to this project type]
+[ADAPT_TO_PROJECT: Replace with project-specific technical concerns during Init]
 
 - **Pattern Usage**: Which existing patterns to follow (from ARCHI.md)
 - **[Concern 1]**: [Description]
@@ -164,23 +159,26 @@ Depending on the feature (major, minor, patch), propose a new version using SemV
 
 ## Step 3: Plan Review & Validation
 
-After creating the plan document, present a summary to the user:
+After creating the plan document, present a summary to the user including:
 
-> **"I've created the plan. Here's a summary:"**
->
-> - **Feature**: [name]
-> - **Approach**: [1-2 sentences]
-> - **Files affected**: [count] files ([list key ones])
-> - **Estimated complexity**: [simple/moderate/complex]
->
-> **"Please review the plan at `docs/1-plans/x.y.z_feature-name.plan.md`"**
->
-> **"Any changes you'd like me to make before we proceed to implementation?"**
+- **Feature**: [name]
+- **Approach**: [1-2 sentences]
+- **Files affected**: [count] files ([list key ones])
+- **Estimated complexity**: [simple/moderate/complex]
+
+Then **use the `AskUserQuestion` tool** to collect feedback:
+
+- **Question**: "Please review the plan at `docs/1-plans/F_x.y.z_feature-name.plan.md`. How would you like to proceed?"
+- **Options**: "Approved" (ready for implementation), "Request changes" (I have modifications), "Needs rework" (significant issues to address)
 
 Handle feedback:
 
-- **If user requests changes**: Update the plan and re-present
-- **If user approves**: The plan is ready for `/2-Implement`
+- **If "Request changes"**: Update the plan and re-present using `AskUserQuestion` again
+- **If "Needs rework"**: Discuss issues, rework the plan, and re-present
+- **If "Other" (custom input)**: Handle accordingly
+- **If "Approved"**: **Use the `AskUserQuestion` tool** to ask:
+  - **Question**: "Plan approved. Would you like to start implementation now?"
+  - **Options**: "Yes, implement now" (proceed with `TRIP-2-implement` using this plan), "Not yet" (I'll implement later)
 
 ---
 
@@ -199,7 +197,7 @@ But NOT:
 - Actual code implementations
 - Detailed algorithm code
 
-Keep it architectural and descriptive. Code comes in the `/2-Implement` phase.
+Keep it architectural and descriptive. Code comes in the `TRIP-2-implement` phase.
 
 ## [ADAPT_TO_PROJECT: Guidance Sections]
 

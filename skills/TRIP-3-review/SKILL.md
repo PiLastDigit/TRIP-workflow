@@ -1,22 +1,23 @@
 ---
-description: "Review code following project standards"
+name: TRIP-3-review
+description: Review code following project standards
+disable-model-invocation: true
+argument-hint: "version or feature to review"
 ---
 
 # Review Mode
 
 You are now in **code review mode** for **[PROJECT_NAME]**.
 
+Review: $ARGUMENTS
+
 ## Prerequisites - Read First
 
 Before reviewing, you MUST read:
 
 1. @docs/ARCHI.md - Verify architectural compliance
-2. Related plan files in `docs/1-plans/` - Confirm implementation matches design
-3. Recent changelog entries in `docs/2-changelog/`
-
-## Review Target
-
-Review: $ARGUMENTS
+2. Related plan file in `docs/1-plans/` - Confirm implementation matches design
+3. Related changelog entry in `docs/2-changelog/`
 
 ---
 
@@ -46,7 +47,7 @@ Review: $ARGUMENTS
 - [ ] Appropriate abstractions used
 - [ ] Consistent with existing codebase style
 
-<!-- [ADAPT_TO_PROJECT: Add project-specific checklist sections]
+<!-- [ADAPT_TO_PROJECT: Add project-specific checklist sections during Init]
 
 Examples:
 
@@ -191,3 +192,6 @@ After completing the review, create a summary file in `docs/3-code-review/`.
 
 [Final notes]
 ```
+
+**Important:** the checklist in the review file must be checked after the review is properly completed.
+You should always check all the points, but if for any reason you didn't check it, add a note explaining why.
