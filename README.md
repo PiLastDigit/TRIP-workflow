@@ -1,19 +1,21 @@
 ![TRIP Workflow Banner](assets/trip-workflow-banner2.png)
 
+![Version](https://img.shields.io/badge/version-1.1.1-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
+
 ## What is TRIP?
 
 A structured development workflow for AI coding agents that brings **memory**, **consistency**, and **reduced hallucination** (only humans should) to AI-assisted development. TRIP helps you enter flow state and eat features like buttered noodles.
 It is also the acronym (reversed) of the 4-phases development cycle: **P**lan, **I**mplement, **R**eview, **T**est.
 
-TRIP was initially designed for Claude Code using the [Agent Skills](https://agentskills.io/home) open standard (`SKILL.md`). This format is also supported by Codex CLI, OpenCode, and many more. Note that some Claude Code specific features (`AskUserQuestion` tool invocation, `@file` references) may need adaptation for other tools.
+TRIP was initially designed for Claude Code using the [Agent Skills](https://agentskills.io/home) open standard (`SKILL.md`). Also compatible with OpenCode, Codex CLI, and Mistral Vibe.
 
 ## Why TRIP?
 
-There are tons of AI coding workflows out there - GSD, Superpowers, BMAD, and countless others. They might be powerful, but overwhelming for many of us dumb asses.
+There are tons of AI coding workflows out there like [Superpowers](https://github.com/obra/superpowers), [BMAD](https://github.com/bmad-code-org/BMAD-METHOD), [Gastown](https://github.com/steveyegge/gastown) and countless others. They might be powerful, but overwhelming for many of us dumb asses.
 
 Even the "simple" ones come with:
 
-- 47 different commands to memorize
+- 47 different commands & skills to memorize
 - Sub-agents swarm for God-knows-what
 - Certification courses (seriously)
 
@@ -41,7 +43,14 @@ It was kept stupid simple because **the goal is to ship features, not to master 
 3. Follow the interactive prompts
 4. Review and approve the generated ARCHI.md
 
+### Additional For Codex CLI users
+
+Also copy `for_codex/ask-user-question/` to `.codex/skills/` — this provides the `AskUserQuestion` tool that TRIP skills rely on (available on Claude Code & OpenCode but missing from Codex CLI).  
+Or use OpenCode with your OpenAI subscription.
+
 Et voila. Start using the skills like `/TRIP-1-plan auth for this webapp`, `/TRIP-2-implement @auth-plan.md`, etc.
+
+https://github.com/user-attachments/assets/d37bbc60-1868-4fa8-9be6-083b60d6a53d
 
 ## The Heart of TRIP: ARCHI.md
 
@@ -51,39 +60,21 @@ The `ARCHI.md` file is the **central nervous system** of this workflow. It serve
 
 **1. Persistent Context Across Sessions**
 
-AI agents have no memory between sessions. Every new conversation starts from zero. ARCHI.md solves this by providing a comprehensive, always-up-to-date snapshot of your architecture that the agent reads at the start of each task.
+AI agents have no memory between sessions. Every new conversation starts from zero. ARCHI.md solves this by providing a comprehensive, always-up-to-date snapshot of your architecture that the agent reads at the start of each task. Unlike tool-specific files like `CLAUDE.md` or `AGENTS.md`, ARCHI.md is purely about architecture. It's tool-agnostic, so it works with any agent. You can still reference it from your `CLAUDE.md` to include it in all conversations.
 
-**2. Massive Token Savings**
+**2. Token Savings & Reduced Hallucination**
 
-Without ARCHI.md, your agent must explore your codebase every time:
+Without ARCHI.md, your agent must glob, grep, and read multiple files to piece together the architecture from scratch for every single session. This wastes tokens and leads to guessing: _"There's probably a utils folder..."_, _"This project likely uses Redux..."_. ARCHI.md eliminates both problems. The agent gets the full picture in one read for minimal exploration & hallucination.
 
-- Glob for file patterns
-- Grep for code structures
-- Read multiple files to understand relationships
-- Piece together the architecture from scratch
-
-This exploration consumes thousands of tokens and wastes time. With ARCHI.md, the agent gets the full picture in one read.
-
-**3. Drastically Reduced Hallucination**
-
-Hallucination often comes from the agent _guessing_ about your codebase:
-
-- _"There's probably a utils folder..."_
-- _"This project likely uses Redux..."_
-- _"The API endpoint is probably at..."_
-
-ARCHI.md eliminates guessing. The agent knows exactly what folders exist and their purposes, which patterns your project uses and how components interact.
-
-**4. Balanced Detail vs Token Usage**
+**3. Balanced Detail vs Token Usage**
 
 ARCHI.md is designed to be:
 
-- **Detailed enough** to provide meaningful context
-- **Concise enough** to not waste tokens
+- **Detailed enough** to provide meaningful context, **concise enough** to not waste tokens
 - **Structured** for quick navigation
 - **Updated** after every architectural change
 
-It's not a dump of your entire codebase - it's a curated architectural guide.
+It's not a dump of your entire codebase, rather a curated architectural guide.
 
 ## The Init Process
 
@@ -103,8 +94,6 @@ The generic TRIP skills contain placeholders like:
 
 - `[PROJECT_NAME]` - Your project's name
 - `[VERSION_FILE]` - Where your version is stored (package.json, Cargo.toml, etc.)
-- `[WEEK_ANCHOR_DATE]` - The Monday of the week Init was run (for project week calculation)
-- `[TEST_COMMAND_*]` - Your actual test commands
 - `[ADAPT_TO_PROJECT: ...]` - Sections to customize
 
 Init walks you through questions and replaces these placeholders based on your answers, creating a workflow tailored to your project.
@@ -121,28 +110,32 @@ Exploratory investigation with defined compute level. For feasibility studies an
 
 ### `/TRIP-compact`
 
-As a rule of thumb, ARCHI.md should not exceed ~20k tokens (~10% of context window for Claude).
-Run this skill to compact ARCHI.md size while preserving relevance, accuracy, and coverage through summarization and restructuring.
+Run this skill to compact ARCHI.md size while preserving relevance, accuracy, and coverage through summarization and restructuring. Token calculator script included.
+As a rule of thumb, ARCHI.md should not exceed ~10% of context window.
+
+## Multi-Agent: Use Different LLMs at Different Steps
+
+Since ARCHI.md is tool-agnostic and the skills follow an open standard, nothing stops you from mixing agents across the TRIP phases. In fact, it's a strong recommendation. Just like you wouldn't ask a chef to judge his own dish, a different model is more likely to catch what the first one missed.
+
+Example workflow:
+
+1. **Plan** with Claude Code — great at interactive discovery and architecture
+2. **Implement** with Claude Code — it wrote the plan, it knows the intent
+3. **Review** with Codex — catches what Claude missed
+4. **Review the review** back in Claude Code — sanity-check the findings, fix what's real, dismiss what's not
+5. **Test** with either — whoever you trust more with your test framework
+
+The key is that ARCHI.md, the plan files, and the changelog all live in `docs/` — they're just text files. Any agent can read them. You're not locked into one tool for the entire cycle.
 
 ## Important: Adapt to Your Use Case
 
 **This workflow is a starting point, not a rigid framework.**
 
-You MUST adapt it to your actual needs:
-
-- **Add what's missing** - Special compliance requirements? Add them.
-- **Adjust the checklists** - They should reflect **your** quality criteria.
-- **Modify the templates** - Make them match **your** conventions.
-
-The provided examples (Web Frontend, Embedded, CLI, etc.) are just templates. Use your brain to customize.
-
-Remember that this is all **experimental**. The intersection of AI-assisted development and structured workflows is new territory.
-**You are highly encouraged to:**
-
-- Tinker with everything
-- Modify, add, break things and fix them
-- Share what works, report what doesn't
-
+The initial setup works out of the box, but you will eventually need to fine-tune the workflow. Use your brain to customize.  
 The best version of this workflow is the one **you** create by adapting it to your reality.
+
+## Contributing
+
+PRs & forks are welcome (improvements, new useful skills,...), but let's try to keep it stupidly simple for all of us fellow regards.
 
 Happy tripping 🍄
