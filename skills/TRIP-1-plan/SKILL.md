@@ -46,15 +46,6 @@ After user answers, either:
   - **Question**: "Based on your answers, I'm thinking the approach would be: [brief description]. Does this align with what you have in mind?"
   - **Options**: "Yes, proceed" (approach looks good), "Adjust" (I have modifications to suggest)
 
-### 1.3 Confirm Before Planning
-
-Only proceed to Step 2 when the user confirms the understanding is correct. **Use the `AskUserQuestion` tool** for final confirmation:
-
-- **Question**: "I believe I have a clear picture now. Ready to create the plan document?"
-- **Options**: "Yes, create the plan" (understanding is correct), "One more thing" (I have additional input before you proceed)
-
-**Minimum: 1 round of questions. Maximum: 3 rounds** (if still unclear after 3 rounds, summarize what you know and proceed with noted assumptions).
-
 ---
 
 ## Step 2: Plan Document Creation

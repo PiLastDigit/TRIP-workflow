@@ -1,13 +1,13 @@
 ![TRIP Workflow Banner](assets/trip-workflow-banner2.png)
 
-![Version](https://img.shields.io/badge/version-1.1.1-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
+![Version](https://img.shields.io/badge/version-1.1.2-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
 
 ## What is TRIP?
 
 A structured development workflow for AI coding agents that brings **memory**, **consistency**, and **reduced hallucination** (only humans should) to AI-assisted development. TRIP helps you enter flow state and eat features like buttered noodles.
 It is also the acronym (reversed) of the 4-phases development cycle: **P**lan, **I**mplement, **R**eview, **T**est.
 
-TRIP was initially designed for Claude Code using the [Agent Skills](https://agentskills.io/home) open standard (`SKILL.md`). Also compatible with OpenCode, Codex CLI, and Mistral Vibe.
+TRIP was initially designed for Claude Code using the [Agent Skills](https://agentskills.io/home) open standard (`SKILL.md`). Also compatible with OpenCode, Codex CLI, Mistral Vibe and more.
 
 ## Why TRIP?
 
@@ -17,7 +17,7 @@ Even the "simple" ones come with:
 
 - 47 different commands & skills to memorize
 - Sub-agents swarm for God-knows-what
-- Certification courses (seriously)
+- Mutlti-chapters courses (sometimes paid lol)
 
 **TRIP is different.** It's deliberately minimal:
 
@@ -43,12 +43,11 @@ It was kept stupid simple because **the goal is to ship features, not to master 
 3. Follow the interactive prompts
 4. Review and approve the generated ARCHI.md
 
-### Additional For Codex CLI users
+### Additional For Codex & Mistral users
 
-Also copy `for_codex/ask-user-question/` to `.codex/skills/` — this provides the `AskUserQuestion` tool that TRIP skills rely on (available on Claude Code & OpenCode but missing from Codex CLI).  
-Or use OpenCode with your OpenAI subscription.
+Also copy `AskUserQuestion/` to your agent `/skills/`, it provides the `AskUserQuestion` tool that TRIP workflow rely on (missing on those two agents BOOOO).  
 
-Et voila. Start using the skills like `/TRIP-1-plan auth for this webapp`, `/TRIP-2-implement @auth-plan.md`, etc.
+Et voila ! Start using the skills like `/TRIP-1-plan auth for this webapp`, `/TRIP-2-implement @auth-plan.md`, etc.
 
 https://github.com/user-attachments/assets/d37bbc60-1868-4fa8-9be6-083b60d6a53d
 
@@ -115,17 +114,23 @@ As a rule of thumb, ARCHI.md should not exceed ~10% of context window.
 
 ## Multi-Agent: Use Different LLMs at Different Steps
 
-Since ARCHI.md is tool-agnostic and the skills follow an open standard, nothing stops you from mixing agents across the TRIP phases. In fact, it's a strong recommendation. Just like you wouldn't ask a chef to judge his own dish, a different model is more likely to catch what the first one missed.
+![TRIP Workflow multiLLM](assets/trip-workflow-multiLLM4.png)
 
-Example workflow:
+Since ARCHI.md is tool-agnostic and skills follow an open standard, nothing stops you from mixing agents across the TRIP phases. In fact, it's a strong recommendation. Just like you wouldn't smell your own fart, an LLM is unlikely to catch bugs in its own implementation. Introducing a different model to catch what the first one missed has become a common practice.
+
+To date, the best combo is Claude Opus 4.6 + Codex 5.3, for example:
 
 1. **Plan** with Claude Code — great at interactive discovery and architecture
 2. **Implement** with Claude Code — it wrote the plan, it knows the intent
-3. **Review** with Codex — catches what Claude missed
-4. **Review the review** back in Claude Code — sanity-check the findings, fix what's real, dismiss what's not
+3. **Review** with Codex — catches what Claude missed  
+4. **Review the review** back in Claude Code — sanity-check the findings, fix what's real, dismiss what's not  
 5. **Test** with either — whoever you trust more with your test framework
 
-The key is that ARCHI.md, the plan files, and the changelog all live in `docs/` — they're just text files. Any agent can read them. You're not locked into one tool for the entire cycle.
+The key is that ARCHI.md, the plans and the changelogs all live in `docs/`, they're just text files. Any agent can read them. You're not locked into one tool for the entire cycle.
+
+## MCP Servers: Less Is More
+
+Every MCP server you add is extra context, extra latency, and extra confusion. Keep it minimal. The one use case where MCP genuinely shines is **up-to-date documentation**, so your agent stops hallucinating deprecated APIs. [ref.tools](https://ref.tools/) is a good option: one server, many docs, no bloat.
 
 ## Important: Adapt to Your Use Case
 
@@ -136,6 +141,6 @@ The best version of this workflow is the one **you** create by adapting it to yo
 
 ## Contributing
 
-PRs & forks are welcome (improvements, new useful skills,...), but let's try to keep it stupidly simple for all of us fellow regards.
+PRs & forks are welcome (improvements, new useful skills,...), but please keep it stupidly simple for all of us fellow regards.
 
 Happy tripping 🍄

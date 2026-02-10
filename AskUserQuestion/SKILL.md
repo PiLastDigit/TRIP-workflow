@@ -1,5 +1,5 @@
 ---
-name: ask-user-question
+name: AskUserQuestion
 description: Emulates the AskUserQuestion tool for agents that lack native support. When a skill instructs you to "use the AskUserQuestion tool", use this skill to present structured questions in markdown and wait for the user's response before proceeding.
 ---
 
