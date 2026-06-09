@@ -1,6 +1,6 @@
 ![TRIP Workflow Banner](assets/trip-workflow-banner2.png)
 
-![Version](https://img.shields.io/badge/version-1.1.2-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
+![Version](https://img.shields.io/badge/version-1.2.0-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
 
 ## What is TRIP?
 
@@ -99,6 +99,14 @@ Init walks you through questions and replaces these placeholders based on your a
 
 ## More Skills
 
+### `/codex-plan-review` & `/codex-code-review`
+
+Iterative review loops powered by Codex CLI. Plans get a second-opinion review before the user sees them. Code gets reviewed against the plan and a shared checklist after implementation. Both use persistent thread state for multi-round convergence (`start → REQUEST_CHANGES → fix → resume → APPROVED`). Integrated directly into TRIP-1-plan (Step 3) and TRIP-2-implement (post-implementation).
+
+### `/TRIP-upgrade`
+
+Upgrades an existing project's TRIP skills to a newer version without losing project customizations. Extracts your project-specific content (test commands, checklist sections, technical considerations, version file paths), applies the new workflow skeleton, and re-injects the customizations. Copy the new skills to `new-TRIP/`, run the skill, done.
+
 ### `/TRIP-hotfix`
 
 Streamlined workflow for production emergencies. Bypasses full TRIP for genuine crises (or lazy debugging).
@@ -118,13 +126,13 @@ As a rule of thumb, ARCHI.md should not exceed ~10% of context window.
 
 Since ARCHI.md is tool-agnostic and skills follow an open standard, nothing stops you from mixing agents across the TRIP phases. In fact, it's a strong recommendation. Just like you wouldn't smell your own fart, an LLM is unlikely to catch bugs in its own implementation. Introducing a different model to catch what the first one missed has become a common practice.
 
-To date, the best combo is Claude Opus 4.6 + Codex 5.3, for example:
+As of v1.2.0, this multi-agent approach is **built into the workflow**: TRIP-1-plan automatically runs a Codex second-opinion review before presenting the plan to you, and TRIP-2-implement runs a Codex code review loop after implementation. Claude writes, Codex reviews, Claude addresses the findings — all in one session.
 
-1. **Plan** with Claude Code — great at interactive discovery and architecture
-2. **Implement** with Claude Code — it wrote the plan, it knows the intent
-3. **Review** with Codex — catches what Claude missed  
-4. **Review the review** back in Claude Code — sanity-check the findings, fix what's real, dismiss what's not  
-5. **Test** with either — whoever you trust more with your test framework
+You can also mix agents manually across the full cycle. To date, the best combo is Claude Opus 4.6 + Codex 5.3, for example:
+
+1. **Plan** with Claude Code — great at interactive discovery and architecture (Codex reviews the plan automatically)
+2. **Implement** with Claude Code — it wrote the plan, it knows the intent (Codex reviews the code automatically)
+3. **Test** with either — whoever you trust more with your test framework
 
 The key is that ARCHI.md, the plans and the changelogs all live in `docs/`, they're just text files. Any agent can read them. You're not locked into one tool for the entire cycle.
 

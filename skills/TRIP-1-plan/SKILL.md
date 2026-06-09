@@ -148,14 +148,46 @@ Depending on the feature (major, minor, patch), propose a new version using SemV
 
 ---
 
-## Step 3: Plan Review & Validation
+## Step 3: Codex Second-Opinion Review
 
-After creating the plan document, present a summary to the user including:
+Before the user sees the plan, run the Codex plan review loop.
+
+### Confirm
+
+`AskUserQuestion`: "I'll run Codex as a second-opinion reviewer and iterate until clean. Proceed?"
+Options: "Yes, run Codex review" (recommended) / "Skip Codex, go to user review" / "Cap iterations at N"
+
+Skip for trivial plans (single-file, low-risk). Run for non-trivial (new module, schema/algorithm change).
+
+### Loop
+
+1. **Start**: `bash .claude/skills/codex-plan-review/scripts/start.sh --prompt-file .claude/skills/codex-plan-review/prompts/start.tpl <plan-path>`
+2. **Parse trailing tag**: `APPROVED` -> Step 4. `NEEDS_REWORK` -> surface to user. `REQUEST_CHANGES` -> continue.
+3. **Address findings critically** — quote each P1/P2, push back on incorrect ones, fix legitimate ones by editing the plan in place.
+4. **Write implementer notes** (1-3 sentences): which findings you fixed, which you pushed back on and why, any user decisions that override existing docs or environment limitations that can't be resolved in the plan.
+5. **Resume** with notes:
+   ```bash
+   bash .claude/skills/codex-plan-review/scripts/resume.sh \
+       --prompt-file .claude/skills/codex-plan-review/prompts/resume.tpl \
+       --notes "Fixed X. Pushed back on Y because Z. User decided W." \
+       <plan-path>
+   ```
+   -> back to step 2.
+6. **Cap at 5 rounds** (or user-specified). Surface remaining findings and let user decide.
+
+Surface Codex reviews verbatim. Keep edits scoped to findings. Reset thread (`reset.sh <plan-path>`) only if context is genuinely confused.
+
+---
+
+## Step 4: User Review & Validation
+
+After Codex review converges (or is skipped), present a summary to the user including:
 
 - **Feature**: [name]
 - **Approach**: [1-2 sentences]
 - **Files affected**: [count] files ([list key ones])
 - **Estimated complexity**: [simple/moderate/complex]
+- **Codex status**: [APPROVED / skipped / capped at N rounds with open findings]
 
 Then **use the `AskUserQuestion` tool** to collect feedback:
 
@@ -164,9 +196,9 @@ Then **use the `AskUserQuestion` tool** to collect feedback:
 
 Handle feedback:
 
-- **If "Request changes"**: Update the plan and re-present using `AskUserQuestion` again
-- **If "Needs rework"**: Discuss issues, rework the plan, and re-present
-- **If "Other" (custom input)**: Handle accordingly
+- **If "Request changes"**: Update the plan and re-present. Run another Codex pass if changes are substantive.
+- **If "Needs rework"**: Discuss issues, rework the plan, and re-present.
+- **If "Other" (custom input)**: Handle accordingly.
 - **If "Approved"**: **Use the `AskUserQuestion` tool** to ask:
   - **Question**: "Plan approved. Would you like to start implementation now?"
   - **Options**: "Yes, implement now" (proceed with `TRIP-2-implement` using this plan), "Not yet" (I'll implement later)

@@ -1,0 +1,4 @@
+# Per-plan Codex review state (thread ids, last review text, raw event logs).
+# Local-only — these are session artifacts, not source-of-truth artifacts.
+*
+!.gitignore

@@ -470,8 +470,8 @@ After user validation, update the other TRIP skill files based on the **actual c
 ### Skills to Update:
 
 1. **`TRIP-1-plan`** - Technical considerations, guidance sections
-2. **`TRIP-2-implement`** - Version file, week offset, tutorials
-3. **`TRIP-3-review`** - Review checklist adapted to actual architecture
+2. **`TRIP-2-implement`** - Version file, week offset, Codex test commands, tutorials
+3. **`TRIP-3-review`** - `checklist.md` and `cr-template.md` adapted to actual architecture
 4. **`TRIP-4-test`** - Test commands, structure, priorities
 
 ---
@@ -697,33 +697,38 @@ Create `docs/5-tuto/tuto_x.y.z.md` explaining the core principle.
 [Add any specific instructions based on their choices]
 ```
 
-**IMPORTANT — Renumber subsequent steps**: After uncommenting the Tutorial as Step 7, renumber the steps that follow:
+**IMPORTANT — Renumber subsequent steps**: After uncommenting the Tutorial as Step 8, renumber the steps that follow:
 
-- Step 7: README Update → **Step 8**: README Update
-- Step 8: Commit → **Step 9**: Commit
-- Step 9: Tag → **Step 10**: Tag
+- Step 8: README Update → **Step 9**: README Update
+- Step 9: Commit → **Step 10**: Commit
+- Step 10: Tag → **Step 11**: Tag
+
+**D. Codex Review Test Commands**
+
+Replace the `[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, and `[TEST_COMMAND]` placeholders in the Codex Code Review pre-step with the **actual commands** for this project (from ARCHI.md or discovered during exploration). For example:
+
+- Python: `uv run ruff check .`, `uv run mypy`, `uv run pytest -q`
+- Node.js: `npm run lint`, `npx tsc --noEmit`, `npm test`
+- Rust: `cargo clippy`, (no separate typecheck), `cargo test`
+- Go: `golangci-lint run`, (no separate typecheck), `go test ./...`
+
+If the project doesn't have a lint or typecheck step, remove the corresponding line entirely rather than leaving a placeholder.
 
 ---
 
 ### 6.4 Update `TRIP-3-review`
 
-**A. Adapt Review Checklist**
+The review skill uses three files: `SKILL.md` (orchestration), `checklist.md` (criteria — single source of truth), and `cr-template.md` (output skeleton). During Init, update **`checklist.md`** and **`cr-template.md`** — leave `SKILL.md` as-is.
 
-Build the review checklist based on **what matters for this specific codebase** as documented in ARCHI.md. The examples below are starting points - include only what's relevant and add project-specific checks:
+**A. Adapt `checklist.md`**
 
-**For Web Frontend** (example - adapt to actual patterns)
+`checklist.md` ships with generic sections (Functional Requirements, Code Quality, Architectural Compliance, Error Handling, Security, Performance). Replace the `[ADAPT_TO_PROJECT]` comment block with **project-specific checklist sections** based on what matters for this codebase as documented in ARCHI.md.
+
+The examples below are starting points — include only what's relevant and add project-specific checks:
 
 **For Web Backend:**
 
 ```markdown
-### 3. Architectural Compliance
-
-- [ ] Routes follow RESTful conventions
-- [ ] Proper separation (controllers, services, repositories)
-- [ ] Middleware used appropriately
-- [ ] Database queries optimized
-- [ ] Proper use of transactions
-
 ### 4. API Best Practices
 
 - [ ] Input validation on all endpoints
@@ -731,27 +736,11 @@ Build the review checklist based on **what matters for this specific codebase** 
 - [ ] Proper HTTP status codes
 - [ ] API versioning respected
 - [ ] Rate limiting considered
-
-### 5. Security
-
-- [ ] Authentication checked on protected routes
-- [ ] Authorization logic correct
-- [ ] No SQL injection vulnerabilities
-- [ ] Sensitive data not logged
-- [ ] CORS configured properly
 ```
 
 **For Embedded/Firmware:**
 
 ```markdown
-### 3. Architectural Compliance
-
-- [ ] HAL abstractions used correctly
-- [ ] Memory allocation follows project patterns
-- [ ] Interrupt handlers are minimal
-- [ ] Critical sections properly protected
-- [ ] Follows coding standard
-
 ### 4. Resource Management
 
 - [ ] Stack usage analyzed
@@ -766,40 +755,30 @@ Build the review checklist based on **what matters for this specific codebase** 
 - [ ] Watchdog considerations addressed
 - [ ] Race conditions prevented
 - [ ] Error recovery implemented
-- [ ] Fail-safe behavior defined
 ```
 
 **For CLI Tool:**
 
 ```markdown
-### 3. Architectural Compliance
-
-- [ ] Command structure follows patterns
-- [ ] Configuration precedence respected
-- [ ] Error handling consistent
-- [ ] Logging follows conventions
-
 ### 4. User Experience
 
 - [ ] Help text is clear and complete
 - [ ] Error messages are actionable
 - [ ] Exit codes are correct
 - [ ] Progress feedback for long operations
-- [ ] Quiet/verbose modes work correctly
-
-### 5. Compatibility
-
-- [ ] Works on target platforms
-- [ ] Handles edge cases (missing files, permissions)
-- [ ] Scriptable (proper stdout/stderr separation)
-- [ ] No hardcoded paths
 ```
 
-_These are examples. Build the checklist from ARCHI.md - what patterns does this project use? What quality criteria matter here? What are the common pitfalls to check for?_
+_Build from ARCHI.md — what patterns does this project use? What quality criteria matter? What are common pitfalls?_
 
-**B. Remove Irrelevant Sections**
+Also update the existing generic sections (3. Architectural Compliance, etc.) with project-specific items if the generic ones are too vague. Remove sections that don't apply.
 
-Remove sections that don't apply to this project. Only keep checklist items that are meaningful for the actual codebase.
+**B. Update `cr-template.md`**
+
+Update the Checklist section in `cr-template.md` to list the **actual section names** from the adapted `checklist.md`. The template ships with generic section names (1-6); after adapting the checklist, the template's section list must match.
+
+**C. Update Approval Gate**
+
+If the project has specific build/test commands, update the "Review Completion Criteria" section at the bottom of `checklist.md` with the actual commands (e.g., `uv run pytest` instead of generic "All existing tests pass").
 
 ---
 
@@ -1032,8 +1011,10 @@ Update: Technology Stack, and any affected architectural sections
   - [ ] `TRIP-1-plan`: Custom plan sections added (if user requested)
   - [ ] `TRIP-2-implement`: `[VERSION_FILE]` placeholder replaced
   - [ ] `TRIP-2-implement`: `[WEEK_ANCHOR_DATE]` placeholder replaced
+  - [ ] `TRIP-2-implement`: Codex review test commands (`[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, `[TEST_COMMAND]`) replaced with actual commands
   - [ ] `TRIP-2-implement`: Tutorial preference configured (if enabled: 5-tuto/ folder created + user context; if disabled: `[TUTORIAL_STEP]` block removed)
-  - [ ] `TRIP-3-review`: `[ADAPT_TO_PROJECT]` markers replaced with project-specific checklist
+  - [ ] `TRIP-3-review/checklist.md`: `[ADAPT_TO_PROJECT]` markers replaced with project-specific checklist sections
+  - [ ] `TRIP-3-review/cr-template.md`: Checklist section names updated to match adapted `checklist.md`
   - [ ] `TRIP-4-test`: `[TEST_COMMAND_*]` placeholders replaced with actual commands
   - [ ] `TRIP-4-test`: `[ADAPT_TO_PROJECT]` markers replaced with actual test structure/priorities
 - [ ] changelog_table.md initialized with version+1 (Phase 7)
