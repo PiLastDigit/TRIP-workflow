@@ -20,78 +20,109 @@ Implement: $ARGUMENTS
 
 ---
 
-## Step 0: Branch Evaluation (Pre-Implementation)
+## Step 0: Create a Branch (Pre-Implementation)
 
-After reading ARCHI.md, evaluate if this implementation warrants a dedicated branch.
-
-### When to Suggest a Branch
-
-Consider a dedicated branch if the task involves:
-
-- Multiple files across different modules
-- Changes that could break existing functionality
-- Features that might need review before merging
-- Work that spans multiple sessions
-- Experimental or risky changes
-
-### Ask the User
-
-**Use the `AskUserQuestion` tool** to ask:
-
-- **Question**: "This implementation involves [brief scope assessment]. Would you like me to create a dedicated branch?"
-- **Options**:
-  1. **"Yes, create branch"** — Suggested name: `feat/[short-description]` or `fix/[short-description]`
-  2. **"No, stay on current branch"** — Continue on the current branch
-
-### If YES
+**Always** create a dedicated branch before implementing — no need to ask. `TRIP-3-release` merges it back into the main branch with fast-forward, keeping a single clean linear history.
 
 ```bash
-git checkout -b [branch-name]
+git checkout -b feat/[short-description]   # or fix/[short-description]
 ```
 
-Confirm branch creation before proceeding.
-
-### If NO
-
-Continue on the current branch.
+Derive the short description from the plan/feature name. If already on a dedicated branch for this work (e.g., resuming a session), continue on it.
 
 ---
 
-## Implementation Rules
+## Implementation Phase — Delegate to Codex
 
-- Apply **DRY** and **KISS** principles
-- Follow existing patterns from the codebase
-- Add comments only for non-obvious logic
+You do NOT write the implementation yourself — delegate it to Codex via the `codex-implement` skill. (Exception: trivial unplanned changes of a few lines may be done directly.)
+
+1. Read the plan fully and decide the delegation scope: the whole plan, or one phase at a time for multi-phase plans.
+
+2. **Start** the implementation session (state dir is handled by the script):
+
+   ```bash
+   bash .claude/skills/codex-implement/scripts/start.sh \
+       --prompt-file .claude/skills/codex-implement/prompts/implement.tpl \
+       <plan-path> "Implement Phase 1 only"   # instructions optional — omit to implement the whole plan
+   ```
+
+   Follow-up phases resume the same thread (context retained):
+
+   ```bash
+   export STATE_DIR=".claude/skills/codex-implement/state"
+   bash .claude/skills/codex-plan-review/scripts/resume.sh \
+       --prompt-file .claude/skills/codex-implement/prompts/continue.tpl \
+       <plan-path> "Now implement Phase 2"
+   ```
+
+3. **Parse the trailing tag** of the report:
+   - `IMPLEMENTATION_COMPLETE` → proceed to Self-Review below.
+   - `IMPLEMENTATION_PARTIAL` → read the report; resume with instructions for the remainder, or finish small leftovers yourself during Self-Review.
+
+For phased delegation, run the Delegate → Self-Review cycle per phase; the testing gate and Codex code review run once, after the last phase.
 
 ---
 
-## Implementation Phase
+## Self-Review & Fix
 
-Proceed with the implementation following the plan or the task description. Cross corresponding checkboxes in the plan to-do list as you go.
+After Codex reports, review the implementation yourself before anything else:
+
+- Read the full diff (`git status -s`, `git diff HEAD`) against the plan, ARCHI.md patterns, and project conventions (DRY, KISS, comment discipline, error-handling and naming conventions from ARCHI.md).
+- Fix any problem **directly yourself** — no back-and-forth with Codex over fixes. Resume the codex-implement thread only for genuinely new scope (e.g., the next phase).
+- Verify the plan checkboxes Codex ticked match what the diff actually contains; cross any it completed but missed.
+
+Proceed to the testing gate once you consider the implementation good for review.
+
+---
+
+## Testing Gate
+
+After implementation, before the Codex review loop. Any failure here blocks the loop from starting.
+
+### 1. Lint, type-check & build
+
+```bash
+# [ADAPT_TO_PROJECT: Replace with actual lint/type-check/build commands during Init]
+[LINT_COMMAND] 2>&1 | tee /tmp/_trip2-lint.txt
+[TYPECHECK_COMMAND] 2>&1 | tee /tmp/_trip2-typecheck.txt
+```
+
+### 2. Run affected unit tests
+
+```bash
+[TEST_COMMAND] <pattern-for-affected-files>
+```
+
+Only the files/areas the change touched — never the full suite by default.
+
+### 3. Integration impact check
+
+<!-- [ADAPT_TO_PROJECT: During Init, replace with the project's integration/E2E impact rules — e.g. "if selectors changed, run the E2E suite" or "if an API contract changed, exercise it against the local server/emulator". Docs-only changes skip this.] -->
+
+If the change modifies an externally observable contract (API shape, UI selectors, auth behavior), exercise it with the project's integration/E2E tooling. Docs-only changes skip this.
+
+### 4. Author missing tests
+
+If the change adds new logic, write its tests **now**, guided by the plan's **Test Impact** section and the project's testing guide (see `TRIP-test`). If no new logic was added, skip this step.
+
+**Hard-to-cover code policy:**
+
+- Test **observable behavior** (inputs → outputs/persisted effects), never internal wiring.
+- **Mock-pain tripwire**: if the mock setup grows longer than the test's assertions, stop fighting it — check the project's testing guide for a seam recipe; if none applies, skip the *deep unit* test and add one line to `docs/4-unit-tests/COVERAGE-DEBT.md` (`path | why hard | escape plan`).
+- **Critical-path floor**: behavior touching auth, deletion, persistence, cost, or external request shape must keep at least one behavioral test or manual integration check — coverage debt may defer internal-path depth, never safety-critical behavior.
+- Never hide untested code (no coverage-ignore comments, no config exclusions, no lowering coverage gates). Legacy modules outside the change scope are not a feature blocker — but record newly encountered risky gaps in the ledger.
+
+### 5. Build the summary
+
+Format: `lint: clean | typecheck: clean | tests: N passed (M new)`
+
+Fix failures before starting the loop.
 
 ---
 
 ## Codex Code Review
 
-After implementation, before user sign-off, run the Codex code review loop.
-
-### Pre-step: Run Tests
-
-Codex can't execute tests. Run them and pass the summary:
-
-```bash
-# [ADAPT_TO_PROJECT: Replace with actual lint/type-check/test commands during Init]
-[LINT_COMMAND] 2>&1 | tee /tmp/_trip2-lint.txt
-[TYPECHECK_COMMAND] 2>&1 | tee /tmp/_trip2-typecheck.txt
-[TEST_COMMAND] 2>&1 | tee /tmp/_trip2-test.txt
-```
-
-Fix failures before starting the loop. Format summary: `lint: clean | typecheck: clean | tests: N passed, 0 failed, M skipped`
-
-### Confirm
-
-`AskUserQuestion`: "Implementation looks done. Run Codex code review against the plan?"
-Options: "Yes, run Codex review" (recommended) / "Skip Codex" / "Cap iterations at N"
+Always run the Codex code review after the testing gate passes — no confirmation needed.
 
 ### Loop
 
@@ -105,9 +136,9 @@ export STATE_DIR=".claude/skills/codex-code-review/state"
    ```bash
    bash .claude/skills/codex-plan-review/scripts/start.sh \
        --prompt-file .claude/skills/codex-code-review/prompts/start.tpl \
-       <plan-path> "$TEST_SUMMARY"
+       <plan-path> "$GATE_SUMMARY"
    ```
-   For unplanned work (no `F_*.plan.md`), pass a free-form label instead of a plan path.
+   `$GATE_SUMMARY` is the testing-gate summary (`lint | typecheck | tests`). For unplanned work (no `F_*.plan.md`), pass a free-form label instead of a plan path.
 
 2. **Parse trailing tag**: `APPROVED` -> synthesize. `NEEDS_REWORK` -> surface to user. `REQUEST_CHANGES` -> continue.
 
@@ -115,12 +146,12 @@ export STATE_DIR=".claude/skills/codex-code-review/state"
 
 4. **Write implementer notes** (1-3 sentences): which findings you fixed, which you pushed back on and why, any user decisions or environment limitations Codex should stop re-flagging.
 
-5. **Resume** (re-run tests first, build fresh summary):
+5. **Resume** (re-run the testing gate first — lint, typecheck, affected tests — and build a fresh summary):
    ```bash
    bash .claude/skills/codex-plan-review/scripts/resume.sh \
        --prompt-file .claude/skills/codex-code-review/prompts/resume.tpl \
        --notes "Fixed X. Pushed back on Y because Z." \
-       <plan-path> "$TEST_SUMMARY"
+       <plan-path> "$GATE_SUMMARY"
    ```
    Loop to step 2.
 
@@ -138,142 +169,27 @@ bash .claude/skills/codex-plan-review/scripts/resume.sh \
     <plan-path> "Today's date is YYYY-MM-DD"
 ```
 
-Outputs `PROMOTION_READY` sentinel. `<x.y.z>` Version placeholder left unfilled (resolved in Step 2 below).
+Outputs `PROMOTION_READY` sentinel. `<x.y.z>` Version placeholder left unfilled (resolved during `TRIP-3-release`).
 
 Edge cases:
 - **Capped without APPROVED**: still synthesize; Codex notes open findings.
-- **User skipped Codex**: no synthesis. Write CR manually: "Code review skipped — trivial change."
+- **User skipped Codex**: no synthesis. The CR is written manually during `TRIP-3-release`: "Code review skipped — trivial change."
 
 ### Operating Notes
 
-Surface reviews verbatim. Keep edits scoped. If Codex repeats a finding, re-read carefully — you likely addressed an adjacent concern. Reset thread only if context is confused. Tests must pass before APPROVED.
+Surface reviews verbatim. Keep edits scoped. If Codex repeats a finding, re-read carefully — you likely addressed an adjacent concern. Reset thread only if context is confused. The testing gate (lint, typecheck, affected tests) must pass before APPROVED.
 
 ---
 
-## Post-Implementation
+## Handoff to Release
 
 After Codex converges (or is skipped):
 
-**Use the `AskUserQuestion` tool** to ask:
-- **Question**: "Is the implementation complete?"
-- **Options**: "Yes, everything is complete" (proceed to post-implementation steps), "No, there are remaining items" (continue working)
+- Cross the corresponding checkboxes in the plan todo list (if any)
+- Then **use the `AskUserQuestion` tool** to ask:
+  - **Question**: "Is the implementation complete?"
+  - **Options**: "Yes, everything is complete" (proceed to release), "No, there are remaining items" (continue working)
 
-**ONLY after user selects "Yes"**, proceed with these steps:
+**If "Yes"**: proceed directly into the release — read `.claude/skills/TRIP-3-release/SKILL.md` and follow it in this session, passing the same plan path (or feature label). The release skill owns everything from version bump to the fast-forward merge and push.
 
-### Step 1: Get Current Date/Week
-
-Run this command to get date and project week:
-
-```bash
-date '+%d-%m-%Y %H:%M' && echo "Project week: $(( ( $(date +%s) - $(date -d '[WEEK_ANCHOR_DATE]' +%s) ) / 604800 + 1 ))"
-```
-
-Use the project week in all subsequent steps.
-
-### Step 2: Version Update
-
-- If not already done in the plan phase, propose new SemVer version (x.y.z)
-- Update version in `[VERSION_FILE]`
-- Do not modify anything else in this file
-
-### Step 3: Promote Code Review
-
-Now that week (`a`) and version (`x.y.z`) are known:
-
-1. Compute state file path:
-   ```bash
-   STATE_KEY="$(realpath <plan-path> | sed 's|^/||; s|/|__|g')"
-   STATE_FILE=".claude/skills/codex-code-review/state/${STATE_KEY}.review.txt"
-   ```
-
-2. Content source:
-   - **Multi-round loop**: state file has synthesized review + `PROMOTION_READY`. Strip sentinel.
-   - **Turn 1 convergence**: state file has full review already.
-   - **Skipped Codex**: write CR from `.claude/skills/TRIP-3-review/cr-template.md` with body "Code review skipped — trivial change." Verdict: `APPROVED with observations`.
-
-3. Replace `<x.y.z>` with actual version. Fill any remaining `<...>` placeholders.
-
-4. Save to `docs/3-code-review/CR_wa_vx.y.z.md`.
-
-5. Verify: no `<...>` placeholders, no `PROMOTION_READY`, version matches version file.
-
-### Step 4: Commit Message
-
-Propose a one-line commit message.
-
-### Step 5: Changelog File
-
-Create `docs/2-changelog/wa_vx.y.z.md` (a=project week, x.y.z=version):
-
-```markdown
-# Changelog - Week a, DD-MM-YYYY, V. x.y.z
-
-**Release Date**: Week a, DD-MM-YYYY at HH:MM
-**Version**: x.y.z (previously x0.y0.z0)
-**Object**: the commit message
-**Code review**: `docs/3-code-review/CR_wa_vx.y.z.md` (Codex loop, N rounds -> verdict)
-
-## Changes
-
-[Describe what changed]
-```
-
-### Step 6: Changelog Table
-
-Add entry on top of `docs/2-changelog/changelog_table.md`:
-
-```markdown
-| `x.y.z` | a | the commit message |
-```
-
-Also add a summary entry in the Changelog Summary section.
-
-### Step 7: Architecture Update
-
-1. Read fully @docs/ARCHI-rules.md
-2. Update @docs/ARCHI.md following the rules
-3. Run `bash .claude/skills/TRIP-compact/count-tokens.sh docs/ARCHI.md` to check token count
-
-**Warning: If ARCHI.md exceeds ~20,000 tokens**, warn the user:
-
-> "ARCHI.md is at ~X tokens. Consider running `TRIP-compact` to reduce it before committing."
-
-<!-- [TUTORIAL_STEP]
-### Step 8: Tutorial
-
-Create `docs/5-tuto/tuto_x.y.z.md` explaining the core principle.
-
-**User context for tutorials**:
-
-- Level: [USER_LEVEL]
-- Learning focus: [USER_LEARNING_FOCUS]
-- Style: [USER_PREFERRED_STYLE]
--->
-
-### Step 8: README Update
-
-Update `README.md` with the new version number.
-Also update relevant sections whenever needed.
-
----
-
-After completing all documentation steps, **use the `AskUserQuestion` tool** to ask:
-
-- **Question**: "All documentation steps are complete. Ready to commit?"
-- **Options**: "Yes, commit now" (proceed with git commit and tag), "Not yet" (review changes first)
-
-**ONLY after user selects "Yes"**, proceed:
-
-### Step 9: Commit
-
-```bash
-git add -A && git commit -m "<commit message from Step 4>"
-```
-
-**Important**: Only use the commit message. Do NOT add Co-Authored-By or any other trailer.
-
-### Step 10: Tag
-
-```bash
-git tag vx.y.z
-```
+**If "No"**: continue working, then repeat the sequence: testing gate → Codex review → this question.

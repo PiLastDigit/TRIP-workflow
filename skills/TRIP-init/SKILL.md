@@ -470,15 +470,16 @@ After user validation, update the other TRIP skill files based on the **actual c
 ### Skills to Update:
 
 1. **`TRIP-1-plan`** - Technical considerations, guidance sections
-2. **`TRIP-2-implement`** - Version file, week offset, Codex test commands, tutorials
-3. **`TRIP-3-review`** - `checklist.md` and `cr-template.md` adapted to actual architecture
-4. **`TRIP-4-test`** - Test commands, structure, priorities
+2. **`TRIP-2-implement`** - Testing gate commands
+3. **`TRIP-3-release`** - Version file, week offset, tutorials
+4. **`TRIP-review`** - `checklist.md` and `cr-template.md` adapted to actual architecture
+5. **`TRIP-test`** - Test commands, structure, priorities
 
 ---
 
 ### 6.1 Universal Updates (ALL skills)
 
-**Project Name**: Replace the `[PROJECT_NAME]` placeholder with the actual project name in all four skill files.
+**Project Name**: Replace the `[PROJECT_NAME]` placeholder with the actual project name in all skill files.
 
 ---
 
@@ -628,7 +629,9 @@ If the user selects "Yes" or provides custom input, add the specified sections t
 
 ---
 
-### 6.3 Update `TRIP-2-implement`
+### 6.3 Update `TRIP-2-implement` and `TRIP-3-release`
+
+The testing gate in `TRIP-2-implement` and the standalone-verification block in `TRIP-3-release` share the same command placeholders. The release ceremony customizations (version, week, tutorials) live in `TRIP-3-release`:
 
 **A. Version File Location**
 
@@ -650,7 +653,7 @@ Run this to get the anchor date:
 date -d "last monday" '+%Y-%m-%d'  # If today is Monday, use: date '+%Y-%m-%d'
 ```
 
-Then replace the `[WEEK_ANCHOR_DATE]` placeholder in `TRIP-2-implement` Step 1 with the actual date. The formula counts elapsed weeks from that fixed date, so it works across year boundaries indefinitely.
+Then replace the `[WEEK_ANCHOR_DATE]` placeholder in `TRIP-3-release` Step 1 with the actual date. The formula counts elapsed weeks from that fixed date, so it works across year boundaries indefinitely.
 
 **C. Tutorial Generation**
 
@@ -663,7 +666,7 @@ Then replace the `[WEEK_ANCHOR_DATE]` placeholder in `TRIP-2-implement` Step 1 w
 
 **If "No"**:
 
-- Remove the `[TUTORIAL_STEP]` block entirely from `TRIP-2-implement`
+- Remove the `[TUTORIAL_STEP]` block entirely from `TRIP-3-release`
 - Do NOT create the `docs/5-tuto/` folder
 - No renumbering needed — the existing step numbers are already correct for this case
 
@@ -681,7 +684,7 @@ Then replace the `[WEEK_ANCHOR_DATE]` placeholder in `TRIP-2-implement` Step 1 w
   **Question 3** (header: "Style"): "What tutorial style do you prefer?"
   - **Options**: "Concise" (key points, minimal explanation), "Balanced" (explanations with examples), "Verbose" (detailed explanations, multiple examples, diagrams)
 
-Then update the `[TUTORIAL_STEP]` block in `TRIP-2-implement` with the user's context:
+Then update the `[TUTORIAL_STEP]` block in `TRIP-3-release` with the user's context:
 
 ```markdown
 ### Step 7: Tutorial
@@ -705,7 +708,7 @@ Create `docs/5-tuto/tuto_x.y.z.md` explaining the core principle.
 
 **D. Codex Review Test Commands**
 
-Replace the `[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, and `[TEST_COMMAND]` placeholders in the Codex Code Review pre-step with the **actual commands** for this project (from ARCHI.md or discovered during exploration). For example:
+Replace the `[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, and `[TEST_COMMAND]` placeholders in the TRIP-2 Testing Gate AND the TRIP-3-release standalone-verification block with the **actual commands** for this project (from ARCHI.md or discovered during exploration). For example:
 
 - Python: `uv run ruff check .`, `uv run mypy`, `uv run pytest -q`
 - Node.js: `npm run lint`, `npx tsc --noEmit`, `npm test`
@@ -716,7 +719,7 @@ If the project doesn't have a lint or typecheck step, remove the corresponding l
 
 ---
 
-### 6.4 Update `TRIP-3-review`
+### 6.4 Update `TRIP-review`
 
 The review skill uses three files: `SKILL.md` (orchestration), `checklist.md` (criteria — single source of truth), and `cr-template.md` (output skeleton). During Init, update **`checklist.md`** and **`cr-template.md`** — leave `SKILL.md` as-is.
 
@@ -782,7 +785,7 @@ If the project has specific build/test commands, update the "Review Completion C
 
 ---
 
-### 6.5 Update `TRIP-4-test`
+### 6.5 Update `TRIP-test`
 
 **A. Test Commands**
 
@@ -1009,14 +1012,15 @@ Update: Technology Stack, and any affected architectural sections
   - [ ] `TRIP-1-plan`: `[ADAPT_TO_PROJECT]` markers replaced with actual technical considerations
   - [ ] `TRIP-1-plan`: Guidance sections replaced with project-specific patterns
   - [ ] `TRIP-1-plan`: Custom plan sections added (if user requested)
-  - [ ] `TRIP-2-implement`: `[VERSION_FILE]` placeholder replaced
-  - [ ] `TRIP-2-implement`: `[WEEK_ANCHOR_DATE]` placeholder replaced
-  - [ ] `TRIP-2-implement`: Codex review test commands (`[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, `[TEST_COMMAND]`) replaced with actual commands
-  - [ ] `TRIP-2-implement`: Tutorial preference configured (if enabled: 5-tuto/ folder created + user context; if disabled: `[TUTORIAL_STEP]` block removed)
-  - [ ] `TRIP-3-review/checklist.md`: `[ADAPT_TO_PROJECT]` markers replaced with project-specific checklist sections
-  - [ ] `TRIP-3-review/cr-template.md`: Checklist section names updated to match adapted `checklist.md`
-  - [ ] `TRIP-4-test`: `[TEST_COMMAND_*]` placeholders replaced with actual commands
-  - [ ] `TRIP-4-test`: `[ADAPT_TO_PROJECT]` markers replaced with actual test structure/priorities
+  - [ ] `TRIP-2-implement`: Testing gate commands (`[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, `[TEST_COMMAND]`) replaced with actual commands
+  - [ ] `TRIP-3-release`: `[VERSION_FILE]` placeholder replaced
+  - [ ] `TRIP-3-release`: `[WEEK_ANCHOR_DATE]` placeholder replaced
+  - [ ] `TRIP-3-release`: Standalone-verification commands replaced with actual commands
+  - [ ] `TRIP-3-release`: Tutorial preference configured (if enabled: 5-tuto/ folder created + user context; if disabled: `[TUTORIAL_STEP]` block removed)
+  - [ ] `TRIP-review/checklist.md`: `[ADAPT_TO_PROJECT]` markers replaced with project-specific checklist sections
+  - [ ] `TRIP-review/cr-template.md`: Checklist section names updated to match adapted `checklist.md`
+  - [ ] `TRIP-test`: `[TEST_COMMAND_*]` placeholders replaced with actual commands
+  - [ ] `TRIP-test`: `[ADAPT_TO_PROJECT]` markers replaced with actual test structure/priorities
 - [ ] changelog_table.md initialized with version+1 (Phase 7)
 - [ ] TESTING.md created, adapted to actual test setup (Phase 7)
 - [ ] ARCHI-rules.md created, referencing actual ARCHI sections (Phase 7)

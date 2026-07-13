@@ -1,11 +1,11 @@
 ![TRIP Workflow Banner](assets/trip-workflow-banner2.png)
 
-![Version](https://img.shields.io/badge/version-1.2.0-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
+![Version](https://img.shields.io/badge/version-2.0.0-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
 
 ## What is TRIP?
 
 A structured development workflow for AI coding agents that brings **memory**, **consistency**, and **reduced hallucination** (only humans should) to AI-assisted development. TRIP helps you enter flow state and eat features like buttered noodles.
-It is also the acronym (reversed) of the 4-phases development cycle: **P**lan, **I**mplement, **R**eview, **T**est.
+It is also the acronym (reversed) of the 4-phases development cycle: **P**lan, **I**mplement, **R**eview, **T**est. Since v2.0.0 the numbered flow is **Plan → Implement → Release** — review and test didn't disappear, they moved *inside* Implement as a testing gate and an automatic Codex review loop, so every feature passes through all four phases with fewer commands.
 
 TRIP was initially designed for Claude Code using the [Agent Skills](https://agentskills.io/home) open standard (`SKILL.md`). Also compatible with OpenCode, Codex CLI, Mistral Vibe and more.
 
@@ -21,18 +21,19 @@ Even the "simple" ones come with:
 
 **TRIP is different.** It's deliberately minimal:
 
-| That's it           | Just these            |
-| ------------------- | --------------------- |
-| `/TRIP-1-plan`      | Think before you code |
-| `/TRIP-2-implement` | Write the code        |
-| `/TRIP-3-review`    | Check the code        |
-| `/TRIP-4-test`      | Test the code         |
+| That's it           | Just these                                             |
+| ------------------- | ------------------------------------------------------ |
+| `/TRIP-1-plan`      | Think before you code (Codex reviews the plan)         |
+| `/TRIP-2-implement` | Codex writes, you review, tests gate, Codex re-reviews |
+| `/TRIP-3-release`   | Version, changelogs, docs, commit, tag, merge, push    |
+
+Support skills on demand: `/TRIP-review` (manual audit), `/TRIP-test` (deep test authoring), plus hotfix/research/compact.
 
 ![TRIP Workflow loop](assets/trip-workflow-loop2.png)
 
-Four skills. One architecture file. Zero PhD required.
+Three numbered skills. One architecture file. Zero PhD required.
 
-The onboarding is: copy the folder, run init, start coding. If you can count to 4, you can TRIP.
+The onboarding is: copy the folder, run init, start coding. If you can count to 3, you can TRIP.
 
 It was kept stupid simple because **the goal is to ship features, not to master a workflow**. The workflow should disappear into the background, not become a project of its own.
 
@@ -99,9 +100,19 @@ Init walks you through questions and replaces these placeholders based on your a
 
 ## More Skills
 
+### `/codex-implement`
+
+Implementation delegated to Codex CLI in a **workspace-write sandbox**: it reads the approved plan, edits the working tree, runs your lint/build, and reports back with a completion tag. Your main agent then self-reviews the diff and fixes issues directly — no ping-pong. Persistent thread per plan, so multi-phase plans resume with full context. Integrated into TRIP-2-implement as the default implementation path.
+
 ### `/codex-plan-review` & `/codex-code-review`
 
-Iterative review loops powered by Codex CLI. Plans get a second-opinion review before the user sees them. Code gets reviewed against the plan and a shared checklist after implementation. Both use persistent thread state for multi-round convergence (`start → REQUEST_CHANGES → fix → resume → APPROVED`). Integrated directly into TRIP-1-plan (Step 3) and TRIP-2-implement (post-implementation).
+Iterative review loops powered by Codex CLI. Plans get a second-opinion review before the user sees them. Code gets reviewed against the plan and a shared checklist after implementation. Both use persistent thread state for multi-round convergence (`start → REQUEST_CHANGES → fix → resume → APPROVED`). Integrated directly into TRIP-1-plan (Step 3) and TRIP-2-implement (after the testing gate).
+
+Per-flow model defaults (implementation vs reviews) live in one file — `codex-plan-review/scripts/_common.sh` — and can be overridden per run via `CODEX_MODEL` / `CODEX_EFFORT` env vars.
+
+### `/TRIP-review` & `/TRIP-test`
+
+The former steps 3 and 4, reborn as on-demand support skills: `/TRIP-review` is the manual fallback/audit review (same checklist as the Codex loop — single source of truth), `/TRIP-test` is the deep test-authoring reference with a seam ladder and a coverage-debt ledger for hard-to-test code.
 
 ### `/TRIP-upgrade`
 
@@ -126,7 +137,7 @@ As a rule of thumb, ARCHI.md should not exceed ~10% of context window.
 
 Since ARCHI.md is tool-agnostic and skills follow an open standard, nothing stops you from mixing agents across the TRIP phases. In fact, it's a strong recommendation. Just like you wouldn't smell your own fart, an LLM is unlikely to catch bugs in its own implementation. Introducing a different model to catch what the first one missed has become a common practice.
 
-As of v1.2.0, this multi-agent approach is **built into the workflow**: TRIP-1-plan automatically runs a Codex second-opinion review before presenting the plan to you, and TRIP-2-implement runs a Codex code review loop after implementation. Claude writes, Codex reviews, Claude addresses the findings — all in one session.
+As of v2.0.0, this multi-agent approach is **the default workflow**: Codex reviews the plan (TRIP-1), Codex *implements* it in a sandboxed thread (codex-implement), Claude self-reviews and fixes the diff, runs the testing gate, then a separate Codex thread reviews the code — all in one session. Writer and reviewer are never the same thread, and you can pin different models per flow (e.g. one model for implementation, another for reviews).
 
 You can also mix agents manually across the full cycle. To date, the best combo is Claude Opus 4.6 + Codex 5.3, for example:
 
@@ -138,7 +149,7 @@ The key is that ARCHI.md, the plans and the changelogs all live in `docs/`, they
 
 ## MCP Servers: Less Is More
 
-Every MCP server you add is extra context, extra latency, and extra confusion. Keep it minimal. The one use case where MCP genuinely shines is **up-to-date documentation**, so your agent stops hallucinating deprecated APIs. [ref.tools](https://ref.tools/) is a good option: one server, many docs, no bloat.
+Every MCP server you add is extra context, extra latency, and extra confusion. Keep it minimal. The one use case where MCP genuinely shines is **up-to-date documentation**, so your agent stops hallucinating deprecated APIs. Two servers cover it: [Context7](https://github.com/upstash/context7) for current library & framework docs, and [Exa](https://github.com/exa-labs/exa-mcp-server) for web search when the answer isn't in any doc. No bloat beyond that.
 
 ## Important: Adapt to Your Use Case
 

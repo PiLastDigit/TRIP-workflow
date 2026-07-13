@@ -12,6 +12,17 @@ SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export STATE_DIR
 mkdir -p "$STATE_DIR"
 
+# Model/effort per flow (single source of truth for all codex skills):
+# implementation runs Luna, reviews (plan + code) run Sol, effort xhigh.
+# Adjust these defaults to your preferred models.
+# CODEX_MODEL / CODEX_EFFORT act as per-run overrides.
+case "$STATE_DIR" in
+    *codex-implement*) CODEX_MODEL="${CODEX_MODEL:-gpt-5.6-luna}" ;;
+    *)                 CODEX_MODEL="${CODEX_MODEL:-gpt-5.6-sol}" ;;
+esac
+CODEX_EFFORT="${CODEX_EFFORT:-xhigh}"
+export CODEX_MODEL CODEX_EFFORT
+
 # Derive a per-target key from a path-like string. For real paths we
 # resolve to absolute; for non-path targets (branch names, commit
 # ranges) we sanitize in place. Replace '/' with '__'; force any other

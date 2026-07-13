@@ -4,7 +4,7 @@ This is the canonical record of how this change was reviewed. Cover every findin
 
 ## Format
 
-Read `.claude/skills/TRIP-3-review/cr-template.md` and produce output conforming to its markdown skeleton.
+Read `.claude/skills/TRIP-review/cr-template.md` and produce output conforming to its markdown skeleton.
 
 Fill-in guide:
 - **Title**: feature/change name from `{{TARGET}}`

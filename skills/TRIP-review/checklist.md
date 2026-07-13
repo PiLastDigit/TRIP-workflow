@@ -1,6 +1,6 @@
 # Code Review Checklist
 
-This file is the **single source of truth** for code-review criteria. Both human-driven reviews via `.claude/skills/TRIP-3-review` and Codex-driven reviews via `.claude/skills/codex-code-review` apply the criteria below — referenced, not copied — so the two review surfaces cannot drift.
+This file is the **single source of truth** for code-review criteria. Both human-driven reviews via `.claude/skills/TRIP-review` and Codex-driven reviews via `.claude/skills/codex-code-review` apply the criteria below — referenced, not copied — so the two review surfaces cannot drift.
 
 ## Systematic Review Checklist
 
@@ -101,5 +101,6 @@ Minimum for approval:
 - [ ] All functional requirements implemented
 - [ ] No critical or major issues remaining
 - [ ] Build/compilation successful
-- [ ] All existing tests pass
+- [ ] Affected unit tests pass (per the TRIP-2 testing gate)
+- [ ] New logic has test coverage (or a coverage-debt ledger entry per the hard-to-cover policy)
 - [ ] Documentation updated per project standards

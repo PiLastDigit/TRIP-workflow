@@ -57,7 +57,8 @@ PROMPT="$(load_prompt "$PROMPT_FILE")"
 codex exec resume "$THREAD_ID" \
     --skip-git-repo-check \
     --json \
-    -c model_reasoning_effort="high" \
+    -c model="$CODEX_MODEL" \
+    -c model_reasoning_effort="$CODEX_EFFORT" \
     -o "$REVIEW_FILE" \
     "$PROMPT" \
     </dev/null \
@@ -72,6 +73,7 @@ codex exec resume "$THREAD_ID" \
 
 echo "resumed review session for $TARGET"
 echo "  thread id:   $THREAD_ID"
+echo "  model/effort: $CODEX_MODEL / $CODEX_EFFORT"
 echo "  review file: $REVIEW_FILE"
 echo "---"
 cat "$REVIEW_FILE"

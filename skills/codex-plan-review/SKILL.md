@@ -35,6 +35,7 @@ The companion `codex-code-review` skill shares the same scripts with its own pro
 
 ## Notes
 
+- Model/effort defaults live in `codex-plan-review/scripts/_common.sh` (implementation → gpt-5.6-luna, plan/code review → gpt-5.6-sol, effort xhigh; derived from `STATE_DIR`). Adjust that one file to your preferred models, or override per run via `CODEX_MODEL` / `CODEX_EFFORT` env vars; the scripts echo the effective values.
 - `--sandbox read-only`. Safe to invoke autonomously.
 - On network failure, check `*.events.ndjson.stderr`. Run `reset.sh` and retry.
 - Thread IDs persisted per-plan (no `--last`). Concurrent reviews don't collide.

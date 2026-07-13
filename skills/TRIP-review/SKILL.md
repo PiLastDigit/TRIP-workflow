@@ -1,6 +1,6 @@
 ---
-name: TRIP-3-review
-description: Review code following project standards
+name: TRIP-review
+description: Review code following project standards (manual fallback/audit path)
 disable-model-invocation: true
 argument-hint: "version or feature to review"
 ---
@@ -8,6 +8,8 @@ argument-hint: "version or feature to review"
 # Review Mode
 
 You are now in **code review mode** for **[PROJECT_NAME]**.
+
+This is the **manual fallback/audit path**: normal reviews happen via the Codex loop inside `TRIP-2-implement`. Use this skill to audit a past version, review unplanned work, or replace the Codex loop when it is unavailable.
 
 Review: $ARGUMENTS
 
@@ -17,7 +19,7 @@ Read before reviewing:
 1. @docs/ARCHI.md — verify architectural compliance
 2. Related plan in `docs/1-plans/`
 3. Related changelog in `docs/2-changelog/`
-4. @.claude/skills/TRIP-3-review/checklist.md — **single source of truth** for review criteria, severity classification, and approval gate
+4. @.claude/skills/TRIP-review/checklist.md — **single source of truth** for review criteria, severity classification, and approval gate
 
 ---
 
@@ -33,7 +35,7 @@ Do not copy the checklist into output — link to it.
 
 Save to `docs/3-code-review/CR_wa_vx.y.z.md` (a=project week, x.y.z=version).
 
-Render the skeleton from `@.claude/skills/TRIP-3-review/cr-template.md`:
+Render the skeleton from `@.claude/skills/TRIP-review/cr-template.md`:
 1. Copy the markdown block from that file.
 2. Replace every `<angle-bracket placeholder>` with concrete content.
 3. Tick `[x]` for passing checklist items; leave unchecked with a one-line caveat otherwise.

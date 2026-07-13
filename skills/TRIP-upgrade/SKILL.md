@@ -60,11 +60,22 @@ Categorize each skill into one of:
 | **Updated — pure workflow** | Changed, but no project customizations | Replace directly |
 | **Updated — customized** | Changed, AND contains project-specific content | Extract → merge → replace |
 
-**Pure workflow skills** (no project customizations): `TRIP-compact`, `TRIP-hotfix`, `TRIP-research`, `TRIP-init`
+**Pure workflow skills** (no project customizations): `TRIP-compact`, `TRIP-hotfix`, `TRIP-research`, `TRIP-init`, `codex-implement`, `codex-plan-review`, `codex-code-review`
 
-**Customized skills** (have project-specific content): `TRIP-1-plan`, `TRIP-2-implement`, `TRIP-3-review`, `TRIP-4-test`
+**Exception — model defaults**: `codex-plan-review/scripts/_common.sh` holds the per-flow Codex model/effort defaults, which the user may have tuned. Before replacing, diff the installed `_common.sh` against staging — if the model/effort values differ from the generic defaults, carry the user's values into the new file.
 
-**Non-TRIP skills** (codex-plan-review, codex-code-review, etc.): Treat as new or check if they already exist.
+**Customized skills** (have project-specific content): `TRIP-1-plan`, `TRIP-2-implement`, `TRIP-3-release`, `TRIP-review`, `TRIP-test`
+
+**Renamed in TRIP v2** — when the installed folder uses an old name, treat it as the same skill under its new name (merge into the new name, then delete the old folder):
+
+| Installed (old) | Staging (new) |
+|---|---|
+| `TRIP-3-review` | `TRIP-review` |
+| `TRIP-4-test` | `TRIP-test` |
+
+`TRIP-3-release` is **new in v2** but its project values (version file, week anchor, tutorial config) are **extracted from the old `TRIP-2-implement`'s post-implementation steps** — categorize it as customized even though no folder exists yet.
+
+**Other non-TRIP skills** in staging (e.g. future additions): Treat as new, or as pure workflow if they already exist.
 
 For each skill, diff the installed vs new version to confirm whether it actually changed:
 
@@ -81,14 +92,16 @@ Skill                 | Status              | Action
 --------------------- | ------------------- | ------
 TRIP-1-plan           | Updated (customized) | Extract + merge
 TRIP-2-implement      | Updated (customized) | Extract + merge
-TRIP-3-review         | Updated (customized) | Extract + merge (structural change)
-TRIP-4-test           | Unchanged            | Skip
+TRIP-3-release        | New (customized)     | New template + values from old TRIP-2
+TRIP-review           | Renamed + updated    | Extract + merge, delete TRIP-3-review/
+TRIP-test             | Renamed + updated    | Extract + merge, delete TRIP-4-test/
 TRIP-compact          | Unchanged            | Skip
 TRIP-hotfix           | Unchanged            | Skip
 TRIP-init             | Updated (pure)       | Replace
 TRIP-research         | Unchanged            | Skip
 codex-plan-review     | New                  | Copy
 codex-code-review     | New                  | Copy
+codex-implement       | New                  | Copy
 ```
 
 `AskUserQuestion`: "Here's the upgrade plan. Proceed?"
@@ -113,7 +126,7 @@ Build a context block by extracting these values from the installed skills:
 - `TECHNICAL_CONSIDERATIONS` — the full content of the `## Technical Considerations` section in the plan template (everything between `## Technical Considerations` and the next `##` heading)
 - `GUIDANCE_SECTIONS` — everything after the plan template's closing section that replaced `[ADAPT_TO_PROJECT: Guidance Sections]` (project-specific per-component guidance at the bottom of the file)
 
-**From TRIP-2-implement/SKILL.md:**
+**From TRIP-2-implement/SKILL.md** (in v1 installs, the release values below live in its Post-Implementation steps; in v2 installs they live in `TRIP-3-release/SKILL.md`):
 - `PROJECT_NAME` — (confirm matches TRIP-1-plan)
 - `VERSION_FILE` — the text that replaced `[VERSION_FILE]` in Step 2
 - `WEEK_ANCHOR_DATE` — the date that replaced `[WEEK_ANCHOR_DATE]` in Step 1
@@ -122,11 +135,11 @@ Build a context block by extracting these values from the installed skills:
 - `TYPECHECK_COMMAND` — if present
 - `TEST_COMMAND` — if present
 
-**From TRIP-3-review/SKILL.md (or checklist.md if already split):**
+**From TRIP-review/SKILL.md — or `TRIP-3-review/` in v1 installs (checklist.md if already split):**
 - `REVIEW_CHECKLIST` — the full checklist content. In older versions this is inline in SKILL.md. In newer versions it's in `checklist.md`. Extract it wherever it lives.
 - `CR_TEMPLATE` — if `cr-template.md` exists, extract it. Otherwise note "no template file — using inline template"
 
-**From TRIP-4-test/SKILL.md:**
+**From TRIP-test/SKILL.md — or `TRIP-4-test/` in v1 installs:**
 - `TEST_COMMANDS` — the full Commands section
 - `TEST_STRUCTURE` — the test structure description
 - `TESTING_PRIORITIES` — the full testing priorities section
@@ -158,10 +171,10 @@ If "No": let the user specify corrections, update the context block.
 
 Before merging, handle any structural changes between the old and new workflow versions. Read both old and new files to detect what changed structurally.
 
-### 3.1 Checklist Extraction (TRIP-3-review)
+### 3.1 Checklist Extraction (TRIP-review)
 
-**Old structure**: Checklist inline in `TRIP-3-review/SKILL.md`
-**New structure**: Checklist in separate `TRIP-3-review/checklist.md`, template in `TRIP-3-review/cr-template.md`
+**Old structure** (early v1): Checklist inline in `TRIP-3-review/SKILL.md`
+**New structure** (v2): Checklist in separate `TRIP-review/checklist.md`, template in `TRIP-review/cr-template.md` (late-v1 installs have these same files under `TRIP-3-review/`)
 
 If the installed version has the checklist inline in SKILL.md (no separate `checklist.md`):
 1. The extracted `REVIEW_CHECKLIST` from Phase 2 is the project-customized checklist
@@ -178,9 +191,9 @@ If the installed version already has `checklist.md`:
 
 These are pure workflow additions — no project-specific content to migrate. They will be applied from the new template. The only project-specific part is the test commands in TRIP-2-implement's Codex pre-step, which come from the extracted context.
 
-### 3.3 New Skills (codex-plan-review, codex-code-review)
+### 3.3 Codex Skills (codex-plan-review, codex-code-review, codex-implement)
 
-These are entirely new. Copy from staging directly. They reference `checklist.md` and `cr-template.md` which will be populated with project content.
+If not installed yet, these are entirely new — copy from staging directly. The review skills reference `TRIP-review/checklist.md` and `TRIP-review/cr-template.md`, which will be populated with project content. If already installed (late-v1), replace as pure workflow (see the `_common.sh` exception in Phase 1.2) — v1 prompt templates point at the old `TRIP-3-review/` paths and must be replaced with the v2 versions.
 
 ---
 
@@ -220,15 +233,23 @@ For each customized skill, take the **new template** from staging and inject the
 
 1. Start from the new template (staging)
 2. Replace `[PROJECT_NAME]` with extracted `PROJECT_NAME`
+3. Replace `[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, `[TEST_COMMAND]` in the Testing Gate with extracted commands
+   - If the old version didn't have Codex review (no test commands extracted), check the old TRIP-4-test for test commands, or ask the user
+4. Adapt the Integration impact check comment block to the project's integration/E2E tooling (from the old TRIP-4-test content if present)
+
+#### TRIP-3-release/SKILL.md (new in v2 — values come from the old TRIP-2)
+
+1. Start from the new template (staging)
+2. Replace `[PROJECT_NAME]` with extracted `PROJECT_NAME`
 3. Replace `[VERSION_FILE]` with extracted `VERSION_FILE`
 4. Replace `[WEEK_ANCHOR_DATE]` with extracted `WEEK_ANCHOR_DATE`
-5. Replace `[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, `[TEST_COMMAND]` with extracted commands
-   - If the old version didn't have Codex review (no test commands extracted), check the old TRIP-4-test for test commands, or ask the user
-6. Handle tutorial config:
+5. Replace `[MAIN_BRANCH]` with the repo's default branch name
+6. Replace the standalone-verification commands with the same extracted lint/typecheck/test commands
+7. Handle tutorial config:
    - If tutorials were disabled: remove the `[TUTORIAL_STEP]` block
    - If tutorials were enabled: replace the `[TUTORIAL_STEP]` block with extracted `TUTORIAL_CONFIG` and renumber subsequent steps
 
-#### TRIP-3-review/SKILL.md + checklist.md + cr-template.md
+#### TRIP-review/SKILL.md + checklist.md + cr-template.md (was `TRIP-3-review` in v1)
 
 1. `SKILL.md`: Start from the new template. Replace `[PROJECT_NAME]`.
 2. `checklist.md`: Start from the new template. Replace the `[ADAPT_TO_PROJECT]` comment block with the project-specific checklist sections from the extracted `REVIEW_CHECKLIST`.
@@ -237,7 +258,7 @@ For each customized skill, take the **new template** from staging and inject the
    - Preserve the Severity Classification and Approval Gate from the **new** template unless the project had custom overrides.
 3. `cr-template.md`: Start from the new template. Update the Checklist section names to match the actual sections in the merged `checklist.md`.
 
-#### TRIP-4-test/SKILL.md
+#### TRIP-test/SKILL.md (was `TRIP-4-test` in v1)
 
 1. Start from the new template (staging)
 2. Replace `[PROJECT_NAME]` with extracted `PROJECT_NAME`
@@ -260,7 +281,7 @@ After writing all files, run a validation pass.
 Scan all upgraded skill files for leftover placeholders:
 
 ```bash
-grep -rn '\[ADAPT_TO_PROJECT\]\|\[PROJECT_NAME\]\|\[VERSION_FILE\]\|\[WEEK_ANCHOR_DATE\]\|\[TEST_COMMAND\]\|\[LINT_COMMAND\]\|\[TYPECHECK_COMMAND\]\|\[TUTORIAL_STEP\]' .claude/skills/TRIP-*/
+grep -rn '\[ADAPT_TO_PROJECT\|\[PROJECT_NAME\]\|\[VERSION_FILE\]\|\[WEEK_ANCHOR_DATE\]\|\[TEST_COMMAND\]\|\[LINT_COMMAND\]\|\[TYPECHECK_COMMAND\]\|\[TUTORIAL_STEP\]\|\[MAIN_BRANCH\]' .claude/skills/TRIP-*/
 ```
 
 If any are found, fill them from context or ask the user.
@@ -268,9 +289,9 @@ If any are found, fill them from context or ask the user.
 ### 5.2 Cross-Reference Check
 
 - `checklist.md` section names must match `cr-template.md` checklist section names
-- `codex-code-review/prompts/start.tpl` references `.claude/skills/TRIP-3-review/checklist.md` — confirm it exists
-- `codex-code-review/prompts/synthesize.tpl` references `.claude/skills/TRIP-3-review/cr-template.md` — confirm it exists
-- `TRIP-2-implement` references `codex-plan-review/scripts/start.sh` — confirm it exists
+- `codex-code-review/prompts/start.tpl` and `resume.tpl` reference `.claude/skills/TRIP-review/checklist.md` — confirm it exists, and that no template still points at the old `TRIP-3-review/` path
+- `codex-code-review/prompts/synthesize.tpl` and `codex-code-review/SKILL.md` reference `.claude/skills/TRIP-review/cr-template.md` — confirm it exists
+- `TRIP-1-plan` and `TRIP-2-implement` reference `codex-plan-review/scripts/start.sh` and `resume.sh`; `TRIP-2-implement` also references `codex-implement/scripts/start.sh` — confirm they exist
 
 ### 5.3 Present Summary
 

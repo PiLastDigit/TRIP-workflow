@@ -47,11 +47,12 @@ Codex uses `git status -s` / `git diff HEAD` in read-only sandbox. If those fail
 
 ## After Convergence
 
-1. Promote `state/<key>.review.txt` to `docs/3-code-review/CR_wa_vx.y.z.md` using `.claude/skills/TRIP-3-review/cr-template.md`.
-2. Continue with TRIP-2-implement post-implementation steps.
+1. Promote `state/<key>.review.txt` to `docs/3-code-review/CR_wa_vx.y.z.md` using `.claude/skills/TRIP-review/cr-template.md`.
+2. Continue with `TRIP-3-release`.
 
 ## Notes
 
+- Model/effort defaults live in `codex-plan-review/scripts/_common.sh` (implementation → gpt-5.6-luna, plan/code review → gpt-5.6-sol, effort xhigh; derived from `STATE_DIR`). Adjust that one file to your preferred models, or override per run via `CODEX_MODEL` / `CODEX_EFFORT` env vars; the scripts echo the effective values.
 - `--sandbox read-only`. Safe to invoke autonomously.
 - Thread IDs persisted per-target (no `--last`). Concurrent reviews don't collide.
 - Separate `STATE_DIR` from `codex-plan-review` — same key is fine.
@@ -64,5 +65,5 @@ turn 1: start.sh -> REQUEST_CHANGES (Critical: A, Major: B C)
          address A B C
 turn 2: resume.sh -> REQUEST_CHANGES (A B addressed, Minor: C partial, Suggestion: D)
          address C, optionally D
-turn 3: resume.sh -> APPROVED -> promote, continue TRIP-2
+turn 3: resume.sh -> APPROVED -> promote, continue with TRIP-3-release
 ```

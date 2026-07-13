@@ -1,16 +1,25 @@
 #!/usr/bin/env bash
-# Turn 1: start a fresh Codex review session for <target>, capture
-# the thread_id from the JSON event stream, and write the final review
-# to the per-target review file.
+# Turn 1: start a fresh Codex IMPLEMENTATION session for <target>, capture
+# the thread_id from the JSON event stream, and write Codex's final report
+# to the per-target report file.
 #
-# Usage: start.sh --prompt-file <tpl> <target> [extra prompt text...]
+# Differs from codex-plan-review/scripts/start.sh in exactly one way:
+# --sandbox workspace-write, so Codex can edit the working tree and run
+# lint/build. `codex exec resume` inherits this sandbox, so follow-up
+# turns reuse the shared resume.sh unchanged.
+#
+# Usage: start.sh --prompt-file <tpl> <target> [custom instructions…]
 # Exits 0 on success, 1 on Codex / thread_id capture failure,
 # 2 on an existing thread (use reset.sh first).
 
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=_common.sh
-source "$SCRIPT_DIR/_common.sh"
+# Default state to THIS skill's directory (shared _common.sh would
+# otherwise default to codex-plan-review's state).
+STATE_DIR="${STATE_DIR:-$(cd "$SCRIPT_DIR/.." && pwd)/state}"
+export STATE_DIR
+# shellcheck source=../../codex-plan-review/scripts/_common.sh
+source "$SCRIPT_DIR/../../codex-plan-review/scripts/_common.sh"
 
 PROMPT_FILE=""
 while [ $# -gt 0 ]; do
@@ -27,7 +36,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ -z "$PROMPT_FILE" ] || [ $# -lt 1 ]; then
-    echo "usage: start.sh --prompt-file <tpl> <target> [extra prompt text...]" >&2
+    echo "usage: start.sh --prompt-file <tpl> <target> [custom instructions…]" >&2
     exit 64
 fi
 
@@ -36,11 +45,11 @@ EXTRA_PROMPT="${*:-}"
 export TARGET EXTRA_PROMPT
 
 THREAD_FILE="$(thread_file "$TARGET")"
-REVIEW_FILE="$(review_file "$TARGET")"
+REPORT_FILE="$(review_file "$TARGET")"
 EVENTS_FILE="$(events_file "$TARGET")"
 
 if [ -f "$THREAD_FILE" ]; then
-    echo "error: review session already exists for $TARGET" >&2
+    echo "error: implementation session already exists for $TARGET" >&2
     echo "       thread id: $(cat "$THREAD_FILE")" >&2
     echo "       run resume.sh to continue, or reset.sh to start fresh." >&2
     exit 2
@@ -49,16 +58,16 @@ fi
 PROMPT="$(load_prompt "$PROMPT_FILE")"
 
 # Run Codex non-interactively: JSONL events to stdout, last message to file.
-# stdin closed to skip the "reading from stdin" detour.
-# read-only sandbox: Codex only inspects files, never modifies them.
+# workspace-write sandbox: Codex edits files in the repo and runs commands
+# (lint/build); no network, no destructive access outside the workspace.
 codex exec \
     --json \
     --skip-git-repo-check \
-    --sandbox read-only \
+    --sandbox workspace-write \
     --color never \
     -c model="$CODEX_MODEL" \
     -c model_reasoning_effort="$CODEX_EFFORT" \
-    -o "$REVIEW_FILE" \
+    -o "$REPORT_FILE" \
     "$PROMPT" \
     </dev/null \
     >"$EVENTS_FILE" \
@@ -70,7 +79,6 @@ codex exec \
         exit 1
     }
 
-# Capture thread_id from the first thread.started event.
 THREAD_ID="$(jq -r 'select(.type == "thread.started") | .thread_id' \
                 "$EVENTS_FILE" 2>/dev/null | head -1)"
 
@@ -82,9 +90,9 @@ if [ -z "$THREAD_ID" ] || [ "$THREAD_ID" = "null" ]; then
 fi
 
 printf '%s\n' "$THREAD_ID" > "$THREAD_FILE"
-echo "started review session for $TARGET"
+echo "started implementation session for $TARGET"
 echo "  thread id:   $THREAD_ID"
 echo "  model/effort: $CODEX_MODEL / $CODEX_EFFORT"
-echo "  review file: $REVIEW_FILE"
+echo "  report file: $REPORT_FILE"
 echo "---"
-cat "$REVIEW_FILE"
+cat "$REPORT_FILE"

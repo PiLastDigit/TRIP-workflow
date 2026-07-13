@@ -37,14 +37,7 @@ Frame questions around:
 
 For each question, provide 2-4 concrete options based on your analysis of the codebase and the feature request. Always let the user provide custom input via the built-in "Other" option.
 
-### 1.2 Iterate Until Clear
-
-After user answers, either:
-
-- **Ask follow-up questions** using the `AskUserQuestion` tool if new ambiguities emerged
-- **Propose an approach** and **use the `AskUserQuestion` tool** to confirm:
-  - **Question**: "Based on your answers, I'm thinking the approach would be: [brief description]. Does this align with what you have in mind?"
-  - **Options**: "Yes, proceed" (approach looks good), "Adjust" (I have modifications to suggest)
+After the user answers, proceed **directly to writing the plan** (Step 2) — no approach-confirmation question. Ask a follow-up round with `AskUserQuestion` only if a blocking ambiguity remains (**maximum 3 rounds total**; if still unclear, summarize what you know and proceed with noted assumptions).
 
 ---
 
@@ -122,6 +115,10 @@ Depending on the feature (major, minor, patch), propose a new version using SemV
 
 [Migration strategy if needed]
 
+## Test Impact
+
+[2-5 bullets: which existing tests the change affects, what new logic will need tests, whether an integration/E2E check applies. No test code — the TRIP-2 testing gate consumes this section.]
+
 ## To-dos
 
 ### Phase 1: [Phase Name] (if multiple phases are needed) or simply skip title if only one phase is needed
@@ -136,7 +133,7 @@ Depending on the feature (major, minor, patch), propose a new version using SemV
 
 **Note**: For simple plans, a single phase is sufficient. Split into multiple phases only for complex features requiring sequential implementation.
 
-**Note**: Testing is OUT OF SCOPE for planning - will be handled separately.
+**Note**: Do NOT write test code during planning — the Test Impact section above only names what the TRIP-2 testing gate will run and author.
 ```
 
 ## Quality Standards
