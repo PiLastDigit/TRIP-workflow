@@ -145,6 +145,25 @@ Conduct the research:
 
 ---
 
+## Step 4b: Codex Cross-Check
+
+For **decision-grade findings** — architecture recommendations, technology choices, anything the user will build on (typically compute level `think hard` and above) — red-team the draft conclusion with the `codex-ask` skill before presenting. Skip for quick lookups.
+
+```bash
+export STATE_DIR=".claude/skills/codex-ask/state"
+bash .claude/skills/codex-plan-review/scripts/start.sh \
+    --prompt-file .claude/skills/codex-ask/prompts/ask.tpl \
+    <topic-label> "Here is my draft recommendation: <summary + key rationale>. Red-team it: what am I missing, what would you choose instead, and why?"
+```
+
+Follow up in the same thread (`resume.sh` + `followup.tpl`) if the answer raises points worth probing. Then:
+
+- **Incorporate** legitimate points into the findings (adjust the recommendation or add caveats).
+- **Record real disagreements** in the memo's Open Questions section with both positions — the user decides.
+- This is advisory, not gating: you own the final recommendation.
+
+---
+
 ## Step 5: Present Findings
 
 ### If "Chat only" was selected
