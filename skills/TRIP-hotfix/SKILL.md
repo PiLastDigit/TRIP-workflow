@@ -34,10 +34,16 @@ Before proceeding, confirm this is a genuine hotfix:
 
 ## Step 2: Create Hotfix Branch
 
+Branch from the **currently active branch** — the workflow is base-branch agnostic, and Step 8 merges back into whatever branch you started from. Run as ONE command so the steps share a shell:
+
 ```bash
-git checkout main && git pull
-git checkout -b hotfix/[short-description]
+BASE_BRANCH="$(git branch --show-current)" \
+    && git pull --ff-only \
+    && git checkout -b hotfix/[short-description] \
+    && git config branch."hotfix/[short-description]".trip-base "$BASE_BRANCH"
 ```
+
+If the active branch has no upstream, drop the `git pull --ff-only` step instead of ignoring its failure.
 
 ---
 
@@ -106,12 +112,37 @@ git add -A && git commit -m "hotfix: [brief description]"
 
 ## Step 8: Merge & Tag
 
+Merge back into the base branch recorded in Step 2. Run as ONE command so the lookup and the merge share a shell:
+
 ```bash
-git checkout main
-git merge hotfix/[short-description]
-git tag vx.y.z
-git push && git push --tags
-git branch -d hotfix/[short-description]
+BASE_BRANCH="$(git config branch.hotfix/[short-description].trip-base)" \
+    && git checkout "$BASE_BRANCH" \
+    && git merge --ff-only hotfix/[short-description] \
+    && git tag vx.y.z \
+    && git branch -d hotfix/[short-description]
+```
+
+If the `trip-base` lookup fails (branch created outside this skill), ask the user which branch to merge into. If `--ff-only` fails, the base branch moved during the fix — rebase the hotfix branch onto it, then retry. **Never create a merge commit.**
+
+## Step 8b: Push
+
+**If the user already specified which branch to push**, push that branch directly and skip the question.
+
+Otherwise, list the available branches:
+
+```bash
+git branch --format='%(refname:short)'
+```
+
+Then **use the `AskUserQuestion` tool** to ask:
+
+- **Question**: "Hotfix vx.y.z is merged and tagged. Which branch should I push?"
+- **Options**: One option per branch from the list above — the base branch first, marked "(recommended)" — plus "Not yet" (push manually later). If there are too many branches to list, include the most relevant ones; the user can name another via "Other".
+
+**If a branch is selected**:
+
+```bash
+git push origin <selected-branch> && git push --tags
 ```
 
 ---

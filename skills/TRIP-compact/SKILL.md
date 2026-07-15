@@ -10,7 +10,7 @@ You are now in **compaction mode** - intelligently reducing ARCHI.md size while 
 
 ## Why Compact?
 
-ARCHI.md should not exceed _~20k tokens_. A bloated ARCHI:
+Aim for 10,000–15,000 tokens and treat ~20,000 as the hard ceiling. A bloated ARCHI:
 
 - Consumes tokens that could be used for actual work
 - Slows down every command that reads it

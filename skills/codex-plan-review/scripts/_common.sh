@@ -5,8 +5,7 @@
 set -euo pipefail
 
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-# STATE_DIR can be overridden by the caller (e.g., codex-code-review
-# exports its own state path before invoking the shared scripts).
+# STATE_DIR can be overridden by a consumer wrapper (e.g., codex-code-review).
 # Default falls back to the script's own skill directory.
 : "${STATE_DIR:=$SKILL_DIR/state}"
 export STATE_DIR
@@ -68,12 +67,20 @@ load_prompt() {
         echo "error: prompt template not found: $tpl" >&2
         return 1
     fi
-    awk -v target="${TARGET-}" -v extra="${EXTRA_PROMPT-}" -v notes="${IMPLEMENTER_NOTES-}" '
+    awk '
+        function replace_literal(text, needle, replacement,    out, position) {
+            out = ""
+            while ((position = index(text, needle)) != 0) {
+                out = out substr(text, 1, position - 1) replacement
+                text = substr(text, position + length(needle))
+            }
+            return out text
+        }
         {
-            gsub(/\{\{TARGET\}\}/, target)
-            gsub(/\{\{EXTRA_PROMPT\}\}/, extra)
-            gsub(/\{\{IMPLEMENTER_NOTES\}\}/, notes)
-            print
+            line = replace_literal($0, "{{TARGET}}", ENVIRON["TARGET"])
+            line = replace_literal(line, "{{EXTRA_PROMPT}}", ENVIRON["EXTRA_PROMPT"])
+            line = replace_literal(line, "{{IMPLEMENTER_NOTES}}", ENVIRON["IMPLEMENTER_NOTES"])
+            print line
         }
     ' "$tpl"
 }

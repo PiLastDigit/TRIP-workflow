@@ -645,7 +645,7 @@ Update Step 2 to reference the actual version file:
 
 **B. Week Anchor**
 
-The week Init is run becomes **Week 1** of the project. Capture the anchor date (Monday of the current week) and update the week formula in `TRIP-2-implement`.
+The week Init is run becomes **Week 1** of the project. Capture the anchor date (Monday of the current week) and update the week formula in `TRIP-3-release`.
 
 Run this to get the anchor date:
 
@@ -687,7 +687,7 @@ Then replace the `[WEEK_ANCHOR_DATE]` placeholder in `TRIP-3-release` Step 1 wit
 Then update the `[TUTORIAL_STEP]` block in `TRIP-3-release` with the user's context:
 
 ```markdown
-### Step 7: Tutorial
+### Step 8: Tutorial
 
 Create `docs/5-tuto/tuto_x.y.z.md` explaining the core principle.
 
@@ -705,6 +705,8 @@ Create `docs/5-tuto/tuto_x.y.z.md` explaining the core principle.
 - Step 8: README Update → **Step 9**: README Update
 - Step 9: Commit → **Step 10**: Commit
 - Step 10: Tag → **Step 11**: Tag
+- Step 11: Merge → **Step 12**: Merge
+- Step 12: Push → **Step 13**: Push
 
 **D. Codex Review Test Commands**
 
@@ -1012,10 +1014,9 @@ Update: Technology Stack, and any affected architectural sections
   - [ ] `TRIP-1-plan`: `[ADAPT_TO_PROJECT]` markers replaced with actual technical considerations
   - [ ] `TRIP-1-plan`: Guidance sections replaced with project-specific patterns
   - [ ] `TRIP-1-plan`: Custom plan sections added (if user requested)
-  - [ ] `TRIP-2-implement`: Testing gate commands (`[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, `[TEST_COMMAND]`) replaced with actual commands
+  - [ ] `TRIP-2-implement` and `TRIP-3-release`: Testing commands (`[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, `[TEST_COMMAND]`) replaced with actual commands
   - [ ] `TRIP-3-release`: `[VERSION_FILE]` placeholder replaced
   - [ ] `TRIP-3-release`: `[WEEK_ANCHOR_DATE]` placeholder replaced
-  - [ ] `TRIP-3-release`: Standalone-verification commands replaced with actual commands
   - [ ] `TRIP-3-release`: Tutorial preference configured (if enabled: 5-tuto/ folder created + user context; if disabled: `[TUTORIAL_STEP]` block removed)
   - [ ] `TRIP-review/checklist.md`: `[ADAPT_TO_PROJECT]` markers replaced with project-specific checklist sections
   - [ ] `TRIP-review/cr-template.md`: Checklist section names updated to match adapted `checklist.md`

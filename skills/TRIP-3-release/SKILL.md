@@ -60,7 +60,7 @@ Now that week (`a`) and version (`x.y.z`) are known:
 
 1. Compute state file path:
    ```bash
-   STATE_KEY="$(realpath <plan-path> | sed 's|^/||; s|/|__|g')"
+   STATE_KEY="$(bash .claude/skills/codex-plan-review/scripts/key.sh <plan-path-or-label>)"
    STATE_FILE=".claude/skills/codex-code-review/state/${STATE_KEY}.review.txt"
    ```
 
@@ -158,25 +158,36 @@ git tag vx.y.z
 
 ## Step 11: Merge (fast-forward)
 
-Merge the feature branch back into the main branch, keeping a single clean linear history:
+Merge the feature branch back into its **base branch** — the branch it was created from, recorded by `TRIP-2-implement` Step 0 — keeping a single clean linear history. Run as ONE command so the lookup and the merge share a shell:
 
 ```bash
-git checkout [MAIN_BRANCH]
-git merge --ff-only <feature-branch>
-git branch -d <feature-branch>
+BASE_BRANCH="$(git config branch.<feature-branch>.trip-base)" \
+    && git checkout "$BASE_BRANCH" \
+    && git merge --ff-only <feature-branch> \
+    && git branch -d <feature-branch>
 ```
 
-If `--ff-only` fails, the main branch moved during implementation — rebase the feature branch onto it, then retry. **Never create a merge commit.**
+If the `trip-base` lookup fails (branch created outside TRIP-2), ask the user which branch to merge into and substitute it for `"$BASE_BRANCH"`.
+
+If `--ff-only` fails, the base branch moved during implementation — rebase the feature branch onto it, then retry. **Never create a merge commit.**
 
 ## Step 12: Push
 
-**Use the `AskUserQuestion` tool** to ask:
+**If the user already specified which branch to push** (in the request or earlier in the session), push that branch directly and skip the question.
 
-- **Question**: "Release vx.y.z is committed, tagged, and merged. Push to remote?"
-- **Options**: "Yes, push now" (push branch and tags), "Not yet" (push manually later)
-
-**If "Yes"**:
+Otherwise, list the available branches:
 
 ```bash
-git push && git push --tags
+git branch --format='%(refname:short)'
+```
+
+Then **use the `AskUserQuestion` tool** to ask:
+
+- **Question**: "Release vx.y.z is committed, tagged, and merged. Which branch should I push?"
+- **Options**: One option per branch from the list above — the base branch first, marked "(recommended)" — plus "Not yet" (push manually later). If there are too many branches to list, include the most relevant ones; the user can name another via "Other".
+
+**If a branch is selected**:
+
+```bash
+git push origin <selected-branch> && git push --tags
 ```

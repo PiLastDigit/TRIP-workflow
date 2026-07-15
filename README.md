@@ -1,6 +1,6 @@
 ![TRIP Workflow Banner](assets/trip-workflow-banner2.png)
 
-![Version](https://img.shields.io/badge/version-2.1.0-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
+![Version](https://img.shields.io/badge/version-2.1.1-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
 
 ## What is TRIP?
 
@@ -18,7 +18,7 @@ Even the "simple" ones come with:
 
 - 47 different commands & skills to memorize
 - Sub-agents swarm for God-knows-what
-- Mutlti-chapters courses (sometimes paid lol)
+- Multi-chapter courses (sometimes paid lol)
 
 **TRIP is different.** It's deliberately minimal:
 
@@ -37,6 +37,8 @@ The onboarding is: copy the folder, run init, start coding. If you can count to 
 It was kept stupid simple because **the goal is to ship features, not to master a workflow**. The workflow should disappear into the background, not become a project of its own.
 
 ## Getting Started
+
+Requirements for the bundled Codex scripts: Bash, Codex CLI, `jq`, and GNU coreutils (`realpath` and GNU `date`). On Windows, run them from WSL or a shell with those tools installed.
 
 1. Copy the `skills/` folder contents to your repo's `.claude/skills/` or whatever
 2. Run `/TRIP-init [YourProjectName]`
@@ -132,7 +134,7 @@ Exploratory investigation with defined compute level. For feasibility studies an
 ### `/TRIP-compact`
 
 Run this skill to compact ARCHI.md size while preserving relevance, accuracy, and coverage through summarization and restructuring. Token calculator script included.
-As a rule of thumb, ARCHI.md should not exceed ~10% of context window.
+Aim for 10,000–15,000 tokens; treat ~20,000 as the hard ceiling.
 
 ## Multi-Agent: Using Different LLMs at Different Steps
 
@@ -147,7 +149,7 @@ As of mid july 2026, this Fable + GPT5.6 harness combo is absolute peak.
 
 ## MCP Servers: Less Is More
 
-Last piece of advise before your new coding quest: Every MCP server you add is extra context, extra latency, and extra confusion. Keep it minimal. The one use case where MCP genuinely shines is **up-to-date documentation**, so your agent stops hallucinating deprecated APIs/whatever. Two servers cover it: [Context7](https://github.com/upstash/context7) for current library & framework docs, and [Exa](https://github.com/exa-labs/exa-mcp-server) for web search when the answer isn't in any doc. No bloat beyond that.
+Last piece of advice before your new coding quest: Every MCP server you add is extra context, extra latency, and extra confusion. Keep it minimal. The one use case where MCP genuinely shines is **up-to-date documentation**, so your agent stops hallucinating deprecated APIs/whatever. Two servers cover it: [Context7](https://github.com/upstash/context7) for current library & framework docs, and [Exa](https://github.com/exa-labs/exa-mcp-server) for web search when the answer isn't in any doc. No bloat beyond that.
 
 ## Contributing
 
