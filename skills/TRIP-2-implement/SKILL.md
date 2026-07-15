@@ -22,13 +22,15 @@ Implement: $ARGUMENTS
 
 ## Step 0: Create a Branch (Pre-Implementation)
 
-**Always** create a dedicated branch before implementing — no need to ask. `TRIP-3-release` merges it back into the main branch with fast-forward, keeping a single clean linear history.
+**Always** create a dedicated branch before implementing — no need to ask. The workflow is base-branch agnostic: whatever branch is active right now becomes the **base branch**, and `TRIP-3-release` merges the feature branch back into it with fast-forward, keeping a single clean linear history.
 
 ```bash
+BASE_BRANCH="$(git branch --show-current)"
 git checkout -b feat/[short-description]   # or fix/[short-description]
+git config branch."feat/[short-description]".trip-base "$BASE_BRANCH"
 ```
 
-Derive the short description from the plan/feature name. If already on a dedicated branch for this work (e.g., resuming a session), continue on it.
+The `trip-base` config entry records where the branch came from so the release step knows where to merge back — no hardcoded main. Derive the short description from the plan/feature name. If already on a dedicated branch for this work (e.g., resuming a session), continue on it.
 
 ---
 
@@ -49,8 +51,7 @@ You do NOT write the implementation yourself — delegate it to Codex via the `c
    Follow-up phases resume the same thread (context retained):
 
    ```bash
-   export STATE_DIR=".claude/skills/codex-implement/state"
-   bash .claude/skills/codex-plan-review/scripts/resume.sh \
+   bash .claude/skills/codex-implement/scripts/resume.sh \
        --prompt-file .claude/skills/codex-implement/prompts/continue.tpl \
        <plan-path> "Now implement Phase 2"
    ```
@@ -126,15 +127,9 @@ Always run the Codex code review after the testing gate passes — no confirmati
 
 ### Loop
 
-Always export before invoking shared scripts:
-
-```bash
-export STATE_DIR=".claude/skills/codex-code-review/state"
-```
-
 1. **Start**:
    ```bash
-   bash .claude/skills/codex-plan-review/scripts/start.sh \
+   bash .claude/skills/codex-code-review/scripts/start.sh \
        --prompt-file .claude/skills/codex-code-review/prompts/start.tpl \
        <plan-path> "$GATE_SUMMARY"
    ```
@@ -148,7 +143,7 @@ export STATE_DIR=".claude/skills/codex-code-review/state"
 
 5. **Resume** (re-run the testing gate first — lint, typecheck, affected tests — and build a fresh summary):
    ```bash
-   bash .claude/skills/codex-plan-review/scripts/resume.sh \
+   bash .claude/skills/codex-code-review/scripts/resume.sh \
        --prompt-file .claude/skills/codex-code-review/prompts/resume.tpl \
        --notes "Fixed X. Pushed back on Y because Z." \
        <plan-path> "$GATE_SUMMARY"
@@ -164,7 +159,7 @@ Skip if loop converged on Turn 1 (state file already holds full review).
 Turn-N state files hold only that turn's delta. After multi-round convergence, produce a consolidated review:
 
 ```bash
-bash .claude/skills/codex-plan-review/scripts/resume.sh \
+bash .claude/skills/codex-code-review/scripts/resume.sh \
     --prompt-file .claude/skills/codex-code-review/prompts/synthesize.tpl \
     <plan-path> "Today's date is YYYY-MM-DD"
 ```

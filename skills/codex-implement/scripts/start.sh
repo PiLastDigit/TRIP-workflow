@@ -14,9 +14,10 @@
 
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Default state to THIS skill's directory (shared _common.sh would
-# otherwise default to codex-plan-review's state).
-STATE_DIR="${STATE_DIR:-$(cd "$SCRIPT_DIR/.." && pwd)/state}"
+# Pin state to THIS skill's directory, like the wrapper scripts do —
+# unconditionally, so a stale STATE_DIR in the environment can't
+# redirect implementation state (or flip the model selection).
+STATE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/state"
 export STATE_DIR
 # shellcheck source=../../codex-plan-review/scripts/_common.sh
 source "$SCRIPT_DIR/../../codex-plan-review/scripts/_common.sh"

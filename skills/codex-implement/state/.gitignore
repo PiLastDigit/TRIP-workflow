@@ -1,0 +1,4 @@
+# Per-target Codex implementation state (thread ids, reports, and event logs).
+# Local-only; these are session artifacts, not source files.
+*
+!.gitignore

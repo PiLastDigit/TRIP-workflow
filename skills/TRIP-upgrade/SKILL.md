@@ -243,9 +243,8 @@ For each customized skill, take the **new template** from staging and inject the
 2. Replace `[PROJECT_NAME]` with extracted `PROJECT_NAME`
 3. Replace `[VERSION_FILE]` with extracted `VERSION_FILE`
 4. Replace `[WEEK_ANCHOR_DATE]` with extracted `WEEK_ANCHOR_DATE`
-5. Replace `[MAIN_BRANCH]` with the repo's default branch name
-6. Replace the standalone-verification commands with the same extracted lint/typecheck/test commands
-7. Handle tutorial config:
+5. Replace the standalone-verification commands with the same extracted lint/typecheck/test commands
+6. Handle tutorial config:
    - If tutorials were disabled: remove the `[TUTORIAL_STEP]` block
    - If tutorials were enabled: replace the `[TUTORIAL_STEP]` block with extracted `TUTORIAL_CONFIG` and renumber subsequent steps
 
@@ -281,7 +280,7 @@ After writing all files, run a validation pass.
 Scan all upgraded skill files for leftover placeholders:
 
 ```bash
-grep -rn '\[ADAPT_TO_PROJECT\|\[PROJECT_NAME\]\|\[VERSION_FILE\]\|\[WEEK_ANCHOR_DATE\]\|\[TEST_COMMAND\]\|\[LINT_COMMAND\]\|\[TYPECHECK_COMMAND\]\|\[TUTORIAL_STEP\]\|\[MAIN_BRANCH\]' .claude/skills/TRIP-*/
+grep -rn '\[ADAPT_TO_PROJECT\|\[PROJECT_NAME\]\|\[VERSION_FILE\]\|\[WEEK_ANCHOR_DATE\]\|\[TEST_COMMAND\]\|\[LINT_COMMAND\]\|\[TYPECHECK_COMMAND\]\|\[TUTORIAL_STEP\]\|\[MAIN_BRANCH\]' .claude/skills/
 ```
 
 If any are found, fill them from context or ask the user.
@@ -291,7 +290,7 @@ If any are found, fill them from context or ask the user.
 - `checklist.md` section names must match `cr-template.md` checklist section names
 - `codex-code-review/prompts/start.tpl` and `resume.tpl` reference `.claude/skills/TRIP-review/checklist.md` — confirm it exists, and that no template still points at the old `TRIP-3-review/` path
 - `codex-code-review/prompts/synthesize.tpl` and `codex-code-review/SKILL.md` reference `.claude/skills/TRIP-review/cr-template.md` — confirm it exists
-- `TRIP-1-plan` and `TRIP-2-implement` reference `codex-plan-review/scripts/start.sh` and `resume.sh`; `TRIP-2-implement` also references `codex-implement/scripts/start.sh` — confirm they exist
+- `TRIP-1-plan` references `codex-plan-review/scripts/`; `TRIP-2-implement` references the local wrappers under `codex-implement/scripts/` and `codex-code-review/scripts/` — confirm they exist
 
 ### 5.3 Present Summary
 
