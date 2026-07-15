@@ -15,8 +15,10 @@ instruction block at the bottom of this prompt.
 
 ## Scope & rules
 
-- Implement exactly what the plan says — nothing more. If the instruction block below narrows
-  the scope (e.g. "Implement Phase 1 only"), do not exceed that scope.
+- Implement exactly what the plan says — nothing more. The instruction block below usually
+  narrows the scope to a **batch** of the plan's checkboxes (e.g. "Implement only: …"). Never
+  exceed the stated scope or start future items — the requester will ask for the next batch
+  in a later turn.
 - Follow the existing codebase patterns documented in ARCHI.md (module boundaries, error
   handling, naming). Apply DRY and KISS.
 - Tick the checkboxes in the plan's To-dos for tasks you complete.

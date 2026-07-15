@@ -1,6 +1,6 @@
 ![TRIP Workflow Banner](assets/trip-workflow-banner2.png)
 
-![Version](https://img.shields.io/badge/version-2.1.0-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
+![Version](https://img.shields.io/badge/version-2.2.0-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
 
 ## What is TRIP?
 
@@ -18,19 +18,19 @@ Even the "simple" ones come with:
 
 - 47 different commands & skills to memorize
 - Sub-agents swarm for God-knows-what
-- Mutlti-chapters courses (sometimes paid lol)
+- Multi-chapters courses (sometimes paid lol)
 
 **TRIP is different.** It's deliberately minimal:
 
 | That's it           | Just these                                             |
 | ------------------- | ------------------------------------------------------ |
-| `/TRIP-1-plan`      | Think before you code (Codex reviews the plan)         |
-| `/TRIP-2-implement` | Codex writes, you review, tests gate, Codex re-reviews |
+| `/TRIP-1-plan`      | Think before you code         |
+| `/TRIP-2-implement` | Implement, test & review |
 | `/TRIP-3-release`   | Version, changelogs, docs, commit, tag, merge, push    |
 
 ![TRIP Workflow loop](assets/trip-workflow-loop2.png)
 
-Three numbered skills. One architecture file. Zero PhD required.
+3 numbered skills. 1 architecture file. 0 PhD required.
 
 The onboarding is: copy the folder, run init, start coding. If you can count to 3, you can TRIP.
 
@@ -45,7 +45,7 @@ It was kept stupid simple because **the goal is to ship features, not to master 
 
 ### Additional For Mistral users (if they exist)
 
-Also copy `AskUserQuestion/` to your agent `/skills/`, it provides the `AskUserQuestion` tool that TRIP workflow rely on.  
+Also copy `AskUserQuestion/` to your agent `/skills/`, it provides the `AskUserQuestion` hook that TRIP workflow rely on.  
 
 Et voila ! Start using the skills like `/TRIP-1-plan auth for this webapp`, `/TRIP-2-implement @auth-plan.md`, etc.
 
@@ -101,25 +101,23 @@ Init walks you through questions and replaces these placeholders based on your a
 
 ### `/codex-implement`
 
-Implementation delegated to Codex CLI in a **workspace-write sandbox**: it reads the approved plan, edits the working tree, runs your lint/build, and reports back with a completion tag. Your main agent then self-reviews the diff and fixes issues directly. Persistent thread per plan, so multi-phase plans resume with full context. Integrated into TRIP-2-implement as the default implementation path.
+Implementation delegated to Codex CLI in a workspace-write sandbox.
 
 ### `/codex-plan-review` & `/codex-code-review`
 
-Iterative review loops powered by Codex CLI. Plans get a second-opinion review before the user sees them. Code gets reviewed against the plan and a shared checklist after implementation. Both use persistent thread state for multi-round convergence (`start → REQUEST_CHANGES → fix → resume → APPROVED`). Integrated directly into TRIP-1-plan and TRIP-2-implement (after the testing gate).
-
-Per-flow model defaults (implementation vs reviews) live in one file — `codex-plan-review/scripts/_common.sh` — and can be overridden per run via `CODEX_MODEL` / `CODEX_EFFORT` env vars.
-
-### `/TRIP-review` & `/TRIP-test`
-
-The former steps 3 and 4, reborn as on-demand support skills: `/TRIP-review` is the manual fallback/audit review (same checklist as the Codex loop — single source of truth), `/TRIP-test` is the deep test-authoring reference with a seam ladder and a coverage-debt ledger for hard-to-test code.
-
-### `/TRIP-upgrade`
-
-Upgrades an existing project's TRIP skills to a newer version without losing project customizations. Extracts your project-specific content (test commands, checklist sections, technical considerations, version file paths), applies the new workflow skeleton, and re-injects the customizations. Copy the new skills to `new-TRIP/`, run the skill, done.
+Iterative review loops powered by Codex CLI.
 
 ### `/codex-ask`
 
-A grounded second opinion on **anything** — architecture calls, debugging hypotheses, research conclusions. Codex answers from inside the repo (read-only), threaded per topic for multi-round discussion. Advisory only: no verdict tags, nothing gated. TRIP-research uses it to red-team decision-grade findings before presenting them.
+A grounded second opinion on **anything**. TRIP-research uses it to brainstorm findings before presenting them.
+
+### `/TRIP-review` & `/TRIP-test`
+
+The former steps 3 and 4, reborn as on-demand support skills.
+
+### `/TRIP-upgrade`
+
+Upgrades an existing project's TRIP skills to a newer version without losing project customizations. Copy the new skills to `new-TRIP/`, run the skill, done.
 
 ### `/TRIP-hotfix`
 
@@ -132,7 +130,6 @@ Exploratory investigation with defined compute level. For feasibility studies an
 ### `/TRIP-compact`
 
 Run this skill to compact ARCHI.md size while preserving relevance, accuracy, and coverage through summarization and restructuring. Token calculator script included.
-As a rule of thumb, ARCHI.md should not exceed ~10% of context window.
 
 ## Multi-Agent: Using Different LLMs at Different Steps
 
@@ -143,6 +140,31 @@ Just like you wouldn't smell your own fart, an LLM is unlikely to catch bugs in 
 As of v2.0.0, this multi-agent approach is **the default workflow**.  
 Considering Claude as your main and Codex as the copilot:  
 Fable writes the plan, 5.6 Sol reviews it, Luna implements, back to Fable who reviews and fixes the diff, runs the testing gate, then a new Sol thread reviews again the code. All in one claude code session. Writer and reviewer are never the same thread.  
+
+```mermaid
+flowchart TD
+    subgraph P["/TRIP-1-plan"]
+        A["Discovery and plan draft"] --> B{"ChatGPT Sol plan review"}
+        B -->|"REQUEST_CHANGES → Fable fixes plan"| B
+    end
+
+    subgraph I["/TRIP-2-implement"]
+        D["Branch + split to-dos into batches"] --> E["ChatGPT Luna implements a batch"]
+        E --> F["Fable review the delta, fix directly"]
+        F -->|"next batch"| E
+        F -->|"all batches done"| G["Fable final pass + testing gate"]
+        G --> H{"ChatGPT Sol full code review"}
+        H -->|"REQUEST_CHANGES → Fable fixes + re-test"| H
+    end
+
+    subgraph R["/TRIP-3-release"]
+        K["Version bump · changelog · docs/ARCHI update<br/>commit · tag · ff-merge · push"]
+    end
+
+    B -->|"APPROVED"| D
+    H -->|"APPROVED"| K
+```
+
 As of mid july 2026, this Fable + GPT5.6 harness combo is absolute peak.
 
 ## MCP Servers: Less Is More

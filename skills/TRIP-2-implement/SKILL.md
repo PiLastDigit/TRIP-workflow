@@ -36,42 +36,60 @@ Derive the short description from the plan/feature name. If already on a dedicat
 
 You do NOT write the implementation yourself — delegate it to Codex via the `codex-implement` skill. (Exception: trivial unplanned changes of a few lines may be done directly.)
 
-1. Read the plan fully and decide the delegation scope: the whole plan, or one phase at a time for multi-phase plans.
+Delegation is **batched**: Codex implements a few of the plan's checkboxes per turn, you review and fix each batch, then request the next one with your corrections attached. Same persistent thread throughout — context and conventions compound across turns.
 
-2. **Start** the implementation session (state dir is handled by the script):
+### 1. Read the plan and decide the batches
 
-   ```bash
-   bash .claude/skills/codex-implement/scripts/start.sh \
-       --prompt-file .claude/skills/codex-implement/prompts/implement.tpl \
-       <plan-path> "Implement Phase 1 only"   # instructions optional — omit to implement the whole plan
-   ```
+Read the plan fully and split its to-dos into batches. You are the judge of batch size:
 
-   Follow-up phases resume the same thread (context retained):
+- A batch is the **smallest set of checkboxes that leaves the tree green** (compiles, lints). Never split an interface from its implementation and wiring.
+- Target a reviewable diff — roughly ≤300 changed lines per batch. A checkbox that alone exceeds this becomes its own batch.
+- Size by risk: novel, architectural, or security-critical work → small batches (down to one checkbox). Mechanical, repetitive work → larger batches.
+- Never span phase boundaries.
+- **One-shot escape hatch**: a low-risk plan (or phase) of ≤3-4 checkboxes is delegated whole — no batching ceremony.
+- **Filter out non-Codex items**: checkboxes needing human input, dashboard/console access, credentials, or ops actions are yours — resolve them with the user before or between batches, never delegate them.
 
-   ```bash
-   export STATE_DIR=".claude/skills/codex-implement/state"
-   bash .claude/skills/codex-plan-review/scripts/resume.sh \
-       --prompt-file .claude/skills/codex-implement/prompts/continue.tpl \
-       <plan-path> "Now implement Phase 2"
-   ```
+### 2. Delegate batch by batch
 
-3. **Parse the trailing tag** of the report:
-   - `IMPLEMENTATION_COMPLETE` → proceed to Self-Review below.
-   - `IMPLEMENTATION_PARTIAL` → read the report; resume with instructions for the remainder, or finish small leftovers yourself during Self-Review.
+**Start** the session with the first batch (state dir is handled by the script):
 
-For phased delegation, run the Delegate → Self-Review cycle per phase; the testing gate and Codex code review run once, after the last phase.
+```bash
+bash .claude/skills/codex-implement/scripts/start.sh \
+    --prompt-file .claude/skills/codex-implement/prompts/implement.tpl \
+    <plan-path> "Implement only: <batch-1 checkboxes>"   # or omit instructions to one-shot a small plan
+```
 
----
+**Each next batch resumes the same thread**, carrying your review corrections as `--notes`:
 
-## Self-Review & Fix
+```bash
+export STATE_DIR=".claude/skills/codex-implement/state"
+bash .claude/skills/codex-plan-review/scripts/resume.sh \
+    --prompt-file .claude/skills/codex-implement/prompts/continue.tpl \
+    --notes "<what you fixed after the last batch and why; conventions to apply from now on>" \
+    <plan-path> "Now implement: <next batch checkboxes>"
+```
 
-After Codex reports, review the implementation yourself before anything else:
+**Parse the trailing tag** of each report:
+- `IMPLEMENTATION_COMPLETE` → review the batch (below).
+- `IMPLEMENTATION_PARTIAL` → read the report; resume with instructions for the remainder, or finish small leftovers yourself during the batch review.
 
-- Read the full diff (`git status -s`, `git diff HEAD`) against the plan, ARCHI.md patterns, and project conventions (DRY, KISS, comment discipline, error-handling and naming conventions from ARCHI.md).
-- Fix any problem **directly yourself** — no back-and-forth with Codex over fixes. Resume the codex-implement thread only for genuinely new scope (e.g., the next phase).
-- Verify the plan checkboxes Codex ticked match what the diff actually contains; cross any it completed but missed.
+### 3. Review each batch (delta review)
 
-Proceed to the testing gate once you consider the implementation good for review.
+After each Codex report, before requesting the next batch:
+
+1. **Review the delta only**: `git status -s && git diff` — worktree vs index shows just this batch, since previous batches are staged (step 4). Check it against the plan, ARCHI.md patterns, and project conventions (DRY, KISS, comment discipline, error-handling and naming conventions from ARCHI.md).
+2. **Fix problems directly yourself** — no back-and-forth with Codex over fixes. What you fixed and why becomes the `--notes` of the next resume.
+3. **Micro-gate**: run the lint and typecheck/build commands from the Testing Gate (fast checks only — tests wait for the gate itself). Fix failures now.
+4. **Checkpoint**: `git add -A` — stage the reviewed batch so the next delta review starts clean. No commits — history stays clean for release.
+5. Verify the plan checkboxes Codex ticked match what the diff actually contains; cross any it completed but missed.
+
+**Adapt as you go**: clean batch → grow the next one; heavy corrections → shrink the next one and spell out the fix pattern in the notes. If Codex ignores notes or repeats corrected mistakes late in a long session, reset the thread at the next batch boundary — the plan file plus a summary note rebuilds context.
+
+### 4. Final pass
+
+After the last batch, read the **full feature diff** once (`git diff HEAD`). Batch reviews catch local issues; this pass catches cross-batch drift — duplicated helpers, divergent naming, dead code left by course corrections. Fix directly.
+
+The testing gate and Codex code review run **once**, after the final pass — never per batch. Proceed to the testing gate once you consider the implementation good for review.
 
 ---
 
