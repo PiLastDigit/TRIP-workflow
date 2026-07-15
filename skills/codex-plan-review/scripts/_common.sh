@@ -19,8 +19,10 @@ mkdir -p "$STATE_DIR"
 # preferred models. CODEX_MODEL / CODEX_EFFORT / CODEX_TIER act as per-run
 # overrides (e.g. CODEX_EFFORT=xhigh to escalate a hard batch).
 # Models that don't support a tier silently ignore it ("default" = standard).
-case "$STATE_DIR" in
-    *codex-implement*)
+# Match the trailing path components exactly — a repo path that merely
+# contains "codex-implement" must not flip reviews to the implement model.
+case "${STATE_DIR%/}" in
+    */codex-implement/state | codex-implement/state)
         CODEX_MODEL="${CODEX_MODEL:-gpt-5.6-luna}"
         CODEX_EFFORT="${CODEX_EFFORT:-high}"
         CODEX_TIER="${CODEX_TIER:-fast}"
@@ -74,23 +76,38 @@ codex_exec() {
     return "$rc"
 }
 
+# Fail fast when a required external tool is missing. Without this,
+# `set -e` + suppressed stderr would kill the caller with no message.
+require_tools() {
+    local tool
+    for tool in "$@"; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            echo "error: required tool not found on PATH: $tool" >&2
+            return 1
+        fi
+    done
+}
+
 # Derive a per-target key from a path-like string. For real paths we
 # resolve to absolute; for non-path targets (branch names, commit
-# ranges) we sanitize in place. Replace '/' with '__'; force any other
-# non-portable characters to '_'.
+# ranges) we use the string as-is. The key is a sanitized, readable
+# form plus a checksum of the resolved target, so distinct targets
+# that sanitize identically (e.g. "foo/bar" vs "foo__bar") never
+# share state files.
 target_key() {
-    local target="$1"
+    local target="$1" resolved sanitized sum
     if [ -e "$target" ]; then
-        local abs
-        abs="$(realpath -- "$target" 2>/dev/null || readlink -f -- "$target")"
-        if [ -z "$abs" ]; then
+        resolved="$(realpath -- "$target" 2>/dev/null || readlink -f -- "$target")"
+        if [ -z "$resolved" ]; then
             echo "error: cannot resolve target path: $target" >&2
             return 1
         fi
-        printf '%s' "$abs" | sed 's|^/||; s|/|__|g'
     else
-        printf '%s' "$target" | sed 's|^/||; s|/|__|g; s|[^A-Za-z0-9._-]|_|g'
+        resolved="$target"
     fi
+    sanitized="$(printf '%s' "$resolved" | sed 's|^/||; s|/|__|g; s|[^A-Za-z0-9._-]|_|g')"
+    sum="$(printf '%s' "$resolved" | cksum | cut -d' ' -f1)"
+    printf '%s.%s' "$sanitized" "$sum"
 }
 
 # Backwards-compatible alias used by older script call sites.
@@ -108,23 +125,21 @@ events_file() {
     printf '%s/%s.events.ndjson' "$STATE_DIR" "$(target_key "$1")"
 }
 
-# Load a prompt template from $1 and substitute {{TARGET}} and
-# {{EXTRA_PROMPT}} placeholders with the values of the $TARGET and
-# $EXTRA_PROMPT environment variables. Other text passes through
-# verbatim — no surprise expansion of unrelated $VAR sequences.
-# Writes the substituted prompt to stdout.
+# Load a prompt template from $1 and substitute {{TARGET}},
+# {{EXTRA_PROMPT}} and {{IMPLEMENTER_NOTES}} placeholders with the
+# values of the corresponding environment variables. The replacement
+# expansions are double-quoted, which forces bash to treat them as
+# literal strings — without the quotes, bash >= 5.2 (patsub_replacement)
+# expands '&' to the matched text, exactly the mangling awk's gsub did.
 load_prompt() {
-    local tpl="$1"
+    local tpl="$1" content
     if [ ! -f "$tpl" ]; then
         echo "error: prompt template not found: $tpl" >&2
         return 1
     fi
-    awk -v target="${TARGET-}" -v extra="${EXTRA_PROMPT-}" -v notes="${IMPLEMENTER_NOTES-}" '
-        {
-            gsub(/\{\{TARGET\}\}/, target)
-            gsub(/\{\{EXTRA_PROMPT\}\}/, extra)
-            gsub(/\{\{IMPLEMENTER_NOTES\}\}/, notes)
-            print
-        }
-    ' "$tpl"
+    content="$(cat "$tpl")"
+    content="${content//'{{TARGET}}'/"${TARGET-}"}"
+    content="${content//'{{EXTRA_PROMPT}}'/"${EXTRA_PROMPT-}"}"
+    content="${content//'{{IMPLEMENTER_NOTES}}'/"${IMPLEMENTER_NOTES-}"}"
+    printf '%s\n' "$content"
 }

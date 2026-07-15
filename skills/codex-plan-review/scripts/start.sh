@@ -12,6 +12,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=_common.sh
 source "$SCRIPT_DIR/_common.sh"
 
+require_tools codex jq
+
 PROMPT_FILE=""
 while [ $# -gt 0 ]; do
     case "$1" in

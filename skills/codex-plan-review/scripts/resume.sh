@@ -11,6 +11,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=_common.sh
 source "$SCRIPT_DIR/_common.sh"
 
+require_tools codex
+
 PROMPT_FILE=""
 IMPLEMENTER_NOTES=""
 while [ $# -gt 0 ]; do
@@ -49,6 +51,11 @@ if [ ! -f "$THREAD_FILE" ]; then
     exit 2
 fi
 THREAD_ID="$(cat "$THREAD_FILE")"
+if [ -z "$THREAD_ID" ]; then
+    echo "error: thread file for $TARGET is empty: $THREAD_FILE" >&2
+    echo "       run reset.sh, then start.sh to begin a fresh session." >&2
+    exit 2
+fi
 
 PROMPT="$(load_prompt "$PROMPT_FILE")"
 
