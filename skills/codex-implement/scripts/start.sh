@@ -21,6 +21,8 @@ export STATE_DIR
 # shellcheck source=../../codex-plan-review/scripts/_common.sh
 source "$SCRIPT_DIR/../../codex-plan-review/scripts/_common.sh"
 
+require_tools codex jq
+
 PROMPT_FILE=""
 while [ $# -gt 0 ]; do
     case "$1" in
