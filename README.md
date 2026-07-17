@@ -143,26 +143,20 @@ Fable writes the plan, 5.6 Sol reviews it, Luna implements, back to Fable who re
 
 ```mermaid
 flowchart TD
-    subgraph P["/TRIP-1-plan"]
-        A["Discovery and plan draft"] --> B{"ChatGPT Sol plan review"}
-        B -->|"REQUEST_CHANGES → Fable fixes plan"| B
-    end
-
-    subgraph I["/TRIP-2-implement"]
-        D["Branch + split to-dos into batches"] --> E["ChatGPT Luna implements a batch"]
-        E --> F["Fable review the delta, fix directly"]
-        F -->|"next batch"| E
-        F -->|"all batches done"| G["Fable final pass + testing gate"]
-        G --> H{"ChatGPT Sol full code review"}
-        H -->|"REQUEST_CHANGES → Fable fixes + re-test"| H
-    end
-
-    subgraph R["/TRIP-3-release"]
-        K["Version bump · changelog · docs/ARCHI update<br/>commit · tag · ff-merge · push"]
-    end
-
-    B -->|"APPROVED"| D
-    H -->|"APPROVED"| K
+    A["<b>/TRIP-1-plan</b><br/>Discovery and plan draft"] --> B{"ChatGPT Sol<br/>plan review"}
+    B -->|"REQUEST_CHANGES"| Bf["Fable fixes the plan"]
+    Bf -->|"re-review"| B
+    B -->|"APPROVED"| D["<b>/TRIP-2-implement</b><br/>Branch + split to-dos into batches"]
+    Bf ~~~ D
+    D --> E["ChatGPT Luna implements a batch"]
+    E --> F["Fable reviews the delta, fixes directly"]
+    F -->|"next batch"| E
+    F -->|"all batches done"| G["Fable final pass + testing gate"]
+    G --> H{"ChatGPT Sol<br/>full code review"}
+    H -->|"REQUEST_CHANGES"| Hf["Fable fixes + re-tests"]
+    Hf -->|"re-review"| H
+    H -->|"APPROVED"| K["<b>/TRIP-3-release</b><br/>Version bump · changelog · docs/ARCHI update<br/>commit · tag · ff-merge · push"]
+    Hf ~~~ K
 ```
 
 As of mid july 2026, this Fable + GPT5.6 harness combo is absolute peak.
