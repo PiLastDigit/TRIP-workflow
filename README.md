@@ -146,16 +146,16 @@ flowchart TD
     A["<b>/TRIP-1-plan</b><br/>Discovery and plan draft"] --> B{"ChatGPT Sol<br/>plan review"}
     B -->|"REQUEST_CHANGES"| Bf["Fable fixes the plan"]
     Bf -->|"re-review"| B
-    B -->|"APPROVED"| D["<b>/TRIP-2-implement</b><br/>Branch + split to-dos into batches"]
+    B -->|"APPROVED"| D["<b>/TRIP-2-implement</b><br/>Branch + split<br/>to-dos into batches"]
     Bf ~~~ D
-    D --> E["ChatGPT Luna implements a batch"]
-    E --> F["Fable reviews the delta, fixes directly"]
+    D --> E["ChatGPT Luna<br/>implements a batch"]
+    E --> F["Fable reviews the delta,<br/>fixes directly"]
     F -->|"next batch"| E
-    F -->|"all batches done"| G["Fable final pass + testing gate"]
+    F -->|"all batches done"| G["Fable final pass<br/>+ testing gate"]
     G --> H{"ChatGPT Sol<br/>full code review"}
     H -->|"REQUEST_CHANGES"| Hf["Fable fixes + re-tests"]
     Hf -->|"re-review"| H
-    H -->|"APPROVED"| K["<b>/TRIP-3-release</b><br/>Version bump · changelog · docs/ARCHI update<br/>commit · tag · ff-merge · push"]
+    H -->|"APPROVED"| K["<b>/TRIP-3-release</b><br/>Version bump · changelog<br/>docs/ARCHI update<br/>commit · tag · ff-merge · push"]
     Hf ~~~ K
 ```
 
