@@ -43,8 +43,10 @@ Any failure blocks the release — fix or return to `TRIP-2-implement` first.
 Run this command to get date and project week:
 
 ```bash
-date '+%d-%m-%Y %H:%M' && echo "Project week: $(( ( $(date +%s) - $(date -d '[WEEK_ANCHOR_DATE]' +%s) ) / 604800 + 1 ))"
+date '+%d-%m-%Y %H:%M' && python3 -c "from datetime import date; print('Project week:', (date.today() - date.fromisoformat('[WEEK_ANCHOR_DATE]')).days // 7 + 1)"
 ```
+
+(Week anchor: the Monday of the week TRIP Init was run. Python is used instead of `date -d` because macOS BSD `date` doesn't support it.)
 
 Use the project week in all subsequent steps.
 
@@ -133,6 +135,17 @@ Create `docs/5-tuto/tuto_x.y.z.md` explaining the core principle.
 Update `README.md` with the new version number.
 Also update relevant sections whenever needed.
 
+## Step 9: Documentation Sync
+
+Keep the pre-existing (non-TRIP) documentation aligned with the code:
+
+1. Read the plan's **Documentation Impact** section.
+2. Contrast it with the **actual diff** of the release (`git diff [MAIN_BRANCH]...HEAD` or equivalent) — the plan may have fallen short; a doc affected by the real changes must be synced even if the plan didn't list it.
+3. Update every affected document. **Factual corrections only**: commands, paths, build targets, script/table entries, cadences, config/env vars, structure trees. It is **forbidden** to touch the voice, tone, or strategic/editorial content of these documents.
+4. The updated files are included in the release commit (Step 10) — never a separate commit.
+
+If the plan says "None" and the diff confirms it, skip with a one-line note.
+
 ---
 
 After completing all documentation steps, **use the `AskUserQuestion` tool** to ask:
@@ -142,7 +155,7 @@ After completing all documentation steps, **use the `AskUserQuestion` tool** to 
 
 **ONLY after user selects "Yes"**, proceed:
 
-## Step 9: Commit
+## Step 10: Commit
 
 ```bash
 git add -A && git commit -m "<commit message from Step 4>"
@@ -150,13 +163,13 @@ git add -A && git commit -m "<commit message from Step 4>"
 
 **Important**: Only use the commit message. Do NOT add Co-Authored-By or any other trailer.
 
-## Step 10: Tag
+## Step 11: Tag
 
 ```bash
 git tag vx.y.z
 ```
 
-## Step 11: Merge (fast-forward)
+## Step 12: Merge (fast-forward)
 
 Merge the feature branch back into the main branch, keeping a single clean linear history:
 
@@ -168,7 +181,7 @@ git branch -d <feature-branch>
 
 If `--ff-only` fails, the main branch moved during implementation — rebase the feature branch onto it, then retry. **Never create a merge commit.**
 
-## Step 12: Push
+## Step 13: Push
 
 **Use the `AskUserQuestion` tool** to ask:
 
