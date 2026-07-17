@@ -161,6 +161,8 @@ flowchart TD
 
 As of mid july 2026, this Fable + GPT5.6 harness combo is absolute peak.
 
+One honest caveat: the implementer's `--notes` are injected into the reviewer's prompt, so a lazy (or scheming) writer agent can talk the reviewer out of findings. The skills mitigate this (reviews surfaced verbatim, capped rounds, push-back must be justified), but if a review converges suspiciously fast, read the notes.
+
 ## MCP Servers: Less Is More
 
 Last piece of advise before your new coding quest: Every MCP server you add is extra context, extra latency, and extra confusion. Keep it minimal. The one use case where MCP genuinely shines is **up-to-date documentation**, so your agent stops hallucinating deprecated APIs/whatever. Two servers cover it: [Context7](https://github.com/upstash/context7) for current library & framework docs, and [Exa](https://github.com/exa-labs/exa-mcp-server) for web search when the answer isn't in any doc. No bloat beyond that.
