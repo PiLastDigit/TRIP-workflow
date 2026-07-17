@@ -13,6 +13,7 @@ You are now in **planning mode** for **[PROJECT_NAME]**.
 Before creating any plan, you MUST read ALL THE LINES of:
 
 1. @docs/ARCHI.md - Understand current system architecture
+2. [ADAPT_TO_PROJECT: optional — list additional living docs a plan must respect (e.g. an operations manual, a public API contract), each with the condition under which it must be read ("only if the feature touches X"). Remove this line if the project has none.]
 
 ## Your Task
 
@@ -118,6 +119,14 @@ Depending on the feature (major, minor, patch), propose a new version using SemV
 ## Test Impact
 
 [2-5 bullets: which existing tests the change affects, what new logic will need tests, whether an integration/E2E check applies. No test code — the TRIP-2 testing gate consumes this section.]
+
+## Documentation Impact
+
+[Mandatory. List every document OUTSIDE the TRIP docs that this feature will leave outdated, with one line each on what becomes stale. Always evaluate these candidates:
+
+[ADAPT_TO_PROJECT: During Init, replace with the project's actual living docs — every non-TRIP document that code changes can leave stale. Typical candidates: `README.md` (quick start, repo structure tree, command reference), module/subdirectory READMEs, operations or user manuals, reference `.md` specs living next to the code, contributor guides (`CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`). One bullet per doc with when it's affected.]
+
+If none are affected, write "None". The TRIP-3 Documentation Sync step consumes this section before the release commit.]
 
 ## To-dos
 

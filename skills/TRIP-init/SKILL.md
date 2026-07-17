@@ -469,7 +469,7 @@ After user validation, update the other TRIP skill files based on the **actual c
 
 ### Skills to Update:
 
-1. **`TRIP-1-plan`** - Technical considerations, guidance sections
+1. **`TRIP-1-plan`** - Technical considerations, guidance sections, documentation impact candidates
 2. **`TRIP-2-implement`** - Testing gate commands
 3. **`TRIP-3-release`** - Version file, week offset, tutorials
 4. **`TRIP-review`** - `checklist.md` and `cr-template.md` adapted to actual architecture
@@ -616,7 +616,21 @@ Required analysis:
 
 _These are examples. Create guidance sections based on what's actually in ARCHI.md - the major patterns, layers, and component types specific to this project._
 
-**C. Custom Plan Sections**
+**C. Documentation Impact Candidates**
+
+Replace the `[ADAPT_TO_PROJECT]` marker inside the plan template's **Documentation Impact** section with the project's actual living documentation — every non-TRIP document that code changes can leave stale, one bullet per doc with when it's affected. Draw from what Phase 2 discovered:
+
+- `README.md` — quick start, repo structure tree, command reference
+- Module/subdirectory READMEs
+- Operations or user manuals
+- Reference `.md` specs living next to the code
+- Contributor guides (`CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`)
+
+This list is what makes the TRIP-3 Documentation Sync step effective — a doc missing here tends to drift silently.
+
+Also resolve the `[ADAPT_TO_PROJECT]` marker in the **Prerequisites** list at the top of `TRIP-1-plan`: if the project has living docs a plan must respect beyond ARCHI.md (e.g. an operations manual), list them with the condition under which they must be read; otherwise delete that line.
+
+**D. Custom Plan Sections**
 
 **Use the `AskUserQuestion` tool** to ask:
 
@@ -645,15 +659,15 @@ Update Step 2 to reference the actual version file:
 
 **B. Week Anchor**
 
-The week Init is run becomes **Week 1** of the project. Capture the anchor date (Monday of the current week) and update the week formula in `TRIP-2-implement`.
+The week Init is run becomes **Week 1** of the project. Capture the anchor date (Monday of the current week) and update the week formula in `TRIP-3-release`.
 
 Run this to get the anchor date:
 
 ```bash
-date -d "last monday" '+%Y-%m-%d'  # If today is Monday, use: date '+%Y-%m-%d'
+python3 -c "from datetime import date, timedelta; t = date.today(); print(t - timedelta(days=t.weekday()))"
 ```
 
-Then replace the `[WEEK_ANCHOR_DATE]` placeholder in `TRIP-3-release` Step 1 with the actual date. The formula counts elapsed weeks from that fixed date, so it works across year boundaries indefinitely.
+Then replace the `[WEEK_ANCHOR_DATE]` placeholder in `TRIP-3-release` Step 1 with the actual date (ISO format, `YYYY-MM-DD` — the formula parses it with `date.fromisoformat`). The formula counts elapsed weeks from that fixed date, so it works across year boundaries indefinitely, and both this command and the formula use Python instead of `date -d`, so they run identically on GNU/Linux and macOS (BSD `date`).
 
 **C. Tutorial Generation**
 
@@ -687,7 +701,7 @@ Then replace the `[WEEK_ANCHOR_DATE]` placeholder in `TRIP-3-release` Step 1 wit
 Then update the `[TUTORIAL_STEP]` block in `TRIP-3-release` with the user's context:
 
 ```markdown
-### Step 7: Tutorial
+### Step 8: Tutorial
 
 Create `docs/5-tuto/tuto_x.y.z.md` explaining the core principle.
 
@@ -703,8 +717,13 @@ Create `docs/5-tuto/tuto_x.y.z.md` explaining the core principle.
 **IMPORTANT — Renumber subsequent steps**: After uncommenting the Tutorial as Step 8, renumber the steps that follow:
 
 - Step 8: README Update → **Step 9**: README Update
-- Step 9: Commit → **Step 10**: Commit
-- Step 10: Tag → **Step 11**: Tag
+- Step 9: Documentation Sync → **Step 10**: Documentation Sync
+- Step 10: Commit → **Step 11**: Commit
+- Step 11: Tag → **Step 12**: Tag
+- Step 12: Merge (fast-forward) → **Step 13**: Merge (fast-forward)
+- Step 13: Push → **Step 14**: Push
+
+Also update the cross-reference inside Documentation Sync — "included in the release commit (Step 10)" becomes "(Step 11)".
 
 **D. Codex Review Test Commands**
 
@@ -1011,6 +1030,8 @@ Update: Technology Stack, and any affected architectural sections
   - [ ] `[PROJECT_NAME]` placeholder replaced in all skills
   - [ ] `TRIP-1-plan`: `[ADAPT_TO_PROJECT]` markers replaced with actual technical considerations
   - [ ] `TRIP-1-plan`: Guidance sections replaced with project-specific patterns
+  - [ ] `TRIP-1-plan`: Documentation Impact candidates replaced with the project's actual living docs
+  - [ ] `TRIP-1-plan`: Prerequisites `[ADAPT_TO_PROJECT]` line resolved (project docs listed, or line deleted)
   - [ ] `TRIP-1-plan`: Custom plan sections added (if user requested)
   - [ ] `TRIP-2-implement`: Testing gate commands (`[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, `[TEST_COMMAND]`) replaced with actual commands
   - [ ] `TRIP-3-release`: `[VERSION_FILE]` placeholder replaced
