@@ -60,7 +60,7 @@ Categorize each skill into one of:
 | **Updated — pure workflow** | Changed, but no project customizations | Replace directly |
 | **Updated — customized** | Changed, AND contains project-specific content | Extract → merge → replace |
 
-**Pure workflow skills** (no project customizations): `TRIP-compact`, `TRIP-hotfix`, `TRIP-research`, `TRIP-init`, `codex-implement`, `codex-plan-review`, `codex-code-review`
+**Pure workflow skills** (no project customizations): `TRIP-compact`, `TRIP-hotfix`, `TRIP-research`, `TRIP-init`, `TRIP-goggins`, `codex-implement`, `codex-plan-review`, `codex-code-review`
 
 **Exception — model defaults**: `codex-plan-review/scripts/_common.sh` holds the per-flow Codex model/effort defaults, which the user may have tuned. Before replacing, diff the installed `_common.sh` against staging — if the model/effort values differ from the generic defaults, carry the user's values into the new file.
 

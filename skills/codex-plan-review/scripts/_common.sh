@@ -17,8 +17,8 @@ mkdir -p "$STATE_DIR"
 # Adjust these defaults to your preferred models.
 # CODEX_MODEL / CODEX_EFFORT act as per-run overrides.
 case "$STATE_DIR" in
-    *codex-implement*) CODEX_MODEL="${CODEX_MODEL:-gpt-5.6-luna}" ;;
-    *)                 CODEX_MODEL="${CODEX_MODEL:-gpt-5.6-sol}" ;;
+    *codex-implement*|*TRIP-goggins*) CODEX_MODEL="${CODEX_MODEL:-gpt-5.6-luna}" ;;
+    *)                                CODEX_MODEL="${CODEX_MODEL:-gpt-5.6-sol}" ;;
 esac
 CODEX_EFFORT="${CODEX_EFFORT:-xhigh}"
 export CODEX_MODEL CODEX_EFFORT

@@ -111,6 +111,12 @@ Iterative review loops powered by Codex CLI.
 
 A grounded second opinion on **anything**. TRIP-research uses it to brainstorm findings before presenting them.
 
+### `/TRIP-goggins`
+
+GOGGINS MODE. A merciless two-model improvement loop for **open-ended work** — frontend design, UX, copy — where the first draft is never wrong, just mediocre, and models stop at mediocre. Codex is son doing the work; your main agent IS David Goggins: runs the app, screenshots it, scores every round on 5–7 dimensions with receipts, roasts what's weak (raw language included — but every insult must anchor to a real finding), and sends numbered demands back. Son answers each with `FIXED` or `DEFENDED`-with-receipts. Loop until `STAY_HARD`. When you think you're done, you're at 40%. WHO'S GONNA CARRY THE BOATS?
+
+(Persona parody — not affiliated with the real Mr. Goggins, who is even harder.)
+
 ### `/TRIP-review` & `/TRIP-test`
 
 The former steps 3 and 4, reborn as on-demand support skills.
