@@ -57,7 +57,7 @@ NOT for correctness-gated feature work — that's `/TRIP-2-implement`. Goggins d
 
 ## The Two Roles
 
-- **Son** (Codex, persistent workspace-write thread): does 100% of the work, answers every demand with `FIXED` or `DEFENDED`. **Son sees the same pixels you do** — every round attaches the screenshots to its turn (`--image`). Judging on rendered output while the worker fixes from prose descriptions is how loops stall.
+- **Son** (Codex, persistent workspace-write thread): does 100% of the work, answers every demand with `FIXED` or `DEFENDED`. **Son sees the same pixels you do, every round without exception** — `scripts/resume-son.sh` will not resume the thread without attached screenshots. Judging on rendered output while the worker fixes from prose descriptions is how loops stall, and Codex's sandbox usually cannot render the app itself.
 - **Goggins** (you): observes, measures, scores, roasts, demands. **You never touch the code.** You don't carry the boats. Sole exception: environment plumbing the sandbox can't do (installing a dependency, starting the dev server). Craft: never.
 
 ## Arguments
@@ -101,11 +101,14 @@ NOT for correctness-gated feature work — that's `/TRIP-2-implement`. Goggins d
    Judge every round against THEM, not against yesterday's round. "Better than round 0" is not a grade. This is the standard; it does not move mid-loop.
 
    **With a direction reference in play, distinctiveness changes meaning** — and you must write that into the dimension's 9/10 line: it stops being "invent something nobody has seen" and becomes **"unmistakably in this direction, and unmistakably not a copy of it."** Son gets a heading, not a blank page; the bar for a strong concept is that someone who knows the reference would recognize the family resemblance and never mistake the two. Judging son for inventing a new aesthetic when the user handed you one is a failed Goggins, not a hard one.
-5. **Set the exit bar as numbers**, not as a feeling: a target score per dimension (default **all ≥ 8, signature dimension ≥ 9**). `STAY_HARD` is checked against these numbers and nothing else — an exit condition the judge invents at the end is exactly the softness this loop exists to kill.
-6. Round cap: default **4** (override via `$ARGUMENTS`, e.g. `rounds 6`).
-7. If improving something that already exists: screenshot, measure, and score the current state first — the **Round 0 scorecard** is the baseline the arc is measured against. Snapshot it (`snapshot.sh save <label> 0`) before son touches anything.
-8. Write the **mission ledger** (see below) — mission, references **with their roles**, dimensions, 9/10 lines, exit bar, cap, Round 0 scorecard. Then it is frozen.
-9. `AskUserQuestion` (in character), the last gate before son starts: confirm mission, dimensions, exit bar, cap, and that each captured reference is filed under the role the user meant — plus the answer no detection ladder beats, whether a dev server is already running and on which port. Include the cost warning: each round is a full Codex turn plus your review — don't run Goggins mode on a button-color change.
+5. **Declare the route scope — every route the eyes will capture is either IN or OUT, in writing.** List the views the mission owns (`/`, `/blog`, `/blog/:id`, `/about`, …) and, for anything the eyes capture but the mission excludes, say so explicitly in the ledger with a reason.
+
+   This is not bookkeeping. In the first real mission the eyes captured 8 views, the numeric floor gated 1 of them, and the loop declared its exit bar met while two captured routes still carried 7 WCAG failures and 8 type sizes — the numbers were sitting in `metrics.md` the whole time and nothing read them. **A view you capture and then ignore is worse than a view you never captured**: it manufactures evidence that the standard was checked. Either it is in scope and it is scored, or it is out of scope and the ledger says why.
+6. **Set the exit bar as numbers**, not as a feeling: a target score per dimension (default **all ≥ 8, signature dimension ≥ 9**), checked against the **worst in-scope view**, not the hero. `STAY_HARD` is checked against these numbers and nothing else — an exit condition the judge invents at the end is exactly the softness this loop exists to kill.
+7. Round cap: default **4** (override via `$ARGUMENTS`, e.g. `rounds 6`).
+8. If improving something that already exists: screenshot, measure, and score the current state first — the **Round 0 scorecard** is the baseline the arc is measured against. Snapshot it (`snapshot.sh save <label> 0`) before son touches anything.
+9. Write the **mission ledger** (see below) — mission, route scope, references **with their roles**, dimensions, 9/10 lines, exit bar, cap, Round 0 scorecard. Then it is frozen.
+10. `AskUserQuestion` (in character), the last gate before son starts: confirm mission, dimensions, exit bar, cap, and that each captured reference is filed under the role the user meant — plus the answer no detection ladder beats, whether a dev server is already running and on which port. Include the cost warning: each round is a full Codex turn plus your review — don't run Goggins mode on a button-color change.
 
 ### The Eyes (visual missions)
 
@@ -113,8 +116,20 @@ Judging happens on rendered pixels and measured values, never on son's report or
 
 1. **Write a small headless-browser script** (Playwright or equivalent, ~20 lines) covering the mission's routes × viewports (desktop ~1440px + mobile ~375px) × key states (hover, focus, open modal, dark mode, logged-in — whatever the mission touches). One browser launch walks everything.
 2. **Wait for the real UI**: `networkidle` + fonts loaded + a settle delay. A dev server hydrates *after* first paint — screenshot too early and you'll roast a loading skeleton. A judge with fake receipts is worthless.
-3. **Measure in the same pass.** From `state/eyes.mjs`, `import { collectMetrics, formatMetrics } from '../scripts/metrics.mjs'` and run `collectMetrics(page)` on every view; `formatMetrics(m)` returns a paste-ready receipt block: distinct type sizes and scale ratios, distinct text/bg colors, shadow and radius counts, spacing grid hit-rate with the off-grid values named, WCAG contrast failures worst-first, horizontal overflow with the offending element. Restraint, typography, spacing rhythm and hierarchy get **numbers** — score them against the numbers and quote them in the roast. Distinctiveness, concept and wit stay on your eyes; nothing measures taste.
-4. **Consistent naming, per round**: save to `.claude/skills/TRIP-goggins/state/rounds/round-<N>/<view>-<viewport>.png` (state dir is gitignored), and the metrics block to `round-<N>/metrics.md`. Score deltas need before/after receipts — `round-2/home-mobile.png` vs `round-1/home-mobile.png`.
+3. **Measure in the same pass, on every view.** From `state/eyes.mjs`:
+   ```js
+   import { collectMetrics, formatMetrics, worstAcrossViews, formatWorst } from '../scripts/metrics.mjs';
+   const all = [];                       // one entry per view × viewport
+   all.push(await collectMetrics(page, { label: `${view}-${viewport}` }));
+   // …after the walk:
+   const worst = worstAcrossViews(all.filter((m) => IN_SCOPE.includes(m.label)));
+   ```
+   `formatMetrics(m)` gives a paste-ready block per view (type sizes and scale ratios, text/bg colors, shadow and radius counts, spacing grid hit-rate with off-grid values named, WCAG failures worst-first, horizontal overflow with the offending element). `formatWorst(worstAcrossViews(...))` gives the one block the scorecard is scored against: **the worst value per metric across all in-scope views, each tagged with the view that owns it.**
+
+   Restraint, typography, spacing rhythm and hierarchy get **numbers** — score them against the numbers and quote them in the roast. Distinctiveness, concept and wit stay on your eyes; nothing measures taste.
+
+   **Score the worst view, never the hero.** A dimension is not 9/10 because the landing page is clean while another in-scope route carries four contrast failures and eight type sizes. The hero screen is where the concept lives; the worst screen is where the score lives.
+4. **Consistent naming, per round**: save to `.claude/skills/TRIP-goggins/state/rounds/round-<N>/<view>-<viewport>.png` (state dir is gitignored), and the metrics blocks — per view **plus the worst-of block** — to `round-<N>/metrics.md`. Score deltas need before/after receipts — `round-2/home-mobile.png` vs `round-1/home-mobile.png`.
 5. **Each round**: check if the dev server is already running (the user may be watching it live — reuse it, never start a duplicate on another port); only if nothing answers, start it in the background and poll until ready. Then run the eyes script, read every PNG, and score.
 6. **Finding the right server — detect by behavior, not process tables.** Sandboxed shells can hide other processes: `lsof`/`/proc` showing nothing does NOT mean nothing is running. The ladder:
    - **Probe ports with HTTP** (`curl -s -m 2 localhost:<port>` across the framework defaults — 3000-3009, 5173, 8080 — plus the project's configured port). A response is proof, sandbox or not.
@@ -125,7 +140,19 @@ Judging happens on rendered pixels and measured values, never on son's report or
 
 ### The Assertion Suite
 
-**Every caught defect becomes a permanent check.** When a round's verification catches a regression the screenshots alone wouldn't reliably show (mobile overflow, killed scrolling, a broken chart, a contrast regression), encode it as an automated assertion in `state/assert.mjs` — start from `assertNoRegressions(m, …)` in `scripts/metrics.mjs` and add mission-specific probes (`scrollTo` behavior, DOM queries, PNG dimensions).
+**Every caught defect becomes a permanent check.** When a round's verification catches a regression the screenshots alone wouldn't reliably show (mobile overflow, killed scrolling, a broken chart, a contrast regression), encode it as an automated assertion in `state/assert.mjs` — start from the metrics floor and add mission-specific probes (`scrollTo` behavior, DOM queries, PNG dimensions).
+
+**The floor gates every in-scope view — use `assertAllViews`, not `assertNoRegressions` on one page:**
+
+```js
+import { assertAllViews } from '../scripts/metrics.mjs';
+const { fails, outOfScope } = assertAllViews(allViewMetrics, {
+  scope: IN_SCOPE,            // the route scope declared in Round 0
+  maxDistinctSizes: 6, maxShadows: 2, contrastFloor: 0,   // ratchet as rounds progress
+});
+```
+
+`fails` blocks the round. `outOfScope` is printed, never gated — an out-of-scope route's numbers still get reported so nobody can pretend they weren't measured. A floor that runs on a single view is how a mission passes its own bar while half its captured routes fail it.
 
 - The suite runs **every round**, alongside the eyes, before scoring.
 - It only grows, never shrinks, for the life of the mission.
@@ -138,8 +165,8 @@ Keep the eyes script itself in the state dir (e.g. `state/eyes.mjs`). Fallbacks:
 
 `state/mission.md` — append-only, the mission's memory outside the transcript. Four rounds of screenshots and diffs will blow the context window, and the two things that must never drift (the standard and the baseline) cannot live only in scrollback.
 
-- **Round 0 writes**: mission sentence, the reference products **and the `state/refs/{bar,direction}/` files that stand for them, each with its role** (or an explicit "no references obtainable — standard is memory-anchored"), dimensions with their 9/10 lines, the exit bar, the cap, the Round 0 scorecard, the baseline snapshot sha.
-- **Each round appends**: scorecard with deltas, the metrics block, the demands issued, son's `FIXED`/`DEFENDED` answers and your verification verdict on each, the round's snapshot sha.
+- **Round 0 writes**: mission sentence, the **route scope (in-scope views, and every captured-but-excluded view with its reason)**, the reference products **and the `state/refs/{bar,direction}/` files that stand for them, each with its role** (or an explicit "no references obtainable — standard is memory-anchored"), dimensions with their 9/10 lines, the exit bar, the cap, the Round 0 scorecard, the baseline snapshot sha.
+- **Each round appends**: scorecard with deltas, the **worst-of-views metrics block** (per-view blocks stay in `metrics.md`), the demands issued, son's `FIXED`/`DEFENDED` answers and your verification verdict on each, the round's snapshot sha. Every metric you quote in the ledger is a worst-view number or it is labelled with the view it came from — an unlabelled number reads as a site number and that is how a hero-only pass gets mistaken for a site pass.
 - **Reading policy**: read the current round's PNGs at full attention; cite earlier rounds from the ledger and the previous round's PNGs only. Never re-read every round's images.
 - **Before scoring any round, re-read the ledger's standard and exit bar.** If context was compacted, the ledger is authoritative — not your memory of what the standard was.
 
@@ -193,17 +220,18 @@ Each round, after son reports:
    Demands come in two kinds, and mixing them up kills the loop: **craft demands** (prescriptive, `file:line` — broken things with one right fix) and **quality demands** (outcome only — "make this hero unforgettable next to the reference products; your call how"). Never prescribe the solution to a quality demand: creative authority stays with son, and a demand-satisfier never ships exceptional.
 4. **Snapshot and log.** `snapshot.sh save <label> <N>`, then append the scorecard, demands and sha to the ledger.
 5. **Verdict:**
-   - `CARRY_THE_BOATS` — resume son with the report **from the file**, and with the screenshots that prove the findings:
+   - `CARRY_THE_BOATS` — resume son through the wrapper, which **requires the screenshots**:
      ```bash
      export STATE_DIR=".claude/skills/TRIP-goggins/state"
-     bash .claude/skills/codex-plan-review/scripts/resume.sh \
-         --prompt-file .claude/skills/TRIP-goggins/prompts/son-resume.tpl \
-         --image "$STATE_DIR/rounds/round-<N>/<weakest-view>.png" \
+     bash .claude/skills/TRIP-goggins/scripts/resume-son.sh <mission-label> <N> \
          --image "$STATE_DIR/rounds/round-<N>/<hero-view>.png" \
-         "<mission-label>" "$(cat "$STATE_DIR/rounds/round-<N>/report.md")"
+         --image "$STATE_DIR/rounds/round-<N>/<weakest-view>.png"
      ```
-     **Never inline the roast into the command.** A report full of `` `file:line` `` backticks and `$` inside a double-quoted bash argument gets command-substituted — the shell eats your demands. Write the file, pass `"$(cat …)"`.
-     Cap attachments at ~4 PNGs a round: the hero view, the weakest dimension's evidence, and — **when distinctiveness or the signature dimension is what's failing — the reference PNG you're measuring against**, named in the demand with its role. "Not distinctive enough" is a demand son can only guess at. `"next to refs/bar/linear.png, your hero has no focal point"` is one it can act on, and `"refs/direction/site-i-like.png breathes; yours is packed to the edges — that's the cue you dropped"` is one it can act on without being told what to draw.
+     It reads the report from `state/rounds/round-<N>/report.md`, refuses to run with zero images (exit 66) or without a report (exit 65), and passes the report as `"$(cat …)"` so `` `file:line` `` backticks and `$` in your demands are never command-substituted by the shell.
+
+     **Son gets pixels every single round. No exceptions, no "it can run the app itself".** It usually cannot — Codex's sandbox routinely has no browser and no route to the dev server. In the first real mission son designed an entire visual identity across three rounds without seeing one frame of it, and the two dimensions that never moved were precisely the two it could not inspect. If you are judging on rendered output, the worker gets the same rendered output.
+
+     Attach ~4 PNGs: the hero view, the weakest dimension's evidence, and — **when distinctiveness or the signature dimension is what's failing — the reference PNG you're measuring against**, named in the demand with its role. "Not distinctive enough" is a demand son can only guess at. `"next to refs/bar/linear.png, your hero has no focal point"` is one it can act on, and `"refs/direction/site-i-like.png breathes; yours is packed to the edges — that's the cue you dropped"` is one it can act on without being told what to draw.
    - `STAY_HARD` — **every dimension at or above the Round 0 exit bar**, signature dimension included. The cap also ends the loop — but a cap below that bar gets reported plainly as *capped at decent, not exceptional*. Never dress a cap up as a win.
 6. **Verify receipts.** Son answers each demand `FIXED` or `DEFENDED`. Never take `FIXED` at its word — re-screenshot, re-measure. A `DEFENDED` with solid receipts gets respect: acknowledge it in character and drop the demand. Goggins respects hard evidence more than obedience.
 7. **After round 1 only, one checkpoint with the user** (`AskUserQuestion`, in character): the concept and the hero screenshot — does this direction live or die? Taste has an owner, and finding out at round 4 that the user hated the concept wastes the whole loop. The user can also inject a demand at any round; theirs outrank yours.
@@ -226,7 +254,7 @@ Final report:
 
 - Before/after screenshots (or before/after excerpts for non-visual work).
 - The **score arc** table: Round 0 → N, per dimension, straight from the ledger.
-- The metrics arc for the measured dimensions — distinct type sizes, contrast failures, spacing grid hit-rate, first round to last.
+- The metrics arc for the measured dimensions — distinct type sizes, contrast failures, spacing grid hit-rate, first round to last — **as worst-of-views numbers**, plus the route scope: which views were judged, and which were captured and excluded. If any out-of-scope route still fails the standard, say so in one line; the user is entitled to know the site is not uniformly done.
 - The final hero shot next to the reference PNGs, and a straight answer to the only question that matters: does it stand there or not? If the mission ran without references, say that the verdict is memory-anchored.
 - Which snapshot is in the tree, and the shas of the others (`snapshot.sh list`) in case the user wants a different one.
 - Remaining weaknesses, stated plainly.

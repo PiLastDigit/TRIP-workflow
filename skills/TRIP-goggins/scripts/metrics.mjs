@@ -300,3 +300,91 @@ export function assertNoRegressions(m, { maxDistinctSizes = 8, maxShadows = 4, c
   }
   return fails;
 }
+
+/**
+ * Run the floor on EVERY captured view, not just the hero.
+ *
+ * Learned the hard way: a suite that gates on `home-desktop` alone lets a
+ * mission declare its exit bar met while other captured routes still carry
+ * WCAG failures and twice the type sizes — the numbers exist in the metrics
+ * file and nothing reads them. If the eyes captured a view, the floor judges
+ * it.
+ *
+ * `scope` names the views the mission owns: pass the in-scope labels (or a
+ * predicate) so out-of-scope routes are reported separately instead of
+ * silently ignored. Anything captured but out of scope comes back under
+ * `outOfScope` — visible, never a gate.
+ *
+ * @param {Array} metricsList - collectMetrics() results, one per view
+ * @param {object} [opts] - floor options (see assertNoRegressions), plus
+ *        `scope`: array of in-scope labels or (label) => boolean
+ * @returns {{fails: string[], outOfScope: string[], byView: object}}
+ */
+export function assertAllViews(metricsList, opts = {}) {
+  const { scope, ...floor } = opts;
+  const inScope =
+    typeof scope === 'function'
+      ? scope
+      : Array.isArray(scope)
+        ? (label) => scope.includes(label)
+        : () => true;
+
+  const fails = [];
+  const outOfScope = [];
+  const byView = {};
+
+  for (const m of metricsList) {
+    const label = m.label || m.url;
+    const viewFails = assertNoRegressions(m, floor).map((f) => `[${label}] ${f}`);
+    byView[label] = { inScope: inScope(label), fails: viewFails };
+    if (inScope(label)) fails.push(...viewFails);
+    else outOfScope.push(...viewFails);
+  }
+  return { fails, outOfScope, byView };
+}
+
+/**
+ * Worst value per metric across every view, with the view that owns it.
+ * The scorecard scores THIS, not the hero — a dimension cannot be 9/10 on the
+ * strength of one screen while another captured screen fails its written
+ * criteria.
+ */
+export function worstAcrossViews(metricsList) {
+  const pick = (get, cmp) =>
+    metricsList.reduce(
+      (best, m) => {
+        const v = get(m);
+        return best.value === undefined || cmp(v, best.value)
+          ? { value: v, view: m.label || m.url }
+          : best;
+      },
+      { value: undefined, view: null }
+    );
+  const gt = (a, b) => a > b;
+  const lt = (a, b) => a < b;
+
+  return {
+    views: metricsList.length,
+    distinctSizes: pick((m) => m.type.distinctSizes, gt),
+    distinctTextColors: pick((m) => m.color.distinctTextColors, gt),
+    distinctBgColors: pick((m) => m.color.distinctBgColors, gt),
+    distinctShadows: pick((m) => m.depth.distinctShadows, gt),
+    distinctRadii: pick((m) => m.depth.distinctRadii, gt),
+    onScalePct: pick((m) => m.space.onScalePct, lt),
+    contrastFailures: pick((m) => m.contrast.failures, gt),
+    totalContrastFailures: metricsList.reduce((n, m) => n + m.contrast.failures, 0),
+    overflowViews: metricsList.filter((m) => m.overflow.horizontal).map((m) => m.label || m.url),
+  };
+}
+
+/** Paste-ready worst-view block for the round report's scorecard. */
+export function formatWorst(w) {
+  const f = (k) => `${w[k].value} (${w[k].view})`;
+  return [
+    `### worst-of-${w.views}-views — what the scorecard scores`,
+    `- type sizes: ${f('distinctSizes')} · text colors: ${f('distinctTextColors')} · bg colors: ${f('distinctBgColors')}`,
+    `- shadows: ${f('distinctShadows')} · radii: ${f('distinctRadii')} · spacing on grid: ${f('onScalePct')}%`,
+    `- contrast failures: ${f('contrastFailures')} worst view · **${w.totalContrastFailures} across all views**`,
+    `- horizontal overflow: ${w.overflowViews.length ? w.overflowViews.join(', ') : 'none'}`,
+  ].join('\n');
+}
