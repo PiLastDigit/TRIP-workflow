@@ -7,10 +7,18 @@
 // son.
 //
 // Usage:
-//   node capture-ref.mjs <label> <url> [--mobile] [--viewport 1440x900] [--full] [--retina]
-//   node capture-ref.mjs linear-issues https://linear.app
+//   node capture-ref.mjs <label> <url> [--role bar|direction] [--mobile]
+//                        [--viewport 1440x900] [--full] [--retina] [--out dir]
+//   node capture-ref.mjs linear https://linear.app --role bar
+//   node capture-ref.mjs site-i-like https://example.com --role direction
 //
-// Writes <skill>/state/refs/<label>.png (override with --out <dir>).
+// Writes <skill>/state/refs/<role>/<label>.png (override with --out <dir>).
+//
+// The role is not cosmetic — the two are scored in opposite directions:
+//   bar        "be as good as this"  -> take the level of craft, never the look
+//   direction  "go this way"         -> take the cues, never the literal design
+// A direction reference filed as a bar gets the worker roasted for doing exactly
+// what the requester asked for.
 //
 // LIMIT — read this before trusting the output: public URLs give you MARKETING
 // pages. The actual product UI behind a login is what most missions should be
@@ -37,10 +45,18 @@ const fullPage = !!flag('--full');
 const retina = !!flag('--retina');
 const vpArg = flag('--viewport');
 const outArg = flag('--out');
+const roleArg = flag('--role');
 const [label, url] = args;
 
 if (!label || !url) {
-  console.error('usage: capture-ref.mjs <label> <url> [--mobile] [--viewport WxH] [--full] [--out dir]');
+  console.error(
+    'usage: capture-ref.mjs <label> <url> [--role bar|direction] [--mobile] [--viewport WxH] [--full] [--retina] [--out dir]'
+  );
+  process.exit(64);
+}
+
+if (roleArg && !['bar', 'direction'].includes(roleArg)) {
+  console.error(`error: --role must be "bar" or "direction" (got "${roleArg}")`);
   process.exit(64);
 }
 
@@ -50,7 +66,7 @@ const [w, h] = mobile
 
 const outDir = typeof outArg === 'string'
   ? outArg
-  : fileURLToPath(new URL('../state/refs/', import.meta.url));
+  : fileURLToPath(new URL(`../state/refs/${roleArg ? roleArg + '/' : ''}`, import.meta.url));
 await mkdir(outDir, { recursive: true });
 const out = `${outDir.replace(/\/$/, '')}/${label}${mobile ? '-mobile' : ''}.png`;
 
@@ -119,6 +135,7 @@ try {
   console.log(`  title:    ${title}`);
   console.log(`  viewport: ${vw}px${fullPage ? ' (full page)' : ''} @${retina ? 2 : 1}x · ${size} KB`);
   console.log(`  consent:  ${dismissed ? 'banner dismissed' : 'none found'}`);
+  console.log(`  role:     ${roleArg || 'UNSET — classify it as bar or direction before attaching it to son'}`);
   if (/^https?:/.test(url)) {
     console.log('  NOTE: public page — not the product UI behind a login. Check the PNG before trusting it as the bar.');
   }
