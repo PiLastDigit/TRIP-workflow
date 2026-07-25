@@ -147,14 +147,7 @@ Depending on the feature (major, minor, patch), propose a new version using SemV
 
 ## Step 3: Codex Second-Opinion Review
 
-Before the user sees the plan, run the Codex plan review loop.
-
-### Confirm
-
-`AskUserQuestion`: "I'll run Codex as a second-opinion reviewer and iterate until clean. Proceed?"
-Options: "Yes, run Codex review" (recommended) / "Skip Codex, go to user review" / "Cap iterations at N"
-
-Skip for trivial plans (single-file, low-risk). Run for non-trivial (new module, schema/algorithm change).
+Before the user sees the plan, run the Codex plan review loop. **Always run it — no confirmation question.** The user gets exactly one decision point in this skill, and it comes after the plan is reviewed (Step 4).
 
 ### Loop
 
@@ -176,29 +169,30 @@ Surface Codex reviews verbatim. Keep edits scoped to findings. Reset thread (`re
 
 ---
 
-## Step 4: User Review & Validation
+## Step 4: User Review
 
-After Codex review converges (or is skipped), present a summary to the user including:
+After the Codex review converges, present a summary:
 
 - **Feature**: [name]
 - **Approach**: [1-2 sentences]
 - **Files affected**: [count] files ([list key ones])
 - **Estimated complexity**: [simple/moderate/complex]
-- **Codex status**: [APPROVED / skipped / capped at N rounds with open findings]
+- **Codex status**: [APPROVED / capped at N rounds with open findings]
 
-Then **use the `AskUserQuestion` tool** to collect feedback:
+Then **one `AskUserQuestion`** — the single decision point of this skill:
 
-- **Question**: "Please review the plan at `docs/1-plans/F_x.y.z_feature-name.plan.md`. How would you like to proceed?"
-- **Options**: "Approved" (ready for implementation), "Request changes" (I have modifications), "Needs rework" (significant issues to address)
+- **Question**: "Review the plan at `docs/1-plans/F_x.y.z_feature-name.plan.md`. How to proceed?"
+- **Options**:
+  - "Approved — implement now" → continue straight into `TRIP-2-implement` with this plan
+  - "Approved — stop here" → plan saved, no implementation
+  - "Rework" → the user provides feedback as text
 
-Handle feedback:
+Handle the answer:
 
-- **If "Request changes"**: Update the plan and re-present. Run another Codex pass if changes are substantive.
-- **If "Needs rework"**: Discuss issues, rework the plan, and re-present.
-- **If "Other" (custom input)**: Handle accordingly.
-- **If "Approved"**: **Use the `AskUserQuestion` tool** to ask:
-  - **Question**: "Plan approved. Would you like to start implementation now?"
-  - **Options**: "Yes, implement now" (proceed with `TRIP-2-implement` using this plan), "Not yet" (I'll implement later)
+- **Rework**: update the plan from the user's feedback, then re-present. Run another Codex pass if the changes are substantive.
+- **Other (custom input)**: handle accordingly.
+
+Approval and the implement-now decision are one question on purpose — approving a plan and choosing when to build it is a single thought, and splitting it into two prompts buys nothing.
 
 ---
 
