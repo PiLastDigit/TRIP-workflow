@@ -173,7 +173,7 @@ export STATE_DIR=".claude/skills/codex-code-review/state"
    ```
    Loop to step 2.
 
-6. **Cap at 5 rounds** (or user-specified). Surface remaining findings.
+6. **No cap** — keep iterating until Codex returns `APPROVED`.
 
 ### Synthesize
 
@@ -189,8 +189,7 @@ bash .claude/skills/codex-plan-review/scripts/resume.sh \
 
 Outputs `PROMOTION_READY` sentinel. `<x.y.z>` Version placeholder left unfilled (resolved during `TRIP-3-release`).
 
-Edge cases:
-- **Capped without APPROVED**: still synthesize; Codex notes open findings.
+Edge case:
 - **User skipped Codex**: no synthesis. The CR is written manually during `TRIP-3-release`: "Code review skipped — trivial change."
 
 ### Operating Notes

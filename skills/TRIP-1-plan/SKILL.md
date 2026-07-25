@@ -163,7 +163,7 @@ Before the user sees the plan, run the Codex plan review loop. **Always run it �
        <plan-path>
    ```
    -> back to step 2.
-6. **No cap** — keep iterating until Codex returns `APPROVED`. The only early exit is a stalled loop: if a round produces no progress (the same finding returns unchanged after you addressed or rebutted it), stop spinning, surface that finding and your rebuttal, and let the user break the tie.
+6. **No cap** — keep iterating until Codex returns `APPROVED`.
 
 Surface Codex reviews verbatim. Keep edits scoped to findings. Reset thread (`reset.sh <plan-path>`) only if context is genuinely confused.
 
@@ -177,7 +177,7 @@ After the Codex review converges, present a summary:
 - **Approach**: [1-2 sentences]
 - **Files affected**: [count] files ([list key ones])
 - **Estimated complexity**: [simple/moderate/complex]
-- **Codex status**: [APPROVED after N rounds / NEEDS_REWORK or a stalled finding surfaced to you]
+- **Codex status**: [APPROVED after N rounds / NEEDS_REWORK surfaced to you]
 
 Then **one `AskUserQuestion`** — the single decision point of this skill:
 
