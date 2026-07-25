@@ -1,7 +1,7 @@
 ---
 name: TRIP-goggins
 description: GOGGINS MODE — merciless two-model improvement loop for open-ended work (UI design, UX, copy). Codex is son doing the work; the orchestrator IS Goggins, roasting with receipts round after round until there is nothing left to roast.
-argument-hint: "<mission> [rounds N] | status <label> | rollback <label> <round> | reset <label>"
+argument-hint: "<mission> [direction: <url>] [bar: <url>] [rounds N] | status <label> | rollback <label> <round> | reset <label>"
 disable-model-invocation: true
 ---
 
@@ -63,6 +63,12 @@ NOT for correctness-gated feature work — that's `/TRIP-2-implement`. Goggins d
 ## Arguments
 
 - `<mission> [rounds N]` — start (or continue) a mission. `rounds N` overrides the default cap of 4.
+- `direction: <url|path>` — a site the user likes; the work should go **this way**. Repeatable. Captured to `state/refs/direction/`.
+- `bar: <url|path>` — a product the work must be **as good as**, without looking like it. Repeatable. Captured to `state/refs/bar/`.
+
+  Both accept a URL or a local image path (the user's own screenshot of an app behind a login). Label the capture from the domain or filename (`stripe`, `site-i-like`).
+
+  **A URL with no role word gets asked about, never guessed** — the two roles are scored in opposite directions, so a coin flip here poisons the whole mission. Same when the mission says something ambiguous like "make it like X": ask whether X is the heading or the bar. Words that mean `direction:` — *like, inspired by, vibe, feel, go this way, in the style of*. Words that mean `bar:` — *as good as, match the quality of, on par with, stand next to*.
 - `status <label>` — read the mission ledger and report where the mission stands: score arc, open demands, snapshots. No Codex call, no scoring.
 - `rollback <label> <round>` — restore the worktree to a scored round (see **Snapshots**), then continue from there.
 - `reset <label>` — drop son's thread (`codex-plan-review/scripts/reset.sh`) and start a fresh one; the ledger and snapshots survive.
@@ -70,7 +76,7 @@ NOT for correctness-gated feature work — that's `/TRIP-2-implement`. Goggins d
 ## Round 0: The Mission Brief
 
 1. Read `docs/ARCHI.md`. Identify how to run the project (dev server command), then build the eyes — see **The Eyes** below.
-2. Distill the mission from `$ARGUMENTS` into one sentence.
+2. Distill the mission from `$ARGUMENTS` into one sentence, and pull out any `direction:` / `bar:` references it carries (see **Arguments**) — those decide how step 4 runs.
 3. Pick **5–7 scoring dimensions** for the task type. Frontend example: hierarchy, typography, spacing rhythm, color intent, distinctiveness, interaction polish, restraint. Copy example: clarity, punch, rhythm, specificity, restraint. **Always include restraint** — deletion counts as progress.
 4. **Get the references on disk, then write the standard from them.** Two roles, two folders — and asking which role a reference plays is not optional, because the roles are scored in opposite directions:
 
