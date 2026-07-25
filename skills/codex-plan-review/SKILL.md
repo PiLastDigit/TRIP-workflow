@@ -40,6 +40,7 @@ The companion `codex-code-review` skill shares the same scripts with its own pro
 - On network failure, check `*.events.ndjson.stderr`. Run `reset.sh` and retry.
 - Thread IDs persisted per-plan (no `--last`). Concurrent reviews don't collide.
 - Extra context -> `{{EXTRA_PROMPT}}`. Keep short.
+- `start.sh` / `resume.sh` accept repeatable `--image <file>` to attach screenshots to a turn (used by TRIP-goggins). Emitted as `--image=<file>`: `codex exec --image` is variadic, so the space-separated form swallows the positional prompt.
 
 ## Loop Shape
 

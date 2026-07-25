@@ -8,9 +8,13 @@
 # lint/build. `codex exec resume` inherits this sandbox, so follow-up
 # turns reuse the shared resume.sh unchanged.
 #
-# Usage: start.sh --prompt-file <tpl> <target> [custom instructions…]
+# Usage: start.sh --prompt-file <tpl> [--image <file>]… <target>
+#            [custom instructions…]
 # Exits 0 on success, 1 on Codex / thread_id capture failure,
 # 2 on an existing thread (use reset.sh first).
+#
+# --image attaches a file to the opening turn (repeatable). Used by
+# TRIP-goggins to hand over the Round 0 baseline screenshots.
 
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -22,12 +26,17 @@ export STATE_DIR
 source "$SCRIPT_DIR/../../codex-plan-review/scripts/_common.sh"
 
 PROMPT_FILE=""
+IMAGES=()
 while [ $# -gt 0 ]; do
     case "$1" in
         --prompt-file)
             PROMPT_FILE="$2"; shift 2 ;;
         --prompt-file=*)
             PROMPT_FILE="${1#*=}"; shift ;;
+        --image|-i)
+            IMAGES+=("$2"); shift 2 ;;
+        --image=*)
+            IMAGES+=("${1#*=}"); shift ;;
         --) shift; break ;;
         -*)
             echo "error: unknown flag: $1" >&2; exit 64 ;;
@@ -36,9 +45,21 @@ while [ $# -gt 0 ]; do
 done
 
 if [ -z "$PROMPT_FILE" ] || [ $# -lt 1 ]; then
-    echo "usage: start.sh --prompt-file <tpl> <target> [custom instructions…]" >&2
+    echo "usage: start.sh --prompt-file <tpl> [--image <file>]… <target> [custom instructions…]" >&2
     exit 64
 fi
+
+# Fail loudly on a missing attachment rather than starting the thread blind.
+# NOTE: `codex exec --image` is variadic (<FILE>...), so the space-separated
+# form swallows the positional prompt. Always emit --image=<file>.
+IMAGE_ARGS=()
+for img in ${IMAGES[@]+"${IMAGES[@]}"}; do
+    if [ ! -f "$img" ]; then
+        echo "error: --image file not found: $img" >&2
+        exit 66
+    fi
+    IMAGE_ARGS+=("--image=$img")
+done
 
 TARGET="$1"; shift
 EXTRA_PROMPT="${*:-}"
@@ -67,6 +88,7 @@ codex exec \
     --color never \
     -c model="$CODEX_MODEL" \
     -c model_reasoning_effort="$CODEX_EFFORT" \
+    ${IMAGE_ARGS[@]+"${IMAGE_ARGS[@]}"} \
     -o "$REPORT_FILE" \
     "$PROMPT" \
     </dev/null \
@@ -93,6 +115,9 @@ printf '%s\n' "$THREAD_ID" > "$THREAD_FILE"
 echo "started implementation session for $TARGET"
 echo "  thread id:   $THREAD_ID"
 echo "  model/effort: $CODEX_MODEL / $CODEX_EFFORT"
+if [ "${#IMAGE_ARGS[@]}" -gt 0 ]; then
+    echo "  images:      ${IMAGES[*]}"
+fi
 echo "  report file: $REPORT_FILE"
 echo "---"
 cat "$REPORT_FILE"

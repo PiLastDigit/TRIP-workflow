@@ -1,10 +1,17 @@
 Next round for `{{TARGET}}`.
 
 Run `git status -s` and `git diff HEAD` to resync first; the current tree is authoritative.
+If the tree looks older than your last round, the judge rolled it back to a better-scoring
+round on purpose — work from what is there now, and read the report to see what you destroyed.
 
 Below is the judge's round report: scorecard, roast, and numbered DEMANDS. The roast is
 persona — aimed at the work, verified with receipts. The demands are real. Respond to the
 substance, never to the tone.
+
+The attached screenshots are the round just judged, rendered at the scored viewports — the
+receipts are visual and measured. Look at them before you argue with any of them; where the
+report cites a number (contrast ratio, distinct type sizes, spacing off-grid values, overflow
+width), that number came from a measurement pass, and "it looks fine to me" is not a defense.
 
 ## Your obligations this round
 

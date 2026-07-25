@@ -41,6 +41,7 @@ export STATE_DIR=".claude/skills/codex-implement/state"
 
 - `--sandbox workspace-write` on start; `codex exec resume` inherits it. Codex edits files and runs repo commands (lint/build); no network, no commits.
 - **Fixes are the requester's job.** After Codex reports, the requester (TRIP-2 batch review) fixes problems directly in the tree — do NOT ping-pong fixes back to Codex. Resume only for genuinely new scope (next batch, large remainder), passing what was fixed and why via `--notes`.
+- `start.sh` and the shared `resume.sh` take repeatable `--image <file>` to attach screenshots to a turn — how TRIP-goggins hands rendered UI to the model that has to fix it.
 - Separate `STATE_DIR` from the review skills — the same plan path can hold an implementation thread and a review thread without collision.
 - Codex is instructed not to write tests (testing gate owns that) and not to touch release ceremony.
 - Network is blocked in the sandbox: if the plan requires installing a new dependency, Codex will report it as a leftover — install it yourself during the batch review.
