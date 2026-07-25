@@ -13,6 +13,9 @@ receipts are visual and measured. Look at them before you argue with any of them
 report cites a number (contrast ratio, distinct type sizes, spacing off-grid values, overflow
 width), that number came from a measurement pass, and "it looks fine to me" is not a defense.
 
+A demand may also attach a reference image (`refs/…`) as the bar it is measuring you against.
+Match the level, not the look: copying a reference is a failure, not a fix.
+
 ## Your obligations this round
 
 1. Answer EVERY numbered demand, each with exactly one of:

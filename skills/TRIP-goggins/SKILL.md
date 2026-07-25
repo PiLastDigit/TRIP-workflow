@@ -72,12 +72,20 @@ NOT for correctness-gated feature work — that's `/TRIP-2-implement`. Goggins d
 1. Read `docs/ARCHI.md`. Identify how to run the project (dev server command), then build the eyes — see **The Eyes** below.
 2. Distill the mission from `$ARGUMENTS` into one sentence.
 3. Pick **5–7 scoring dimensions** for the task type. Frontend example: hierarchy, typography, spacing rhythm, color intent, distinctiveness, interaction polish, restraint. Copy example: clarity, punch, rhythm, specificity, restraint. **Always include restraint** — deletion counts as progress.
-4. Write one line per dimension describing what a 9/10 looks like — anchored to **best-in-class references, never to the current state**: name 2–3 products whose craft this mission should stand next to (Linear, Stripe, a Bloomberg terminal — whatever fits the domain) and judge every round against THEM, not against yesterday's round. "Better than round 0" is not a grade. This is the standard; it does not move mid-loop.
+4. **Get the references on disk, then write the standard from them.** Name 2–3 products whose craft this mission should stand next to (Linear, Stripe, a Bloomberg terminal — whatever fits the domain), then put real pixels in `state/refs/`:
+   - The user's own screenshots are the best source — especially for app UI, which lives behind a login. **Ask here, before writing the standard** (`AskUserQuestion`: which products, and do they have screenshots or should you capture the public pages?) — the standard can't be written from references that don't exist yet.
+   - Otherwise capture public pages: `node .claude/skills/TRIP-goggins/scripts/capture-ref.mjs <label> <url> [--mobile]` (dismisses consent walls, waits for fonts, writes `state/refs/<label>.png`). Read the PNG before trusting it: a marketing hero is a fine reference for a landing page and a misleading one for a dashboard.
+   - Cap it at ~4 images. **Read them, then write the 9/10 lines from what you see** — one line per dimension. A standard written from memory of Linear is a standard anchored to your prior, not to Linear.
+   - No references obtainable → say so plainly in the ledger and the final debrief: the standard is memory-anchored and the distinctiveness score is softer for it. Don't pretend otherwise.
+
+   Judge every round against THEM, not against yesterday's round. "Better than round 0" is not a grade. This is the standard; it does not move mid-loop.
+
+   **The references are a craft bar, not a template.** Son matches their level of intent and restraint; it does not adopt their visual language. A recognizable clone of a reference scores 0 on distinctiveness — you cannot be uncommon amongst uncommon people by dressing like them.
 5. **Set the exit bar as numbers**, not as a feeling: a target score per dimension (default **all ≥ 8, signature dimension ≥ 9**). `STAY_HARD` is checked against these numbers and nothing else — an exit condition the judge invents at the end is exactly the softness this loop exists to kill.
 6. Round cap: default **4** (override via `$ARGUMENTS`, e.g. `rounds 6`).
 7. If improving something that already exists: screenshot, measure, and score the current state first — the **Round 0 scorecard** is the baseline the arc is measured against. Snapshot it (`snapshot.sh save <label> 0`) before son touches anything.
 8. Write the **mission ledger** (see below) — mission, references, dimensions, 9/10 lines, exit bar, cap, Round 0 scorecard. Then it is frozen.
-9. `AskUserQuestion` (in character): confirm mission, dimensions, exit bar, cap — and whether a dev server is already running and on which port (one human answer beats any detection ladder). Include the cost warning: each round is a full Codex turn plus your review — don't run Goggins mode on a button-color change.
+9. `AskUserQuestion` (in character), the last gate before son starts: confirm mission, dimensions, exit bar, cap, and that the captured references are the right bar — plus the answer no detection ladder beats, whether a dev server is already running and on which port. Include the cost warning: each round is a full Codex turn plus your review — don't run Goggins mode on a button-color change.
 
 ### The Eyes (visual missions)
 
@@ -110,7 +118,7 @@ Keep the eyes script itself in the state dir (e.g. `state/eyes.mjs`). Fallbacks:
 
 `state/mission.md` — append-only, the mission's memory outside the transcript. Four rounds of screenshots and diffs will blow the context window, and the two things that must never drift (the standard and the baseline) cannot live only in scrollback.
 
-- **Round 0 writes**: mission sentence, reference products, dimensions with their 9/10 lines, the exit bar, the cap, the Round 0 scorecard, the baseline snapshot sha.
+- **Round 0 writes**: mission sentence, the reference products **and the `state/refs/` files that stand for them** (or an explicit "no references obtainable — standard is memory-anchored"), dimensions with their 9/10 lines, the exit bar, the cap, the Round 0 scorecard, the baseline snapshot sha.
 - **Each round appends**: scorecard with deltas, the metrics block, the demands issued, son's `FIXED`/`DEFENDED` answers and your verification verdict on each, the round's snapshot sha.
 - **Reading policy**: read the current round's PNGs at full attention; cite earlier rounds from the ledger and the previous round's PNGs only. Never re-read every round's images.
 - **Before scoring any round, re-read the ledger's standard and exit bar.** If context was compacted, the ledger is authoritative — not your memory of what the standard was.
@@ -133,7 +141,7 @@ A snapshot is a commit object built from the worktree (tracked + untracked, `.gi
 
 ## The Loop
 
-Start son (state lives in this skill; attach the baseline screenshots so son starts with your eyes, not its imagination):
+Start son (state lives in this skill; attach the baseline **and the references**, so son starts with your eyes and the actual bar rather than its memory of both):
 
 ```bash
 export STATE_DIR=".claude/skills/TRIP-goggins/state"
@@ -141,8 +149,12 @@ bash .claude/skills/codex-implement/scripts/start.sh \
     --prompt-file .claude/skills/TRIP-goggins/prompts/son-start.tpl \
     --image "$STATE_DIR/rounds/round-0/home-desktop.png" \
     --image "$STATE_DIR/rounds/round-0/home-mobile.png" \
-    "<mission-label>" "<mission brief: goal, dimensions, what a 9/10 looks like per dimension, exit bar>"
+    --image "$STATE_DIR/refs/linear.png" \
+    --image "$STATE_DIR/refs/stripe.png" \
+    "<mission-label>" "<mission brief: goal, dimensions, what a 9/10 looks like per dimension, exit bar, which attachments are baseline vs reference>"
 ```
+
+Name the attachments in the brief — which are the current state and which are the bar. An unlabelled pile of screenshots is how son ends up cloning a reference.
 
 **Round 1 is a divergence round, not a polish pass.** The first brief demands a named design concept — a point of view in one sentence — plus the boldest take son can commit to on the mission's hero view. Judge the concept before the craft: if it's timid, kill it in round 1 and demand a stronger one before any converging begins. Three rounds of polishing a template still ships a template.
 
@@ -153,7 +165,7 @@ Each round, after son reports:
    - Every dimension 1–10, one receipt per score. No receipt, no score.
    - **A score may only rise if the receipt names what changed** — a pixel, a measurement that moved, a deleted element. If you can't point at it, the delta is 0, no matter how much son wrote.
    - Where a number exists (restraint, spacing, contrast, type scale), the number decides. You don't get to feel generous about a 29%-on-grid layout.
-   - **A 9 or 10 must name which reference product the work now stands beside.** If you can't name it, it's an 8.
+   - **A 9 or 10 must name the reference PNG the work now stands beside**, with `state/refs/<file>.png` open next to the round's screenshot. Not "feels Linear-grade" — which image, and what specifically holds up next to it. If you can't do that, it's an 8.
    - Effort is not a dimension. Nobody cares what son did yesterday.
 3. **Roast it.** Write the round report to `state/rounds/round-<N>/report.md`: the scorecard table with round-over-round deltas, the metrics and assertion-suite blocks, roast lines each anchored to a receipt, then the numbered **DEMANDS** — concrete, verifiable, one per weakness. Open the report by quoting son's `FIXED`/`DEFENDED` answers and its weakest-dimension confession verbatim — the user reads the whole exchange in the transcript, and son's excuses deserve a public reading. Show the report in the transcript too; the file is for son and the ledger.
    Demands come in two kinds, and mixing them up kills the loop: **craft demands** (prescriptive, `file:line` — broken things with one right fix) and **quality demands** (outcome only — "make this hero unforgettable next to the reference products; your call how"). Never prescribe the solution to a quality demand: creative authority stays with son, and a demand-satisfier never ships exceptional.
@@ -168,7 +180,8 @@ Each round, after son reports:
          --image "$STATE_DIR/rounds/round-<N>/<hero-view>.png" \
          "<mission-label>" "$(cat "$STATE_DIR/rounds/round-<N>/report.md")"
      ```
-     **Never inline the roast into the command.** A report full of `` `file:line` `` backticks and `$` inside a double-quoted bash argument gets command-substituted — the shell eats your demands. Write the file, pass `"$(cat …)"`. Cap attachments at ~4 PNGs a round: the hero view plus the weakest dimension's evidence.
+     **Never inline the roast into the command.** A report full of `` `file:line` `` backticks and `$` inside a double-quoted bash argument gets command-substituted — the shell eats your demands. Write the file, pass `"$(cat …)"`.
+     Cap attachments at ~4 PNGs a round: the hero view, the weakest dimension's evidence, and — **when distinctiveness or the signature dimension is what's failing — the reference PNG you're measuring against**, named in the demand. "Not distinctive enough" is a demand son can only guess at; "next to `refs/linear.png`, your hero has no focal point" is one it can act on.
    - `STAY_HARD` — **every dimension at or above the Round 0 exit bar**, signature dimension included. The cap also ends the loop — but a cap below that bar gets reported plainly as *capped at decent, not exceptional*. Never dress a cap up as a win.
 6. **Verify receipts.** Son answers each demand `FIXED` or `DEFENDED`. Never take `FIXED` at its word — re-screenshot, re-measure. A `DEFENDED` with solid receipts gets respect: acknowledge it in character and drop the demand. Goggins respects hard evidence more than obedience.
 7. **After round 1 only, one checkpoint with the user** (`AskUserQuestion`, in character): the concept and the hero screenshot — does this direction live or die? Taste has an owner, and finding out at round 4 that the user hated the concept wastes the whole loop. The user can also inject a demand at any round; theirs outrank yours.
@@ -192,6 +205,7 @@ Final report:
 - Before/after screenshots (or before/after excerpts for non-visual work).
 - The **score arc** table: Round 0 → N, per dimension, straight from the ledger.
 - The metrics arc for the measured dimensions — distinct type sizes, contrast failures, spacing grid hit-rate, first round to last.
+- The final hero shot next to the reference PNGs, and a straight answer to the only question that matters: does it stand there or not? If the mission ran without references, say that the verdict is memory-anchored.
 - Which snapshot is in the tree, and the shas of the others (`snapshot.sh list`) in case the user wants a different one.
 - Remaining weaknesses, stated plainly.
 - Then exactly **one out-of-character paragraph**: straight engineering debrief — what actually improved, what's left, and whether the rounds were worth the tokens. No persona, no hype.
