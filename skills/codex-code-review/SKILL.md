@@ -52,6 +52,8 @@ Codex uses `git status -s` / `git diff HEAD` in read-only sandbox. If those fail
 
 ## Notes
 
+- **Run Codex calls in a background shell.** Invoke `start.sh` / `resume.sh` via the Bash tool with `run_in_background: true` — never as a foreground/inline command. Codex runs at xhigh effort routinely outlast the foreground command timeout; the background task notifies on completion, then read its output. `reset.sh` / `show.sh` are instant and fine in the foreground.
+- **Set `CODEX_TIMEOUT=1800`** (30 min) when invoking `start.sh` / `resume.sh` — a generous circuit breaker against hung runs, not a performance target; bump higher for unusually large diffs rather than risk killing a legitimate run. Script default is `0` = no timeout. On expiry the script fails through the normal error path with a "timed out" message in the stderr tail. Requires GNU `timeout`/`gtimeout` (macOS: `brew install coreutils`); warns and runs unbounded if neither is present.
 - Model/effort defaults live in `codex-plan-review/scripts/_common.sh` (implementation → gpt-5.6-luna, plan/code review → gpt-5.6-sol, effort xhigh; derived from `STATE_DIR`). Adjust that one file to your preferred models, or override per run via `CODEX_MODEL` / `CODEX_EFFORT` env vars; the scripts echo the effective values.
 - `--sandbox read-only`. Safe to invoke autonomously.
 - Thread IDs persisted per-target (no `--last`). Concurrent reviews don't collide.

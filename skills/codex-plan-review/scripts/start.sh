@@ -51,7 +51,7 @@ PROMPT="$(load_prompt "$PROMPT_FILE")"
 # Run Codex non-interactively: JSONL events to stdout, last message to file.
 # stdin closed to skip the "reading from stdin" detour.
 # read-only sandbox: Codex only inspects files, never modifies them.
-codex exec \
+codex_exec exec \
     --json \
     --skip-git-repo-check \
     --sandbox read-only \

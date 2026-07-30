@@ -60,7 +60,7 @@ PROMPT="$(load_prompt "$PROMPT_FILE")"
 # Run Codex non-interactively: JSONL events to stdout, last message to file.
 # workspace-write sandbox: Codex edits files in the repo and runs commands
 # (lint/build); no network, no destructive access outside the workspace.
-codex exec \
+codex_exec exec \
     --json \
     --skip-git-repo-check \
     --sandbox workspace-write \

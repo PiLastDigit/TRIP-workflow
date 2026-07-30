@@ -39,6 +39,8 @@ export STATE_DIR=".claude/skills/codex-implement/state"
 
 ## Notes
 
+- **Run Codex calls in a background shell.** Invoke `start.sh` / `resume.sh` via the Bash tool with `run_in_background: true` — never as a foreground/inline command. Implementation runs are the longest Codex calls in the workflow and will outlast the foreground command timeout; the background task notifies on completion, then read its output. `reset.sh` / `show.sh` are instant and fine in the foreground.
+- **Set `CODEX_TIMEOUT=7200`** (2 h) when invoking `start.sh` / `resume.sh` — a circuit breaker against hung runs only, deliberately far above any normal batch; bump higher for unusually large batches rather than risk a mid-run kill. Script default is `0` = no timeout. A timeout here kills Codex while it is editing the tree, leaving a partially modified working state — inspect via `git status` / `git diff` before retrying.
 - `--sandbox workspace-write` on start; `codex exec resume` inherits it. Codex edits files and runs repo commands (lint/build); no network, no commits.
 - **Fixes are the requester's job.** After Codex reports, the requester (TRIP-2 batch review) fixes problems directly in the tree — do NOT ping-pong fixes back to Codex. Resume only for genuinely new scope (next batch, large remainder), passing what was fixed and why via `--notes`.
 - Separate `STATE_DIR` from the review skills — the same plan path can hold an implementation thread and a review thread without collision.

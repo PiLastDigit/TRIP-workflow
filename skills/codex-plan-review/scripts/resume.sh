@@ -54,7 +54,7 @@ PROMPT="$(load_prompt "$PROMPT_FILE")"
 
 # resume inherits sandbox from the original session; --sandbox and --color
 # are not accepted by `codex exec resume`.
-codex exec resume "$THREAD_ID" \
+codex_exec exec resume "$THREAD_ID" \
     --skip-git-repo-check \
     --json \
     -c model="$CODEX_MODEL" \

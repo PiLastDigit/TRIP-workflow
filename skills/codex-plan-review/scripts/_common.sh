@@ -23,6 +23,47 @@ esac
 CODEX_EFFORT="${CODEX_EFFORT:-xhigh}"
 export CODEX_MODEL CODEX_EFFORT
 
+# Optional wall-clock bound for each codex call, in whole seconds.
+# 0 (the default) = no timeout — identical to historical behavior.
+CODEX_TIMEOUT="${CODEX_TIMEOUT:-0}"
+case "$CODEX_TIMEOUT" in
+    ''|*[!0-9]*)
+        echo "error: CODEX_TIMEOUT must be a whole number of seconds (got '$CODEX_TIMEOUT')" >&2
+        exit 64 ;;
+esac
+export CODEX_TIMEOUT
+
+# codex_exec <codex args...> — run codex, bounded by CODEX_TIMEOUT when set.
+# TERM first, KILL 10s later. GNU timeout exits 124 on expiry, which flows
+# through the call sites' existing `|| { ... }` failure handling; the
+# "timed out" message below lands in the redirected stderr file, so the
+# handlers' stderr tail surfaces it. macOS has no stock `timeout` — fall
+# back to gtimeout (brew coreutils), and warn rather than silently running
+# unbounded when neither exists.
+codex_exec() {
+    if [ "$CODEX_TIMEOUT" -eq 0 ]; then
+        codex "$@"
+        return
+    fi
+    local timeout_bin=""
+    if command -v timeout >/dev/null 2>&1; then
+        timeout_bin=timeout
+    elif command -v gtimeout >/dev/null 2>&1; then
+        timeout_bin=gtimeout
+    fi
+    if [ -z "$timeout_bin" ]; then
+        echo "warning: CODEX_TIMEOUT=$CODEX_TIMEOUT is set but neither 'timeout' nor 'gtimeout' is available; running unbounded (macOS: brew install coreutils)" >&2
+        codex "$@"
+        return
+    fi
+    local rc=0
+    "$timeout_bin" --signal=TERM --kill-after=10 "$CODEX_TIMEOUT" codex "$@" || rc=$?
+    if [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ]; then
+        echo "error: codex timed out after ${CODEX_TIMEOUT}s (CODEX_TIMEOUT)" >&2
+    fi
+    return "$rc"
+}
+
 # Derive a per-target key from a path-like string. For real paths we
 # resolve to absolute; for non-path targets (branch names, commit
 # ranges) we sanitize in place. Replace '/' with '__'; force any other
