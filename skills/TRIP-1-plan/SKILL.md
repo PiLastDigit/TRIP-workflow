@@ -122,11 +122,9 @@ Depending on the feature (major, minor, patch), propose a new version using SemV
 
 ## Documentation Impact
 
-[Mandatory. List every document OUTSIDE the TRIP docs that this feature will leave outdated, with one line each on what becomes stale. Always evaluate these candidates:
+[Mandatory. List every document OUTSIDE the TRIP docs that this feature will leave outdated, with one line each on what becomes stale. If none are affected, write "None". The TRIP-3 Documentation Sync step consumes this section before the release commit. Always evaluate the candidates below.]
 
-[ADAPT_TO_PROJECT: During Init, replace with the project's actual living docs — every non-TRIP document that code changes can leave stale. Typical candidates: `README.md` (quick start, repo structure tree, command reference), module/subdirectory READMEs, operations or user manuals, reference `.md` specs living next to the code, contributor guides (`CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`). One bullet per doc with when it's affected.]
-
-If none are affected, write "None". The TRIP-3 Documentation Sync step consumes this section before the release commit.]
+[ADAPT_TO_PROJECT: During Init, replace this block with the project's actual living docs — every non-TRIP document that code changes can leave stale. Typical candidates: `README.md` (quick start, repo structure tree, command reference), module/subdirectory READMEs, operations or user manuals, reference `.md` specs living next to the code, contributor guides (`CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`). One bullet per doc with when it's affected.]
 
 ## To-dos
 

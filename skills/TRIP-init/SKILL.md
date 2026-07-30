@@ -667,7 +667,7 @@ Run this to get the anchor date:
 python3 -c "from datetime import date, timedelta; t = date.today(); print(t - timedelta(days=t.weekday()))"
 ```
 
-Then replace the `[WEEK_ANCHOR_DATE]` placeholder in `TRIP-3-release` Step 1 with the actual date (ISO format, `YYYY-MM-DD` — the formula parses it with `date.fromisoformat`). The formula counts elapsed weeks from that fixed date, so it works across year boundaries indefinitely, and both this command and the formula use Python instead of `date -d`, so they run identically on GNU/Linux and macOS (BSD `date`).
+Then replace the `[WEEK_ANCHOR_DATE]` placeholder in `TRIP-3-release` Step 1 with the actual date (ISO format, `YYYY-MM-DD` — the formula parses it with `date.fromisoformat`). The formula counts elapsed weeks from that fixed date, so it works across year boundaries indefinitely, and both this command and the formula use Python instead of `date -d`, so they run identically on GNU/Linux and macOS (BSD `date`). If `python3` is not on PATH — e.g. Git Bash on Windows — use `python` instead.
 
 **C. Tutorial Generation**
 

@@ -125,6 +125,8 @@ Build a context block by extracting these values from the installed skills:
 - `PROJECT_NAME` — the text that replaced `[PROJECT_NAME]` (appears in the `# Planning Mode` header and `**planning mode** for` line)
 - `TECHNICAL_CONSIDERATIONS` — the full content of the `## Technical Considerations` section in the plan template (everything between `## Technical Considerations` and the next `##` heading)
 - `GUIDANCE_SECTIONS` — everything after the plan template's closing section that replaced `[ADAPT_TO_PROJECT: Guidance Sections]` (project-specific per-component guidance at the bottom of the file)
+- `DOC_IMPACT_CANDIDATES` — the candidates list inside the plan template's `## Documentation Impact` section, if present (may not exist in pre-v2.4 installs)
+- `PLAN_PREREQUISITES` — any additional living-docs lines in the Prerequisites list beyond ARCHI.md, if present
 
 **From TRIP-2-implement/SKILL.md** (in v1 installs, the release values below live in its Post-Implementation steps; in v2 installs they live in `TRIP-3-release/SKILL.md`):
 - `PROJECT_NAME` — (confirm matches TRIP-1-plan)
@@ -228,6 +230,8 @@ For each customized skill, take the **new template** from staging and inject the
 2. Replace `[PROJECT_NAME]` with extracted `PROJECT_NAME`
 3. Replace the generic `## Technical Considerations` block in the plan template with extracted `TECHNICAL_CONSIDERATIONS`
 4. Replace the `[ADAPT_TO_PROJECT: Guidance Sections]` comment block with extracted `GUIDANCE_SECTIONS`
+5. Resolve the `[ADAPT_TO_PROJECT]` marker in the `## Documentation Impact` section: use extracted `DOC_IMPACT_CANDIDATES` if present; otherwise build the list from the project's living docs (README, module READMEs, operations/user manuals, reference specs next to the code, contributor guides), one bullet per doc with when it's affected
+6. Resolve the `[ADAPT_TO_PROJECT]` line in the Prerequisites list: use extracted `PLAN_PREREQUISITES` if present; otherwise list any living docs a plan must respect beyond ARCHI.md, or delete the line if there are none
 
 #### TRIP-2-implement/SKILL.md
 

@@ -46,7 +46,7 @@ Run this command to get date and project week:
 date '+%d-%m-%Y %H:%M' && python3 -c "from datetime import date; print('Project week:', (date.today() - date.fromisoformat('[WEEK_ANCHOR_DATE]')).days // 7 + 1)"
 ```
 
-(Week anchor: the Monday of the week TRIP Init was run. Python is used instead of `date -d` because macOS BSD `date` doesn't support it.)
+(Week anchor: the Monday of the week TRIP Init was run. Python is used instead of `date -d` because macOS BSD `date` doesn't support it. If `python3` is not on PATH — e.g. Git Bash on Windows — use `python` instead.)
 
 Use the project week in all subsequent steps.
 
@@ -133,7 +133,7 @@ Create `docs/5-tuto/tuto_x.y.z.md` explaining the core principle.
 ## Step 8: README Update
 
 Update `README.md` with the new version number.
-Also update relevant sections whenever needed.
+(Content corrections belong to Documentation Sync, next step — do not sync sections here.)
 
 ## Step 9: Documentation Sync
 
