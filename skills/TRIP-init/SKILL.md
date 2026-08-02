@@ -669,7 +669,17 @@ python3 -c "from datetime import date, timedelta; t = date.today(); print(t - ti
 
 Then replace the `[WEEK_ANCHOR_DATE]` placeholder in `TRIP-3-release` Step 1 with the actual date (ISO format, `YYYY-MM-DD` — the formula parses it with `date.fromisoformat`). The formula counts elapsed weeks from that fixed date, so it works across year boundaries indefinitely, and both this command and the formula use Python instead of `date -d`, so they run identically on GNU/Linux and macOS (BSD `date`). If `python3` is not on PATH — e.g. Git Bash on Windows — use `python` instead.
 
-**C. Tutorial Generation**
+**C. Main Branch**
+
+Replace the `[MAIN_BRANCH]` placeholder in `TRIP-3-release` (the Documentation Sync diff command and the fast-forward merge step) with the repo's default branch name. Detect it with:
+
+```bash
+basename "$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null || git branch --show-current)"
+```
+
+(The fallback covers repos without a remote — there, the branch Init runs on is the main branch.)
+
+**D. Tutorial Generation**
 
 **Use the `AskUserQuestion` tool** to ask:
 
@@ -725,7 +735,7 @@ Create `docs/5-tuto/tuto_x.y.z.md` explaining the core principle.
 
 Also update the cross-reference inside Documentation Sync — "included in the release commit (Step 10)" becomes "(Step 11)".
 
-**D. Codex Review Test Commands**
+**E. Codex Review Test Commands**
 
 Replace the `[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, and `[TEST_COMMAND]` placeholders in the TRIP-2 Testing Gate AND the TRIP-3-release standalone-verification block with the **actual commands** for this project (from ARCHI.md or discovered during exploration). For example:
 
@@ -1036,6 +1046,7 @@ Update: Technology Stack, and any affected architectural sections
   - [ ] `TRIP-2-implement`: Testing gate commands (`[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, `[TEST_COMMAND]`) replaced with actual commands
   - [ ] `TRIP-3-release`: `[VERSION_FILE]` placeholder replaced
   - [ ] `TRIP-3-release`: `[WEEK_ANCHOR_DATE]` placeholder replaced
+  - [ ] `TRIP-3-release`: `[MAIN_BRANCH]` placeholder replaced
   - [ ] `TRIP-3-release`: Standalone-verification commands replaced with actual commands
   - [ ] `TRIP-3-release`: Tutorial preference configured (if enabled: 5-tuto/ folder created + user context; if disabled: `[TUTORIAL_STEP]` block removed)
   - [ ] `TRIP-review/checklist.md`: `[ADAPT_TO_PROJECT]` markers replaced with project-specific checklist sections
