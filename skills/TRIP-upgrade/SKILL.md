@@ -125,7 +125,7 @@ Build a context block by extracting these values from the installed skills:
 - `PROJECT_NAME` — the text that replaced `[PROJECT_NAME]` (appears in the `# Planning Mode` header and `**planning mode** for` line)
 - `TECHNICAL_CONSIDERATIONS` — the full content of the `## Technical Considerations` section in the plan template (everything between `## Technical Considerations` and the next `##` heading)
 - `GUIDANCE_SECTIONS` — everything after the plan template's closing section that replaced `[ADAPT_TO_PROJECT: Guidance Sections]` (project-specific per-component guidance at the bottom of the file)
-- `DOC_IMPACT_CANDIDATES` — the candidates list inside the plan template's `## Documentation Impact` section, if present (may not exist in pre-v2.4 installs)
+- `DOC_IMPACT_CANDIDATES` — the candidates list inside the plan template's `## Documentation Impact` section, if present (may not exist in pre-v2.5 installs)
 - `PLAN_PREREQUISITES` — any additional living-docs lines in the Prerequisites list beyond ARCHI.md, if present
 
 **From TRIP-2-implement/SKILL.md** (in v1 installs, the release values below live in its Post-Implementation steps; in v2 installs they live in `TRIP-3-release/SKILL.md`):
