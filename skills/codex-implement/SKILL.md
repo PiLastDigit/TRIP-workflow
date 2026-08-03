@@ -46,4 +46,10 @@ export STATE_DIR=".claude/skills/codex-implement/state"
 - Separate `STATE_DIR` from the review skills — the same plan path can hold an implementation thread and a review thread without collision.
 - Codex is instructed not to write tests (testing gate owns that) and not to touch release ceremony.
 - Network is blocked in the sandbox: if the plan requires installing a new dependency, Codex will report it as a leftover — install it yourself during the batch review.
-- Model/effort defaults live in `codex-plan-review/scripts/_common.sh` (implementation → gpt-5.6-luna, reviews → gpt-5.6-sol, effort xhigh; derived from `STATE_DIR`). Adjust that one file to your preferred models, or override per run via `CODEX_MODEL` / `CODEX_EFFORT` env vars; the scripts echo the effective values.
+- Model/effort/tier defaults live in `codex-plan-review/scripts/_common.sh` (implementation → gpt-5.6-luna at **high** effort on the **fast** service tier; reviews → gpt-5.6-sol at xhigh on standard routing; derived from `STATE_DIR`). Adjust that one file to your preferred models, or override per run via `CODEX_MODEL` / `CODEX_EFFORT` / `CODEX_TIER` env vars; the scripts echo the effective values.
+- **Effort escalation (per batch).** high is the default because plan batches are well-scoped and every batch passes through the requester's delta review plus the final full code review. Escalate a single batch to xhigh (`CODEX_EFFORT=xhigh` on that batch's `start.sh`/`resume.sh` call) when it involves any of:
+  - **novel core logic** designed from scratch — an algorithm, data structure, protocol, or state machine with no existing pattern in the codebase to follow;
+  - **changes the testing gate can't meaningfully verify** — correctness only observable at runtime or by inspection, with no automated check covering it;
+  - **concurrency, security, or data-integrity-sensitive code** — where a subtle slip is costly and hard to spot in review;
+  - **cross-cutting changes** — one batch touching many files or layers whose interactions must stay coherent.
+  When none apply, stay at high — a slipped batch is caught and fixed directly in the delta review.

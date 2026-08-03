@@ -62,7 +62,7 @@ Categorize each skill into one of:
 
 **Pure workflow skills** (no project customizations): `TRIP-compact`, `TRIP-hotfix`, `TRIP-research`, `TRIP-init`, `codex-implement`, `codex-plan-review`, `codex-code-review`
 
-**Exception — model defaults**: `codex-plan-review/scripts/_common.sh` holds the per-flow Codex model/effort defaults, which the user may have tuned. Before replacing, diff the installed `_common.sh` against staging — if the model/effort values differ from the generic defaults, carry the user's values into the new file.
+**Exception — model defaults**: `codex-plan-review/scripts/_common.sh` holds the per-flow Codex model/effort/service-tier defaults, which the user may have tuned. Before replacing, diff the installed `_common.sh` against staging — if the model/effort/tier values differ from the generic defaults, carry the user's values into the new file.
 
 **Customized skills** (have project-specific content): `TRIP-1-plan`, `TRIP-2-implement`, `TRIP-3-release`, `TRIP-review`, `TRIP-test`
 

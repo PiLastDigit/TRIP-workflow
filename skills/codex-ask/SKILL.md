@@ -57,5 +57,5 @@ export STATE_DIR=".claude/skills/codex-ask/state"
 - **Run Codex calls in a background shell.** Invoke `start.sh` / `resume.sh` via the Bash tool with `run_in_background: true` — never as a foreground/inline command. Codex runs at xhigh effort routinely outlast the foreground command timeout; the background task notifies on completion, then read its output. `reset.sh` / `show.sh` are instant and fine in the foreground.
 - **Set `CODEX_TIMEOUT=1800`** (30 min) when invoking `start.sh` / `resume.sh` — a generous circuit breaker against hung runs (script default `0` = no timeout); fails through the normal error path with a "timed out" message on expiry.
 - Read-only sandbox — Codex can read the repo but change nothing.
-- Model/effort come from `codex-plan-review/scripts/_common.sh` (non-implement flows get the review-class model by default); override per run via `CODEX_MODEL` / `CODEX_EFFORT`.
+- Model/effort/tier come from `codex-plan-review/scripts/_common.sh` (non-implement flows get the review-class model at xhigh by default); override per run via `CODEX_MODEL` / `CODEX_EFFORT` / `CODEX_TIER`.
 - Surface Codex's answer to the user verbatim when it disagrees with your position — the disagreement itself is the valuable output.

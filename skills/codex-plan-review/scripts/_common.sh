@@ -12,16 +12,26 @@ SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export STATE_DIR
 mkdir -p "$STATE_DIR"
 
-# Model/effort per flow (single source of truth for all codex skills):
-# implementation runs Luna, reviews (plan + code) run Sol, effort xhigh.
-# Adjust these defaults to your preferred models.
-# CODEX_MODEL / CODEX_EFFORT act as per-run overrides.
+# Model/effort/tier per flow (single source of truth for all codex skills):
+# implementation runs Luna at high effort on the fast service tier (benchmarked
+# ~40-150% higher throughput, no observed quality cost); reviews (plan + code)
+# run Sol at xhigh on standard routing. Adjust these defaults to your
+# preferred models. CODEX_MODEL / CODEX_EFFORT / CODEX_TIER act as per-run
+# overrides (e.g. CODEX_EFFORT=xhigh to escalate a hard batch).
+# Models that don't support a tier silently ignore it ("default" = standard).
 case "$STATE_DIR" in
-    *codex-implement*) CODEX_MODEL="${CODEX_MODEL:-gpt-5.6-luna}" ;;
-    *)                 CODEX_MODEL="${CODEX_MODEL:-gpt-5.6-sol}" ;;
+    *codex-implement*)
+        CODEX_MODEL="${CODEX_MODEL:-gpt-5.6-luna}"
+        CODEX_EFFORT="${CODEX_EFFORT:-high}"
+        CODEX_TIER="${CODEX_TIER:-fast}"
+        ;;
+    *)
+        CODEX_MODEL="${CODEX_MODEL:-gpt-5.6-sol}"
+        CODEX_EFFORT="${CODEX_EFFORT:-xhigh}"
+        CODEX_TIER="${CODEX_TIER:-default}"
+        ;;
 esac
-CODEX_EFFORT="${CODEX_EFFORT:-xhigh}"
-export CODEX_MODEL CODEX_EFFORT
+export CODEX_MODEL CODEX_EFFORT CODEX_TIER
 
 # Optional wall-clock bound for each codex call, in whole seconds.
 # 0 (the default) = no timeout — identical to historical behavior.

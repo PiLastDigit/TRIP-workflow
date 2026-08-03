@@ -58,6 +58,7 @@ codex_exec exec \
     --color never \
     -c model="$CODEX_MODEL" \
     -c model_reasoning_effort="$CODEX_EFFORT" \
+    -c service_tier="$CODEX_TIER" \
     -o "$REVIEW_FILE" \
     "$PROMPT" \
     </dev/null \
@@ -84,7 +85,7 @@ fi
 printf '%s\n' "$THREAD_ID" > "$THREAD_FILE"
 echo "started review session for $TARGET"
 echo "  thread id:   $THREAD_ID"
-echo "  model/effort: $CODEX_MODEL / $CODEX_EFFORT"
+echo "  model/effort/tier: $CODEX_MODEL / $CODEX_EFFORT / $CODEX_TIER"
 echo "  review file: $REVIEW_FILE"
 echo "---"
 cat "$REVIEW_FILE"
