@@ -1,7 +1,6 @@
 ---
 name: TRIP-hotfix
 description: Urgent fix bypassing full TRIP workflow
-disable-model-invocation: true
 argument-hint: "what is broken in production?"
 ---
 
