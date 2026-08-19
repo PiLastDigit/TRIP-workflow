@@ -1,6 +1,6 @@
 ![TRIP Workflow Banner](assets/trip-workflow-banner2.png)
 
-![Version](https://img.shields.io/badge/version-2.6.0-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
+![Version](https://img.shields.io/badge/version-2.7.0-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
 
 ## What is TRIP?
 
@@ -48,6 +48,8 @@ It was kept stupid simple because **the goal is to ship features, not to master 
 Also copy `AskUserQuestion/` to your agent `/skills/`, it provides the `AskUserQuestion` hook that TRIP workflow rely on.  
 
 Et voila ! Start using the skills like `/TRIP-1-plan auth for this webapp`, `/TRIP-2-implement @auth-plan.md`, etc.
+
+Feeling confident? `/TRIP-1-plan --speedrun <feature>` skips the plan-approval question: answer the discovery questions, walk away, and come back to an implemented feature waiting at the TRIP-2 gate. The Codex plan review still gates the chain — a plan stuck at `NEEDS_REWORK` always comes back to you.
 
 https://github.com/user-attachments/assets/d37bbc60-1868-4fa8-9be6-083b60d6a53d
 

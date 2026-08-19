@@ -1,7 +1,7 @@
 ---
 name: TRIP-1-plan
 description: Plan a new feature following project standards
-argument-hint: "describe the feature you want to build"
+argument-hint: "describe the feature you want to build (add --speedrun to chain straight into implementation)"
 ---
 
 # Planning Mode
@@ -18,6 +18,8 @@ Before creating any plan, you MUST read ALL THE LINES of:
 ## Your Task
 
 Plan the following feature: $ARGUMENTS
+
+**Speedrun**: if the arguments contain `--speedrun`, strip the flag from the feature description and run in speedrun mode — Step 4's approval question is skipped and the plan chains directly into `TRIP-2-implement` once Codex returns `APPROVED`. `NEEDS_REWORK` always cancels speedrun and falls back to the normal Step 4 question. Discovery questions (Step 1) still run — speedrun removes the end gate, not the understanding phase.
 
 ---
 
@@ -186,7 +188,9 @@ After the Codex review converges, present a summary:
 - **Estimated complexity**: [simple/moderate/complex]
 - **Codex status**: [APPROVED after N rounds / NEEDS_REWORK surfaced to you]
 
-Then **one `AskUserQuestion`** — the single decision point of this skill:
+**Speedrun mode**: present the summary above (so the record exists), then skip the question and proceed directly into `TRIP-2-implement` as if the user had answered "Approved — implement now". (A `NEEDS_REWORK` Codex status always cancels speedrun — ask the question normally.)
+
+Otherwise, **one `AskUserQuestion`** — the single decision point of this skill:
 
 - **Question**: "Review the plan at `docs/1-plans/F_x.y.z_feature-name.plan.md`. How to proceed?"
 - **Options**:
