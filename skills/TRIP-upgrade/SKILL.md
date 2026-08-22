@@ -295,7 +295,7 @@ If any are found, fill them from context or ask the user.
 - `checklist.md` section names must match `cr-template.md` checklist section names
 - `codex-code-review/prompts/start.tpl` and `resume.tpl` reference `.claude/skills/TRIP-review/checklist.md` — confirm it exists, and that no template still points at the old `TRIP-3-review/` path
 - `codex-code-review/prompts/synthesize.tpl` and `codex-code-review/SKILL.md` reference `.claude/skills/TRIP-review/cr-template.md` — confirm it exists
-- `TRIP-1-plan` and `TRIP-2-implement` reference `codex-plan-review/scripts/start.sh` and `resume.sh`; `TRIP-2-implement` also references `codex-implement/scripts/start.sh` — confirm they exist
+- `TRIP-1-plan` references `codex-plan-review/scripts/start.sh` and `resume.sh`; `TRIP-2-implement` and `TRIP-research` invoke each skill's own wrapper scripts — confirm `codex-implement`, `codex-code-review`, and `codex-ask` each ship `scripts/{start,resume,reset,show}.sh` (they pin `STATE_DIR` and delegate to `codex-plan-review`), and that `codex-plan-review/scripts/key.sh` exists
 
 ### 5.3 Present Summary
 

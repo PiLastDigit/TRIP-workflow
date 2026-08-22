@@ -8,11 +8,7 @@ argument-hint: "<plan-path> [instructions] | reset <plan-path> | show <plan-path
 
 Non-interactive implementation via Codex CLI in a **workspace-write** sandbox: Codex reads the plan, edits the working tree directly, runs the project's lint/build on its own work, and reports back. One persistent thread per target, so a plan can be delegated in successive batches (or phase by phase) with full context retained.
 
-State persisted under `.claude/skills/codex-implement/state/<sanitized-target>.{thread,review.txt,events.ndjson}` (the `.review.txt` file holds Codex's implementation **report** — the naming comes from the shared helpers). `resume`/`reset`/`show` reuse the shared scripts from `codex-plan-review`; always export before invoking them:
-
-```bash
-export STATE_DIR=".claude/skills/codex-implement/state"
-```
+State persisted under `.claude/skills/codex-implement/state/<sanitized-target>.{thread,review.txt,events.ndjson}` (the `.review.txt` file holds Codex's implementation **report** — the naming comes from the shared helpers). All operations go through this skill's own `scripts/` wrappers: `start.sh` is a dedicated workspace-write script, while `resume`/`reset`/`show` pin the correct `STATE_DIR` and delegate to the shared `codex-plan-review` implementation — so there is no `export` to remember (a forgotten export would silently operate on a review thread instead of the implementation thread).
 
 ## Arguments
 
@@ -27,11 +23,11 @@ export STATE_DIR=".claude/skills/codex-implement/state"
 
 2. **Auto** — try `start.sh` first (exit code 2 = thread exists → use `resume.sh`):
    - **Start**: `bash .claude/skills/codex-implement/scripts/start.sh --prompt-file .claude/skills/codex-implement/prompts/implement.tpl <target> [instructions]`
-   - **Resume** (next batch / additional scope): `bash .claude/skills/codex-plan-review/scripts/resume.sh --prompt-file .claude/skills/codex-implement/prompts/continue.tpl [--notes "review corrections"] <target> [instructions]`
+   - **Resume** (next batch / additional scope): `bash .claude/skills/codex-implement/scripts/resume.sh --prompt-file .claude/skills/codex-implement/prompts/continue.tpl [--notes "review corrections"] <target> [instructions]`
 
-3. **Reset**: `bash .claude/skills/codex-plan-review/scripts/reset.sh <target>`
+3. **Reset**: `bash .claude/skills/codex-implement/scripts/reset.sh <target>`
 
-4. **Show**: `bash .claude/skills/codex-plan-review/scripts/show.sh <target>`
+4. **Show**: `bash .claude/skills/codex-implement/scripts/show.sh <target>`
 
 5. **Parse trailing tag** of the report:
    - `IMPLEMENTATION_COMPLETE` — hand control back to the requester's batch review (TRIP-2).

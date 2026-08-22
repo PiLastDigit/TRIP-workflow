@@ -10,11 +10,7 @@ Iterative code review via Codex CLI on uncommitted changes. Codex reads the plan
 
 Review output stays in `state/<key>.review.txt` — not `docs/3-code-review/`. Promotion to `docs/3-code-review/CR_wa_vx.y.z.md` happens after convergence, not per-turn.
 
-State persisted under `.claude/skills/codex-code-review/state/<sanitized-target>.{thread,review.txt,events.ndjson}`. Shared scripts live under `.claude/skills/codex-plan-review/scripts/`; always export before invoking:
-
-```bash
-export STATE_DIR=".claude/skills/codex-code-review/state"
-```
+State persisted under `.claude/skills/codex-code-review/state/<sanitized-target>.{thread,review.txt,events.ndjson}`. Invoke this skill's own wrapper scripts under `.claude/skills/codex-code-review/scripts/` — they pin the correct `STATE_DIR` and delegate to the shared `codex-plan-review` implementation, so there is no `export` to remember (a forgotten export would silently operate on the plan-review thread for the same target).
 
 ## Arguments
 
@@ -27,12 +23,12 @@ export STATE_DIR=".claude/skills/codex-code-review/state"
 1. **Parse `$ARGUMENTS`**: extract action (`reset`/`show`/auto) and target.
 
 2. **Auto** — try `start.sh` first (exit code 2 = thread exists -> use `resume.sh`):
-   - **Start**: `bash .claude/skills/codex-plan-review/scripts/start.sh --prompt-file .claude/skills/codex-code-review/prompts/start.tpl <target> [extra]`
-   - **Resume**: `bash .claude/skills/codex-plan-review/scripts/resume.sh --prompt-file .claude/skills/codex-code-review/prompts/resume.tpl <target> [extra]`
+   - **Start**: `bash .claude/skills/codex-code-review/scripts/start.sh --prompt-file .claude/skills/codex-code-review/prompts/start.tpl <target> [extra]`
+   - **Resume**: `bash .claude/skills/codex-code-review/scripts/resume.sh --prompt-file .claude/skills/codex-code-review/prompts/resume.tpl <target> [extra]`
 
-3. **Reset**: `bash .claude/skills/codex-plan-review/scripts/reset.sh <target>`
+3. **Reset**: `bash .claude/skills/codex-code-review/scripts/reset.sh <target>`
 
-4. **Show**: `bash .claude/skills/codex-plan-review/scripts/show.sh <target>`
+4. **Show**: `bash .claude/skills/codex-code-review/scripts/show.sh <target>`
 
 5. **Parse trailing tag**:
    - `APPROVED` — propose post-convergence steps.

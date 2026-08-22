@@ -1,0 +1,5 @@
+# Per-target Codex Q&A state (thread ids, last answer text, raw event
+# logs). Local-only — these are session artifacts, not source-of-truth
+# artifacts.
+*
+!.gitignore

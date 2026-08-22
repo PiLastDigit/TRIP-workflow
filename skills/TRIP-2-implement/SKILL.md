@@ -62,8 +62,7 @@ bash .claude/skills/codex-implement/scripts/start.sh \
 **Each next batch resumes the same thread**, carrying your review corrections as `--notes`:
 
 ```bash
-export STATE_DIR=".claude/skills/codex-implement/state"
-bash .claude/skills/codex-plan-review/scripts/resume.sh \
+bash .claude/skills/codex-implement/scripts/resume.sh \
     --prompt-file .claude/skills/codex-implement/prompts/continue.tpl \
     --notes "<what you fixed after the last batch and why; conventions to apply from now on>" \
     <plan-path> "Now implement: <next batch checkboxes>"
@@ -144,15 +143,11 @@ Always run the Codex code review after the testing gate passes — no confirmati
 
 ### Loop
 
-Always export before invoking shared scripts:
-
-```bash
-export STATE_DIR=".claude/skills/codex-code-review/state"
-```
+The code-review wrappers pin their own state dir — no `export` needed:
 
 1. **Start**:
    ```bash
-   bash .claude/skills/codex-plan-review/scripts/start.sh \
+   bash .claude/skills/codex-code-review/scripts/start.sh \
        --prompt-file .claude/skills/codex-code-review/prompts/start.tpl \
        <plan-path> "$GATE_SUMMARY"
    ```
@@ -166,7 +161,7 @@ export STATE_DIR=".claude/skills/codex-code-review/state"
 
 5. **Resume** (re-run the testing gate first — lint, typecheck, affected tests — and build a fresh summary):
    ```bash
-   bash .claude/skills/codex-plan-review/scripts/resume.sh \
+   bash .claude/skills/codex-code-review/scripts/resume.sh \
        --prompt-file .claude/skills/codex-code-review/prompts/resume.tpl \
        --notes "Fixed X. Pushed back on Y because Z." \
        <plan-path> "$GATE_SUMMARY"
@@ -182,7 +177,7 @@ Skip if loop converged on Turn 1 (state file already holds full review).
 Turn-N state files hold only that turn's delta. After multi-round convergence, produce a consolidated review:
 
 ```bash
-bash .claude/skills/codex-plan-review/scripts/resume.sh \
+bash .claude/skills/codex-code-review/scripts/resume.sh \
     --prompt-file .claude/skills/codex-code-review/prompts/synthesize.tpl \
     <plan-path> "Today's date is YYYY-MM-DD"
 ```
