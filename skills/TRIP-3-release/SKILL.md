@@ -60,9 +60,9 @@ Use the project week in all subsequent steps.
 
 Now that week (`a`) and version (`x.y.z`) are known:
 
-1. Compute state file path:
+1. Compute state file path (derive the key via `key.sh` so it matches what the review scripts actually wrote — never re-derive it inline):
    ```bash
-   STATE_KEY="$(realpath <plan-path> | sed 's|^/||; s|/|__|g')"
+   STATE_KEY="$(bash .claude/skills/codex-plan-review/scripts/key.sh <plan-path>)"
    STATE_FILE=".claude/skills/codex-code-review/state/${STATE_KEY}.review.txt"
    ```
 
