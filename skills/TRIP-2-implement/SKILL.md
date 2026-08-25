@@ -43,9 +43,9 @@ Delegation is **batched**: Codex implements a few of the plan's checkboxes per t
 Read the plan fully and split its to-dos into batches. You are the judge of batch size:
 
 - A batch is the **smallest set of checkboxes that leaves the tree green** (compiles, lints). Never split an interface from its implementation and wiring.
+- **The plan is likely sliced vertically**: batch within the plan's phase order, never spanning phase boundaries; where possible, prefer a batch that completes a thin end-to-end path over one that builds out a single layer.
 - Target a reviewable diff — roughly ≤300 changed lines per batch. A checkbox that alone exceeds this becomes its own batch.
 - Size by risk: novel, architectural, or security-critical work → small batches (down to one checkbox). Mechanical, repetitive work → larger batches.
-- Never span phase boundaries.
 - **One-shot escape hatch**: a low-risk plan (or phase) of ≤3-4 checkboxes is delegated whole — no batching ceremony.
 - **Filter out non-Codex items**: checkboxes needing human input, dashboard/console access, credentials, or ops actions are yours — resolve them with the user before or between batches, never delegate them.
 

@@ -1,6 +1,6 @@
 ![TRIP Workflow Banner](assets/trip-workflow-banner2.png)
 
-![Version](https://img.shields.io/badge/version-2.7.4-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
+![Version](https://img.shields.io/badge/version-2.8.0-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
 
 ## What is TRIP?
 
@@ -49,7 +49,7 @@ Also copy `AskUserQuestion/` to your agent `/skills/`, it provides the `AskUserQ
 
 Et voila ! Start using the skills like `/TRIP-1-plan auth for this webapp`, `/TRIP-2-implement @auth-plan.md`, etc.
 
-Feeling confident? `/TRIP-1-plan --speedrun <feature>` skips the plan-approval question: answer the discovery questions, walk away, and come back to an implemented feature waiting at the TRIP-2 gate. The Codex plan review still gates the chain — a plan stuck at `NEEDS_REWORK` always comes back to you.
+Feeling confident? `/TRIP-1-plan <feature> --yolo` skips the plan-approval question: answer the discovery questions, walk away, and come back to an implemented feature.
 
 https://github.com/user-attachments/assets/d37bbc60-1868-4fa8-9be6-083b60d6a53d
 
@@ -140,30 +140,29 @@ Run this skill to compact ARCHI.md size while preserving relevance, accuracy, an
 Just like you wouldn't smell your own fart, an LLM is unlikely to catch bugs in its own implementation. Some people conduct adversarial review with a different session but still the same model, which is..._meh_. The best approach is to introduce a different model in the same reasoning ballpark as the first one, that will most likely catch what the other missed.
 
 As of v2.0.0, this multi-agent approach is **the default workflow**.  
-Considering Claude as your main and Codex as the copilot:  
-Fable writes the plan, 5.6 Sol reviews it, Luna implements, back to Fable who reviews and fixes the diff, runs the testing gate, then a new Sol thread reviews again the code. All in one claude code session. Writer and reviewer are never the same thread.  
+Considering Claude Code as your main agent and Codex as the copilot, the recommended approach to save tokens is to split in two sessions.  
+Session 1 with Fable for planning, Session 2 with Opus for implementation (or switch model mid-session).  
 
 ```mermaid
 flowchart TD
-    A["<b>/TRIP-1-plan</b><br/>Discovery and plan draft"] --> B{"ChatGPT Sol<br/>plan review"}
+    A["<b>/TRIP-1-plan</b> · Fable<br/>Discovery and plan draft"] --> B{"ChatGPT Sol<br/>plan review"}
     B -->|"REQUEST_CHANGES"| Bf["Fable fixes the plan"]
     Bf -->|"re-review"| B
-    B -->|"APPROVED"| D["<b>/TRIP-2-implement</b><br/>Branch + split<br/>to-dos into batches"]
+    B -->|"APPROVED"| D["<b>/TRIP-2-implement</b> · Opus<br/>Branch + split<br/>to-dos into batches"]
     Bf ~~~ D
     D --> E["ChatGPT Luna<br/>implements a batch"]
-    E --> F["Fable reviews the delta,<br/>fixes directly"]
+    E --> F["Opus reviews the delta,<br/>fixes directly"]
     F -->|"next batch"| E
-    F -->|"all batches done"| G["Fable final pass<br/>+ testing gate"]
+    F -->|"all batches done"| G["Opus final pass<br/>+ testing gate"]
     G --> H{"ChatGPT Sol<br/>full code review"}
-    H -->|"REQUEST_CHANGES"| Hf["Fable fixes + re-tests"]
+    H -->|"REQUEST_CHANGES"| Hf["Opus fixes + re-tests"]
     Hf -->|"re-review"| H
     H -->|"APPROVED"| K["<b>/TRIP-3-release</b><br/>Version bump · changelog<br/>docs/ARCHI update · docs sync<br/>commit · tag · ff-merge · push"]
     Hf ~~~ K
 ```
 
-As of mid july 2026, this Fable + GPT5.6 harness combo is absolute peak.
-
-One honest caveat: the implementer's `--notes` are injected into the reviewer's prompt, so a lazy (or scheming) writer agent can talk the reviewer out of findings. The skills mitigate this (reviews surfaced verbatim, capped rounds, push-back must be justified), but if a review converges suspiciously fast, read the notes.
+As of end August 2026, this Fable + Opus + GPT5.6 harness combo is absolute peak.  
+Recommended plans: Claude Max 5x ($100) + ChatGPT Plus ($20). The compute value you get out of those 2 is still unmatched, no chinese API can compete with those subsidized subs. Enjoy while it lasts.
 
 ## MCP Servers: Less Is More
 

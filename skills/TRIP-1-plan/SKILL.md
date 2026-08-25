@@ -1,7 +1,7 @@
 ---
 name: TRIP-1-plan
 description: Plan a new feature following project standards
-argument-hint: "describe the feature you want to build (add --speedrun to chain straight into implementation)"
+argument-hint: "describe the feature you want to build (add --yolo to chain straight into implementation)"
 ---
 
 # Planning Mode
@@ -19,7 +19,7 @@ Before creating any plan, you MUST read ALL THE LINES of:
 
 Plan the following feature: $ARGUMENTS
 
-**Speedrun**: if the arguments contain `--speedrun`, strip the flag from the feature description and run in speedrun mode — Step 4's approval question is skipped and the plan chains directly into `TRIP-2-implement` once Codex returns `APPROVED`. `NEEDS_REWORK` always cancels speedrun and falls back to the normal Step 4 question. Discovery questions (Step 1) still run — speedrun removes the end gate, not the understanding phase.
+**YOLO**: if the arguments contain `--yolo`, strip the flag from the feature description and run in YOLO mode — Step 4's approval question is skipped and the plan chains directly into `TRIP-2-implement` once Codex returns `APPROVED`. `NEEDS_REWORK` always cancels YOLO and falls back to the normal Step 4 question. Discovery questions (Step 1) still run — YOLO removes the end gate, not the understanding phase.
 
 ---
 
@@ -40,7 +40,25 @@ Frame questions around:
 
 For each question, provide 2-4 concrete options based on your analysis of the codebase and the feature request. Always let the user provide custom input via the built-in "Other" option.
 
-After the user answers, proceed **directly to writing the plan** (Step 2) — no approach-confirmation question. Ask a follow-up round with `AskUserQuestion` only if a blocking ambiguity remains (**maximum 3 rounds total**; if still unclear, summarize what you know and proceed with noted assumptions).
+**Every question ships a recommendation.** For each question, pick the option you'd choose and mark it — put it **first** in the options list with `(Recommended)` appended to its label. If you genuinely have no lean, say so in the option descriptions rather than faking a recommendation.
+
+### 1.2 Alignment: keep asking until aligned
+
+The goal is a **shared understanding** of the feature, not a fixed number of questions. Batch up to 4 questions per `AskUserQuestion` call (one "round"), and keep asking follow-up rounds **while genuine blocking ambiguities remain**. Stop as soon as none do — do not manufacture questions to fill a quota.
+
+A safety ceiling caps the questioning if you're still finding gaps, scaled by plan size:
+
+| Plan size | Ceiling (rounds of up to 4 questions) |
+| --------- | ------------------------------------- |
+| patch     | 1                                     |
+| minor     | 3                                     |
+| major     | 5                                     |
+
+When a ceiling is hit, summarize what you know, note open assumptions explicitly, and proceed to Step 2. Don't over-question: the Codex plan review (Step 3) backstops anything discovery misses, so lean toward proceeding rather than squeezing out every edge case.
+
+**User escape hatch.** From the **second round onward**, include a standing option worded like **"Use your recommendations for everything remaining → write the plan"** as one of the choices. If the user picks it, stop asking immediately, adopt your recommended answer for every still-open question, and proceed to Step 2. The user decides when alignment is enough — this option lets them, without waiting for the ceiling.
+
+After discovery ends (aligned, ceiling hit, or escape hatch), proceed **directly to writing the plan** (Step 2).
 
 ---
 
@@ -142,6 +160,8 @@ Depending on the feature (major, minor, patch), propose a new version using SemV
 
 **Note**: For simple plans, a single phase is sufficient. Split into multiple phases only for complex features requiring sequential implementation.
 
+**Note — slice vertically, not horizontally**: When a feature needs multiple phases, whenever possible make each phase a **thin end-to-end slice** (e.g. schema → service → minimal UI touch) that is verifiable on its own, so the **first** phase already produces something you can exercise. Do NOT structure phases as one whole layer at a time ("all schema", then "all API", then "all UI") — that leaves nothing testable until the end and makes course-correction expensive. Order phases so the thinnest working path lands first; later phases thicken it (more cases, edge handling, admin views, polish).
+
 **Note**: Do NOT write test code during planning — the Test Impact section above only names what the TRIP-2 testing gate will run and author.
 ```
 
@@ -188,7 +208,7 @@ After the Codex review converges, present a summary:
 - **Estimated complexity**: [simple/moderate/complex]
 - **Codex status**: [APPROVED after N rounds / NEEDS_REWORK surfaced to you]
 
-**Speedrun mode**: present the summary above (so the record exists), then skip the question and proceed directly into `TRIP-2-implement` as if the user had answered "Approved — implement now". (A `NEEDS_REWORK` Codex status always cancels speedrun — ask the question normally.)
+**YOLO mode**: present the summary above (so the record exists), then skip the question and proceed directly into `TRIP-2-implement` as if the user had answered "Approved — implement now". (A `NEEDS_REWORK` Codex status always cancels YOLO — ask the question normally.)
 
 Otherwise, **one `AskUserQuestion`** — the single decision point of this skill:
 
