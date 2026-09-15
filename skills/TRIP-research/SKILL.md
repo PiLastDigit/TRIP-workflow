@@ -3,6 +3,8 @@ name: TRIP-research
 description: Exploratory research or spike - investigation without production code
 disable-model-invocation: true
 argument-hint: "what do you want to investigate?"
+metadata:
+  trip-version: "2.8.1"
 ---
 
 # Research Mode

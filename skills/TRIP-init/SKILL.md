@@ -3,6 +3,8 @@ name: TRIP-init
 description: Initialize TRIP workflow in a new project (creates docs structure and generates ARCHI.md)
 disable-model-invocation: true
 argument-hint: "name of the project to initialize"
+metadata:
+  trip-version: "2.8.1"
 ---
 
 # TRIP Initialization Mode

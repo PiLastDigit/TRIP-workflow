@@ -2,6 +2,8 @@
 name: codex-implement
 description: Delegate implementation of a TRIP plan (or a scoped part of it) to Codex CLI
 argument-hint: "<plan-path> [instructions] | reset <plan-path> | show <plan-path>"
+metadata:
+  trip-version: "2.8.1"
 ---
 
 # Codex Implement

@@ -33,6 +33,10 @@ If `git diff HEAD` returns nothing (already committed), use `git diff @{u}...HEA
 - **Type-annotation aesthetics** beyond what the project's type checker requires.
 - **Theoretical edge cases** that real inputs don't produce.
 - **Repeating a prior finding** the implementer addressed or pushed back on with rationale.
+- **Release bookkeeping.** Version bumps, changelogs, architecture docs, and coverage ledgers
+  belong to the release step. Never flag their absence from an implementation diff.
+- **Round discipline.** From the third review round on, only new Critical or Major findings may
+  block approval. Anything smaller goes in Suggestions.
 
 ## Output format
 

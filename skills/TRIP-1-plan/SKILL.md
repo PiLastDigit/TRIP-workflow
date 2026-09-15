@@ -2,6 +2,8 @@
 name: TRIP-1-plan
 description: Plan a new feature following project standards
 argument-hint: "describe the feature you want to build (add --yolo to chain straight into implementation)"
+metadata:
+  trip-version: "2.8.1"
 ---
 
 # Planning Mode

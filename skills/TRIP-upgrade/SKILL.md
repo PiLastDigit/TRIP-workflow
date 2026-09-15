@@ -3,6 +3,8 @@ name: TRIP-upgrade
 description: Upgrade TRIP workflow skills to a newer version while preserving project customizations
 disable-model-invocation: true
 argument-hint: "[path to new-TRIP folder]"
+metadata:
+  trip-version: "2.8.1"
 ---
 
 # TRIP Upgrade Mode
@@ -38,7 +40,23 @@ ls -R <staging-path>/
 If missing or empty, tell the user:
 > "No staging folder found at `<path>`. Copy the new TRIP workflow's `skills/` folder there first, then re-run."
 
-### 1.2 Categorize Skills
+### 1.2 Detect Versions
+
+Since v2.8.1 every `SKILL.md` carries `metadata.trip-version` in its frontmatter. Read both sides:
+
+```bash
+# Installed (one line per distinct version; more than one line = a mixed install)
+grep -h "trip-version" .claude/skills/*/SKILL.md | sort | uniq -c
+
+# Staged
+grep -h "trip-version" <staging-path>/*/SKILL.md | sort -u
+```
+
+- **Field present on both sides**: report `installed X → staged Y`. If X equals Y, tell the user the project is already on this version and stop unless they want to force a re-merge.
+- **Field missing in the installed copy**: the install predates v2.8.1. Fall back to structural fingerprints — `--speedrun` in TRIP-1-plan = 2.7.x, `checklist.md` + `TRIP-3-release` present = v2, `codex-*` skills absent = v1 — and report the estimate as such.
+- **Mixed versions**: list the outliers; they are usually skills skipped in a previous upgrade and should be merged like any other.
+
+### 1.3 Categorize Skills
 
 List all skill folders in both locations:
 
@@ -83,11 +101,13 @@ For each skill, diff the installed vs new version to confirm whether it actually
 diff -rq .claude/skills/<skill>/ <staging-path>/<skill>/
 ```
 
-### 1.3 Present Inventory
+### 1.4 Present Inventory
 
-Show a summary table to the user:
+Show the version line, then a summary table to the user:
 
 ```
+TRIP 2.7.4 → 2.8.1 (installed version read from metadata.trip-version)
+
 Skill                 | Status              | Action
 --------------------- | ------------------- | ------
 TRIP-1-plan           | Updated (customized) | Extract + merge
@@ -195,7 +215,7 @@ These are pure workflow additions — no project-specific content to migrate. Th
 
 ### 3.3 Codex Skills (codex-plan-review, codex-code-review, codex-implement)
 
-If not installed yet, these are entirely new — copy from staging directly. The review skills reference `TRIP-review/checklist.md` and `TRIP-review/cr-template.md`, which will be populated with project content. If already installed (late-v1), replace as pure workflow (see the `_common.sh` exception in Phase 1.2) — v1 prompt templates point at the old `TRIP-3-review/` paths and must be replaced with the v2 versions.
+If not installed yet, these are entirely new — copy from staging directly. The review skills reference `TRIP-review/checklist.md` and `TRIP-review/cr-template.md`, which will be populated with project content. If already installed (late-v1), replace as pure workflow (see the `_common.sh` exception in Phase 1.3) — v1 prompt templates point at the old `TRIP-3-review/` paths and must be replaced with the v2 versions.
 
 ---
 
@@ -331,7 +351,22 @@ After user confirms:
 
 ---
 
+## Frontmatter and Version Stamp
+
+The YAML frontmatter of every merged `SKILL.md` (`name`, `description`, `argument-hint`, `disable-model-invocation`, `metadata.trip-version`) is **pure workflow**: take it verbatim from the staged file, never from the installed copy. After the merge, verify every skill reports the staged version:
+
+```bash
+grep -h "trip-version" .claude/skills/*/SKILL.md | sort | uniq -c
+```
+
+Exactly one line must come back, matching the staged version. Any other line means a skill was skipped or merged from the old frontmatter — fix it before reporting completion.
+
+---
+
 ## Edge Cases
+
+### Installed skills have no `metadata.trip-version`
+Pre-2.8.1 install. Use the structural fingerprints from Phase 1.2 to estimate the version, and say it is an estimate. The merge itself stamps the field everywhere.
 
 ### Old version has no Codex skills at all
 This is the most common upgrade path. The Codex skills are "New" — copy directly. The Codex integration in TRIP-1-plan and TRIP-2-implement comes from the new template and needs no project-specific content except test commands.

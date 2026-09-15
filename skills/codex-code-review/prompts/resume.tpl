@@ -11,7 +11,7 @@ with a doc-update to-do should NOT be re-flagged.
 
 {{IMPLEMENTER_NOTES}}
 
-Apply the same severity tags and the same approval gate from `checklist.md` as the initial review. Do **not** re-read `.claude/skills/TRIP-review/SKILL.md` — `checklist.md` is the only file you need for the criteria.
+Apply the same severity tags and the same approval gate from `checklist.md` as the initial review. From the third round on, only new Critical or Major findings may block approval; anything smaller goes in Suggestions. Release bookkeeping (version, changelog, architecture docs, coverage ledger) is never a finding. Do **not** re-read `.claude/skills/TRIP-review/SKILL.md` — `checklist.md` is the only file you need for the criteria.
 
 End with the same tag on its own line:
 

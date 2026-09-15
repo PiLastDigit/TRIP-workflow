@@ -1,6 +1,6 @@
 ![TRIP Workflow Banner](assets/trip-workflow-banner2.png)
 
-![Version](https://img.shields.io/badge/version-2.8.0-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
+![Version](https://img.shields.io/badge/version-2.8.1-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
 
 ## What is TRIP?
 
@@ -121,6 +121,14 @@ The former steps 3 and 4, reborn as on-demand support skills.
 
 Upgrades an existing project's TRIP skills to a newer version without losing project customizations. Copy the new skills to `new-TRIP/`, run the skill, done.
 
+Not sure which TRIP version a project runs? Every skill carries it in its frontmatter (`metadata.trip-version`, since v2.8.1):
+
+```bash
+grep -h "trip-version" .claude/skills/*/SKILL.md | sort | uniq -c
+```
+
+One line back means a clean install; several lines mean some skills were skipped in a past upgrade. No output means a pre-2.8.1 install.
+
 ### `/TRIP-hotfix`
 
 Streamlined workflow for production emergencies. Bypasses full TRIP for genuine crises (or lazy debugging).
@@ -131,7 +139,7 @@ Exploratory investigation with defined compute level. For feasibility studies an
 
 ### `/TRIP-compact`
 
-Run this skill to compact ARCHI.md size while preserving relevance, accuracy, and coverage through summarization and restructuring. Token calculator script included.
+Run this skill to compact ARCHI.md size while preserving relevance, accuracy, and coverage through summarization and restructuring. Token calculator script included. `/TRIP-compact --sync` skips compression and audits ARCHI.md against the actual codebase instead, reporting stale claims and gaps before fixing them.
 
 ## Multi-Agent: Using Different LLMs at Different Steps
 
@@ -161,7 +169,7 @@ flowchart TD
     Hf ~~~ K
 ```
 
-As of end August 2026, this Fable + Opus + GPT5.6 harness combo is absolute peak.  
+As of mid september 2026, this Fable + Opus + GPT5.6 harness combo is absolute peak.  
 Recommended plans: Claude Max 5x ($100) + ChatGPT Plus ($20). The compute value you get out of those 2 is still unmatched, no chinese API can compete with those subsidized subs. Enjoy while it lasts.
 
 ## MCP Servers: Less Is More

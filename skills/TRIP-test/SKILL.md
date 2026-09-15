@@ -3,6 +3,8 @@ name: TRIP-test
 description: Write/run tests following project standards (deep test authoring)
 disable-model-invocation: true
 argument-hint: "component or feature to test"
+metadata:
+  trip-version: "2.8.1"
 ---
 
 # Testing Mode

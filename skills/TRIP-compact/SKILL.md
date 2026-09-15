@@ -1,7 +1,10 @@
 ---
 name: TRIP-compact
-description: Compact ARCHI.md when it exceeds recommended size - smart compression without losing relevance
+description: Compact ARCHI.md when it exceeds recommended size - smart compression without losing relevance; --sync audits it against the codebase instead
 disable-model-invocation: true
+argument-hint: "[--sync]"
+metadata:
+  trip-version: "2.8.1"
 ---
 
 # ARCHI Compaction Mode
@@ -20,6 +23,27 @@ ARCHI.md should not exceed _~20k tokens_. A bloated ARCHI:
 ## Your Task
 
 Compact: @docs/ARCHI.md
+
+**If `$ARGUMENTS` contains `--sync`**: run only the Sync Audit below, then stop. Otherwise run the Sync Audit first (a stale claim is bloat too), then Steps 1–6.
+
+---
+
+## Sync Audit: ARCHI vs codebase
+
+ARCHI.md is only useful while it is true. TRIP-3 verifies the sections each release touches; this audit covers the whole document and catches what accumulated in between.
+
+**Method** — one section (`##`) at a time, cheapest check that settles each claim:
+
+1. List the section's concrete claims: paths, commands, routes, tables and columns, env vars, named flow steps. Skip prose about intent or rationale — it cannot drift.
+2. Verify each with `ls`, `grep -n`, or a manifest lookup (`package.json` scripts, `Cargo.toml`, CMake targets…). Read a source file only when a claim describes a flow and a grep cannot settle it. Never read a file to confirm something `ls` already answered.
+3. Record every mismatch as: `section · claim · reality · proposed fix`. Missing coverage counts too: a top-level directory or route module present in the tree but absent from ARCHI.
+
+**Report** the table (or "no drift found"), then **use the `AskUserQuestion` tool**:
+
+- **Question**: "ARCHI drift audit: [N] claims checked, [M] stale, [K] gaps. Apply the proposed fixes?"
+- **Options**: "Apply all" (edit ARCHI.md, following `docs/ARCHI-rules.md`), "Let me pick" (user lists the rows to apply), "Report only" (stop here)
+
+In `--sync` mode, stop after applying. Otherwise continue to Step 1 with the corrected file.
 
 ---
 
@@ -220,6 +244,7 @@ If still over 15k tokens after smart compression:
 
 ## When to Run This Skill
 
+- `--sync` every few months, or the first time the agent guesses a path that ARCHI.md describes wrongly
 - ARCHI.md feels sluggish to read
 - You notice redundant information
 - Periodically (every few months) as maintenance

@@ -2,6 +2,8 @@
 name: TRIP-hotfix
 description: Urgent fix bypassing full TRIP workflow
 argument-hint: "what is broken in production?"
+metadata:
+  trip-version: "2.8.1"
 ---
 
 # Hotfix Mode
