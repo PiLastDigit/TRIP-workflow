@@ -90,12 +90,28 @@ require_tools() {
 
 # Derive a per-target key from a path-like string. For real paths we
 # resolve to absolute; for non-path targets (branch names, commit
-# ranges) we use the string as-is. The key is a sanitized, readable
-# form plus a checksum of the resolved target, so distinct targets
-# that sanitize identically (e.g. "foo/bar" vs "foo__bar") never
-# share state files.
+# ranges) we use the string as-is. The key is the target's BASENAME
+# plus a checksum of the resolved target, so distinct targets that
+# share a basename (e.g. the same plan in two checkouts) never share
+# state files.
+#
+# The basename, not the whole path: folding every directory component
+# into the filename makes state paths grow with the depth of the
+# checkout, and on Windows that crosses the 260-char MAX_PATH. Past
+# that limit bash still writes the file (MSYS handles long paths) but
+# `jq` is a native binary without long-path support and fails with
+# "Could not open file ... No such file or directory" for a file that
+# exists. start.sh redirects jq's stderr to /dev/null, so THREAD_ID
+# comes back empty, .thread is never written, and every subsequent
+# resume.sh reports "no review session ... run start.sh first" --
+# which reads as "Codex did nothing" rather than as a path-length bug.
+#
+# The checksum is still taken over the FULL resolved path, so
+# uniqueness is unchanged; only the human-readable half is shortened.
+# The basename is capped so that one very long target filename cannot
+# reintroduce the problem on its own.
 target_key() {
-    local target="$1" resolved sanitized sum
+    local target="$1" resolved base sanitized sum
     if [ -e "$target" ]; then
         resolved="$(realpath -- "$target" 2>/dev/null || readlink -f -- "$target")"
         if [ -z "$resolved" ]; then
@@ -105,7 +121,13 @@ target_key() {
     else
         resolved="$target"
     fi
-    sanitized="$(printf '%s' "$resolved" | sed 's|^/||; s|/|__|g; s|[^A-Za-z0-9._-]|_|g')"
+    # Strip trailing slashes before taking the basename, so a directory
+    # target does not reduce to an empty string.
+    base="${resolved%"${resolved##*[!/]}"}"
+    base="${base##*/}"
+    [ -n "$base" ] && [ "$base" != "." ] || base="target"
+    sanitized="$(printf '%s' "$base" | sed 's|[^A-Za-z0-9._-]|_|g')"
+    sanitized="${sanitized:0:80}"
     sum="$(printf '%s' "$resolved" | cksum | cut -d' ' -f1)"
     printf '%s.%s' "$sanitized" "$sum"
 }
