@@ -119,7 +119,7 @@ The former steps 3 and 4, reborn as on-demand support skills.
 
 ### `/TRIP-upgrade`
 
-Upgrades an existing project's TRIP skills to a newer version without losing project customizations. Copy the new skills to `new-TRIP/`, run the skill, done. Under the hood it recovers the generic template you installed from, computes your customizations as a diff, and replays them onto the new version with a git three-way merge, so the result is exact and every change is shown as a diff before it lands.
+Upgrades an existing project's TRIP skills to the latest release without losing project customizations. Run `/TRIP-upgrade`, done: it fetches this repository itself (pass a version to pin one, or a local folder to upgrade from a fork). Under the hood it recovers the generic template you installed from, computes your customizations as a diff, and replays them onto the new version with a git three-way merge, so the result is exact and every change is shown as a diff before it lands.
 
 Not sure which TRIP version a project runs? Every skill carries it in its frontmatter (`metadata.trip-version`, since v2.8.1):
 

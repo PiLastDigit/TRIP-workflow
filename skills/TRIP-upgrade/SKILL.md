@@ -2,7 +2,7 @@
 name: TRIP-upgrade
 description: Upgrade TRIP workflow skills to a newer version while preserving project customizations
 disable-model-invocation: true
-argument-hint: "[path to new-TRIP folder]"
+argument-hint: "[version, e.g. 2.9.0 | path to a local skills folder]"
 metadata:
   trip-version: "2.8.3"
 ---
@@ -21,24 +21,28 @@ A naive copy would destroy layer 2. This skill recovers the **generic template t
 
 ## Prerequisites
 
-The user must have copied the new generic TRIP skills into a staging folder before running this skill. Default location: `.claude/skills/new-TRIP/`
+Nothing to copy. The skill fetches the TRIP-workflow repository itself and upgrades to its **latest release** by default.
 
-If `$ARGUMENTS` is provided, treat it as the path to the staging folder. Otherwise use `.claude/skills/new-TRIP/`.
+`$ARGUMENTS`, optional:
+- a **version** (`2.9.0` or `v2.9.0`) pins the target release instead of the latest;
+- a **path** to a local `skills/` folder (a fork, an offline copy) is used as the staged source instead of fetching. In that case the base template (Phase 2) still needs the clone; without network, use the Fallback path.
 
 ---
 
 ## Phase 1: Inventory
 
-### 1.1 Validate Staging Folder
+### 1.1 Fetch the Latest Release
 
-Confirm the staging folder exists and contains TRIP skills:
+One clone serves the whole upgrade — it provides the new skills now and the base template in Phase 2:
 
 ```bash
-ls -R <staging-path>/
+TRIP_SRC=$(mktemp -d)
+git clone -q --no-checkout https://github.com/PiLastDigit/TRIP-workflow "$TRIP_SRC"
+TARGET=$(git -C "$TRIP_SRC" tag --list 'v*' --sort=-v:refname | head -1)   # or v$ARGUMENTS when a version was given
+S=$(mktemp -d); git -C "$TRIP_SRC" archive "$TARGET" skills | tar -x -C "$S" --strip-components=1
 ```
 
-If missing or empty, tell the user:
-> "No staging folder found at `<path>`. Copy the new TRIP workflow's `skills/` folder there first, then re-run."
+`$S` is the **staged** source for the rest of this skill. If a path was passed instead, `S=<that path>` and skip the archive. If the clone fails (offline, no access), tell the user and stop — or take the Fallback path with a local folder.
 
 ### 1.2 Detect Versions
 
@@ -49,10 +53,10 @@ Since v2.8.1 every `SKILL.md` carries `metadata.trip-version` in its frontmatter
 grep -h "^  trip-version" .claude/skills/*/SKILL.md | sort | uniq -c
 
 # Staged
-grep -h "^  trip-version" <staging-path>/*/SKILL.md | sort -u
+grep -h "^  trip-version" "$S"/*/SKILL.md | sort -u
 ```
 
-- **Field present on both sides**: report `installed X → staged Y`. If X equals Y, tell the user the project is already on this version and stop unless they want to force a re-merge.
+- **Field present on both sides**: report `installed X → target Y`. If X equals Y, tell the user the project is already on the latest release and stop; remove `$TRIP_SRC` and `$S`.
 - **Field missing in the installed copy**: the install predates v2.8.1. Describe it from structural hints — `--speedrun` in TRIP-1-plan = 2.7.x, `checklist.md` + `TRIP-3-release` present = v2, `codex-*` skills absent = v1 — and plan on the **Fallback: Manual Extraction** path, since no base template can be fetched.
 - **Mixed versions**: list the outliers; they are usually skills skipped in a previous upgrade and should be merged like any other.
 
@@ -64,15 +68,15 @@ List all skill folders in both locations:
 # Currently installed
 ls -d .claude/skills/*/
 
-# New (staging)
-ls -d <staging-path>/*/
+# New (staged)
+ls -d "$S"/*/
 ```
 
 Categorize each skill into one of:
 
 | Category | Meaning | Action |
 |----------|---------|--------|
-| **New** | Exists in staging only | Copy directly |
+| **New** | Exists in `$S` only | Copy directly |
 | **Removed** | Exists in installed only | Warn user, leave in place |
 | **Unchanged** | Identical in both | Skip |
 | **Updated — pure workflow** | Changed, but no project customizations | Replace directly |
@@ -86,19 +90,19 @@ Categorize each skill into one of:
 
 **Renamed in TRIP v2** — when the installed folder uses an old name, treat it as the same skill under its new name (merge into the new name, then delete the old folder):
 
-| Installed (old) | Staging (new) |
+| Installed (old) | Target (new) |
 |---|---|
 | `TRIP-3-review` | `TRIP-review` |
 | `TRIP-4-test` | `TRIP-test` |
 
 `TRIP-3-release` is **new in v2** but its project values (version file, week anchor, tutorial config) are **extracted from the old `TRIP-2-implement`'s post-implementation steps** — categorize it as customized even though no folder exists yet.
 
-**Other non-TRIP skills** in staging (e.g. future additions): Treat as new, or as pure workflow if they already exist.
+**Other non-TRIP skills** in `$S` (e.g. future additions): Treat as new, or as pure workflow if they already exist.
 
 For each skill, diff the installed vs new version to confirm whether it actually changed:
 
 ```bash
-diff -rq .claude/skills/<skill>/ <staging-path>/<skill>/
+diff -rq .claude/skills/<skill>/ "$S"/<skill>/
 ```
 
 ### 1.4 Present Inventory
@@ -134,15 +138,13 @@ Options: "Yes, start upgrade" (recommended) / "Let me review the new files first
 
 The merge needs the **generic skills of the version currently installed** (the "base"). The project never holds them — only the customized copy — so fetch them from the TRIP-workflow repository.
 
-### 2.1 Clone the Workflow Repository
+### 2.1 Reuse the Clone
+
+`$TRIP_SRC` from Phase 1.1 already holds every release tag:
 
 ```bash
-TRIP_SRC=$(mktemp -d)
-git clone -q --no-checkout https://github.com/PiLastDigit/TRIP-workflow "$TRIP_SRC"
 git -C "$TRIP_SRC" tag --sort=-v:refname | head -20
 ```
-
-If the clone fails (offline, no access), skip to **Fallback: Manual Extraction** below.
 
 ### 2.2 Identify the Base Tag
 
@@ -161,7 +163,7 @@ git -C "$TRIP_SRC" archive "v$INSTALLED_VERSION" skills | tar -x -C "$BASE" --st
 
 ## Phase 3: Three-Way Merge
 
-For **every file in staging**, state folders excluded, decide by presence:
+For **every file in `$S`**, state folders excluded, decide by presence:
 
 | Installed | Base | Action |
 |---|---|---|
@@ -173,7 +175,7 @@ For **every file in staging**, state folders excluded, decide by presence:
 Build everything in a scratch directory first; nothing under `.claude/skills/` changes until Phase 4 passes.
 
 ```bash
-MERGED=$(mktemp -d); S=<staging-path>; I=.claude/skills; CONFLICTS=0
+MERGED=$(mktemp -d); I=.claude/skills   # $S = staged source from Phase 1.1
 ( cd "$S" && find . -type f -not -path '*/state/*' ) | sed 's|^\./||' | while read -r f; do
   mkdir -p "$MERGED/$(dirname "$f")"
   if [ -f "$I/$f" ]; then
@@ -254,20 +256,20 @@ If "Show me the diffs first": present the Phase 4.1 diffs. If "Abort": remove th
 rsync -a --exclude 'state/' "$MERGED"/ .claude/skills/
 ```
 
-Then delete renamed-away folders (`TRIP-3-review/`, `TRIP-4-test/`) if any, remove the staging folder and the scratch directories (`<staging-path>`, `$TRIP_SRC`, `$BASE`, `$MERGED` — use `trash-put` where available, otherwise `rm -r`), and confirm the stamp once more on the live install:
+Then delete renamed-away folders (`TRIP-3-review/`, `TRIP-4-test/`) if any, remove the scratch directories (`$TRIP_SRC`, `$S` unless it is a user-supplied path, `$BASE`, `$MERGED` — use `trash-put` where available, otherwise `rm -r`), and confirm the stamp once more on the live install:
 
 ```bash
 grep -h "^  trip-version" .claude/skills/*/SKILL.md | sort | uniq -c
 ```
 
 Report:
-> "TRIP workflow upgraded vX → vY. N files merged, M copied, 0 conflicts. Staging removed. `git diff .claude/skills/` shows the change before you commit."
+> "TRIP workflow upgraded vX → vY. N files merged, M copied, 0 conflicts. `git diff .claude/skills/` shows the change before you commit."
 
 ---
 
 ## Fallback: Manual Extraction
 
-Use this path when the installed skills carry no `metadata.trip-version` (pre-2.8.1 install) or when the TRIP-workflow repository could not be cloned. It rebuilds each customized skill from the new template by hand.
+Use this path when the installed skills carry no `metadata.trip-version` (pre-2.8.1 install). It needs a staged source `$S` — the fetched release from Phase 1.1, or a local folder passed as argument. It rebuilds each customized skill from the new template by hand.
 
 ### F.1 Extract Project Context
 
@@ -356,20 +358,20 @@ These are pure workflow additions — no project-specific content to migrate. Th
 
 #### F.2.3 Codex Skills (codex-plan-review, codex-code-review, codex-implement)
 
-If not installed yet, these are entirely new — copy from staging directly. The review skills reference `TRIP-review/checklist.md` and `TRIP-review/cr-template.md`, which will be populated with project content. If already installed (late-v1), replace as pure workflow (see the `_common.sh` exception in Phase 1.3) — v1 prompt templates point at the old `TRIP-3-review/` paths and must be replaced with the v2 versions.
+If not installed yet, these are entirely new — copy from `$S` directly. The review skills reference `TRIP-review/checklist.md` and `TRIP-review/cr-template.md`, which will be populated with project content. If already installed (late-v1), replace as pure workflow (see the `_common.sh` exception in Phase 1.3) — v1 prompt templates point at the old `TRIP-3-review/` paths and must be replaced with the v2 versions.
 
 ---
 
 
 ### F.3 Customized Skills — Rebuild From Template
 
-For each customized skill, take the **new template** from staging and inject the **extracted project context** from Phase 2. 
+For each customized skill, take the **new template** from `$S` and inject the **extracted project context** from Phase 2. 
 
 **General approach**: Read the new template file. Find each placeholder or generic section. Replace with the corresponding extracted value. Write the result.
 
 #### TRIP-1-plan/SKILL.md
 
-1. Start from the new template (staging)
+1. Start from the new template (`$S`)
 2. Replace `[PROJECT_NAME]` with extracted `PROJECT_NAME`
 3. Replace the generic `## Technical Considerations` block in the plan template with extracted `TECHNICAL_CONSIDERATIONS`
 4. Replace the `[ADAPT_TO_PROJECT: Guidance Sections]` comment block with extracted `GUIDANCE_SECTIONS`
@@ -378,7 +380,7 @@ For each customized skill, take the **new template** from staging and inject the
 
 #### TRIP-2-implement/SKILL.md
 
-1. Start from the new template (staging)
+1. Start from the new template (`$S`)
 2. Replace `[PROJECT_NAME]` with extracted `PROJECT_NAME`
 3. Replace `[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, `[TEST_COMMAND]` in the Testing Gate with extracted commands
    - If the old version didn't have Codex review (no test commands extracted), check the old TRIP-4-test for test commands, or ask the user
@@ -386,7 +388,7 @@ For each customized skill, take the **new template** from staging and inject the
 
 #### TRIP-3-release/SKILL.md (new in v2 — values come from the old TRIP-2)
 
-1. Start from the new template (staging)
+1. Start from the new template (`$S`)
 2. Replace `[PROJECT_NAME]` with extracted `PROJECT_NAME`
 3. Replace `[VERSION_FILE]` with extracted `VERSION_FILE`
 4. Replace `[WEEK_ANCHOR_DATE]` with extracted `WEEK_ANCHOR_DATE`
@@ -407,14 +409,14 @@ For each customized skill, take the **new template** from staging and inject the
 
 #### TRIP-test/SKILL.md (was `TRIP-4-test` in v1)
 
-1. Start from the new template (staging)
+1. Start from the new template (`$S`)
 2. Replace `[PROJECT_NAME]` with extracted `PROJECT_NAME`
 3. Replace `[TEST_COMMAND_*]` placeholders with extracted `TEST_COMMANDS`
 4. Replace test structure placeholder with extracted `TEST_STRUCTURE`
 5. Replace testing priorities placeholder with extracted `TESTING_PRIORITIES`
 
 
-New skills: copy from staging. Pure-workflow skills: copy from staging with `rsync -a --exclude 'state/'` (never delete a skill folder — codex `state/` lives inside). Then continue with Phase 4.2 onward, treating the rebuilt files as `$MERGED`.
+New skills: copy from `$S`. Pure-workflow skills: copy from `$S` with `rsync -a --exclude 'state/'` (never delete a skill folder — codex `state/` lives inside). Then continue with Phase 4.2 onward, treating the rebuilt files as `$MERGED`.
 
 ---
 ## Frontmatter and Version Stamp
