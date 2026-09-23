@@ -436,6 +436,9 @@ Exactly one line must come back, matching the staged version. Any other line mea
 ### Installed skills have no `metadata.trip-version`
 Pre-2.8.1 install. Use the structural hints from Phase 1.2 to describe the version, then take the Fallback path. The rebuilt files carry the stamp, so the next upgrade uses the merge.
 
+### Installed TRIP-upgrade predates 2.8.4 (or does not exist — v1 installs)
+The user copied this skill's folder over `.claude/skills/TRIP-upgrade/` by hand to bootstrap. That is expected: run normally. The old skill (if any) used a `new-TRIP/` staging folder — if one is present, treat it as a user-supplied `$S` path and remove it in Phase 5.
+
 ### Old version has no Codex skills at all
 This is the most common upgrade path. The Codex skills are "New" — copy directly. The Codex integration in TRIP-1-plan and TRIP-2-implement comes from the new template and needs no project-specific content except test commands.
 
