@@ -4,7 +4,7 @@ description: Exploratory research or spike - investigation without production co
 disable-model-invocation: true
 argument-hint: "what do you want to investigate?"
 metadata:
-  trip-version: "2.8.2"
+  trip-version: "2.8.3"
 ---
 
 # Research Mode

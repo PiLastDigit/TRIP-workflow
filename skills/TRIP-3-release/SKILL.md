@@ -3,7 +3,7 @@ name: TRIP-3-release
 description: Release a completed implementation - version, code review promotion, changelogs, docs, commit, tag, ff-merge, push
 argument-hint: "plan file or feature label"
 metadata:
-  trip-version: "2.8.2"
+  trip-version: "2.8.3"
 ---
 
 # Release Mode

@@ -3,7 +3,7 @@ name: codex-ask
 description: Ask Codex for a grounded second opinion on any question - advisory, not gating
 argument-hint: "<topic-label> <question> | reset <topic-label> | show <topic-label>"
 metadata:
-  trip-version: "2.8.2"
+  trip-version: "2.8.3"
 ---
 
 # Codex Ask

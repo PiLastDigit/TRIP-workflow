@@ -4,7 +4,7 @@ description: Compact ARCHI.md when it exceeds recommended size - smart compressi
 disable-model-invocation: true
 argument-hint: "[--sync]"
 metadata:
-  trip-version: "2.8.2"
+  trip-version: "2.8.3"
 ---
 
 # ARCHI Compaction Mode
