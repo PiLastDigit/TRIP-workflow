@@ -3,7 +3,7 @@ name: codex-implement
 description: Delegate implementation of a TRIP plan (or a scoped part of it) to Codex CLI
 argument-hint: "<plan-path> [instructions] | reset <plan-path> | show <plan-path>"
 metadata:
-  trip-version: "2.8.1"
+  trip-version: "2.8.2"
 ---
 
 # Codex Implement
@@ -44,7 +44,7 @@ State persisted under `.claude/skills/codex-implement/state/<sanitized-target>.{
 - Separate `STATE_DIR` from the review skills — the same plan path can hold an implementation thread and a review thread without collision.
 - Codex is instructed not to write tests (testing gate owns that) and not to touch release ceremony.
 - Network is blocked in the sandbox: if the plan requires installing a new dependency, Codex will report it as a leftover — install it yourself during the batch review.
-- Model/effort/tier defaults live in `codex-plan-review/scripts/_common.sh` (implementation → gpt-5.6-luna at **high** effort on the **fast** service tier; reviews → gpt-5.6-sol at xhigh on standard routing; derived from `STATE_DIR`). Adjust that one file to your preferred models, or override per run via `CODEX_MODEL` / `CODEX_EFFORT` / `CODEX_TIER` env vars; the scripts echo the effective values.
+- Model/effort/tier defaults live in `codex-plan-review/scripts/_common.sh`, derived from `STATE_DIR`: implementation → gpt-6-luna at high effort on the fast service tier; plan review → gpt-6-astra at xhigh on standard routing; code review → gpt-6-sol at xhigh on the fast tier; codex-ask → gpt-6-astra at xhigh on standard routing. Adjust that one file to your preferred models, or override per run via `CODEX_MODEL` / `CODEX_EFFORT` / `CODEX_TIER` env vars; the scripts echo the effective values.
 - **Effort escalation (per batch).** high is the default because plan batches are well-scoped and every batch passes through the requester's delta review plus the final full code review. Escalate a single batch to xhigh (`CODEX_EFFORT=xhigh` on that batch's `start.sh`/`resume.sh` call) when it involves any of:
   - **novel core logic** designed from scratch — an algorithm, data structure, protocol, or state machine with no existing pattern in the codebase to follow;
   - **changes the testing gate can't meaningfully verify** — correctness only observable at runtime or by inspection, with no automated check covering it;

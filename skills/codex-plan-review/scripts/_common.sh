@@ -12,23 +12,38 @@ SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export STATE_DIR
 mkdir -p "$STATE_DIR"
 
-# Model/effort/tier per flow (single source of truth for all codex skills):
-# implementation runs Luna at high effort on the fast service tier (benchmarked
-# ~40-150% higher throughput, no observed quality cost); reviews (plan + code)
-# run Sol at xhigh on standard routing. Adjust these defaults to your
-# preferred models. CODEX_MODEL / CODEX_EFFORT / CODEX_TIER act as per-run
-# overrides (e.g. CODEX_EFFORT=xhigh to escalate a hard batch).
-# Models that don't support a tier silently ignore it ("default" = standard).
-# Match the trailing path components exactly — a repo path that merely
-# contains "codex-implement" must not flip reviews to the implement model.
+# Model/effort/tier per flow (single source of truth for all codex skills),
+# derived from STATE_DIR:
+#   codex-implement   -> GPT-6 Luna, high, fast tier (benchmarked ~40-150% higher
+#                        throughput, no observed quality cost)
+#   codex-plan-review -> GPT-6 Astra, xhigh, standard routing (deepest model on
+#                        the cheapest artifact to fix)
+#   codex-code-review -> GPT-6 Sol, xhigh, fast tier
+#   anything else (codex-ask) -> GPT-6 Astra, xhigh, standard routing
+# Adjust these defaults to your preferred models. CODEX_MODEL / CODEX_EFFORT /
+# CODEX_TIER act as per-run overrides (e.g. CODEX_EFFORT=xhigh to escalate a
+# hard batch). Models that don't support a tier silently ignore it
+# ("default" = standard). Match the trailing path components exactly — a repo
+# path that merely contains "codex-implement" must not flip reviews to the
+# implement model.
 case "${STATE_DIR%/}" in
     */codex-implement/state | codex-implement/state)
-        CODEX_MODEL="${CODEX_MODEL:-gpt-5.6-luna}"
+        CODEX_MODEL="${CODEX_MODEL:-gpt-6-luna}"
         CODEX_EFFORT="${CODEX_EFFORT:-high}"
         CODEX_TIER="${CODEX_TIER:-fast}"
         ;;
+    */codex-plan-review/state | codex-plan-review/state)
+        CODEX_MODEL="${CODEX_MODEL:-gpt-6-astra}"
+        CODEX_EFFORT="${CODEX_EFFORT:-xhigh}"
+        CODEX_TIER="${CODEX_TIER:-default}"
+        ;;
+    */codex-code-review/state | codex-code-review/state)
+        CODEX_MODEL="${CODEX_MODEL:-gpt-6-sol}"
+        CODEX_EFFORT="${CODEX_EFFORT:-xhigh}"
+        CODEX_TIER="${CODEX_TIER:-fast}"
+        ;;
     *)
-        CODEX_MODEL="${CODEX_MODEL:-gpt-5.6-sol}"
+        CODEX_MODEL="${CODEX_MODEL:-gpt-6-astra}"
         CODEX_EFFORT="${CODEX_EFFORT:-xhigh}"
         CODEX_TIER="${CODEX_TIER:-default}"
         ;;

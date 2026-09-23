@@ -4,7 +4,7 @@ description: Initialize TRIP workflow in a new project (creates docs structure a
 disable-model-invocation: true
 argument-hint: "name of the project to initialize"
 metadata:
-  trip-version: "2.8.1"
+  trip-version: "2.8.2"
 ---
 
 # TRIP Initialization Mode

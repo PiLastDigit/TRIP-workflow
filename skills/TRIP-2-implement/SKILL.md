@@ -3,7 +3,7 @@ name: TRIP-2-implement
 description: Implement a feature following TRIP plan
 argument-hint: "plan file or feature to implement"
 metadata:
-  trip-version: "2.8.1"
+  trip-version: "2.8.2"
 ---
 
 # Implementation Mode

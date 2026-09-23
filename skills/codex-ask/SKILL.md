@@ -3,7 +3,7 @@ name: codex-ask
 description: Ask Codex for a grounded second opinion on any question - advisory, not gating
 argument-hint: "<topic-label> <question> | reset <topic-label> | show <topic-label>"
 metadata:
-  trip-version: "2.8.1"
+  trip-version: "2.8.2"
 ---
 
 # Codex Ask
@@ -55,5 +55,5 @@ State persisted per topic label under `.claude/skills/codex-ask/state/` — foll
 - **Run Codex calls in a background shell.** Invoke `start.sh` / `resume.sh` via the Bash tool with `run_in_background: true` — never as a foreground/inline command. Codex runs at xhigh effort routinely outlast the foreground command timeout; the background task notifies on completion, then read its output. `reset.sh` / `show.sh` are instant and fine in the foreground.
 - **Set `CODEX_TIMEOUT=1800`** (30 min) when invoking `start.sh` / `resume.sh` — a generous circuit breaker against hung runs (script default `0` = no timeout); fails through the normal error path with a "timed out" message on expiry.
 - Read-only sandbox — Codex can read the repo but change nothing.
-- Model/effort/tier come from `codex-plan-review/scripts/_common.sh` (non-implement flows get the review-class model at xhigh by default); override per run via `CODEX_MODEL` / `CODEX_EFFORT` / `CODEX_TIER`.
+- Model/effort/tier defaults live in `codex-plan-review/scripts/_common.sh`, derived from `STATE_DIR`: implementation → gpt-6-luna at high effort on the fast service tier; plan review → gpt-6-astra at xhigh on standard routing; code review → gpt-6-sol at xhigh on the fast tier; codex-ask → gpt-6-astra at xhigh on standard routing. Adjust that one file to your preferred models, or override per run via `CODEX_MODEL` / `CODEX_EFFORT` / `CODEX_TIER` env vars; the scripts echo the effective values.
 - Surface Codex's answer to the user verbatim when it disagrees with your position — the disagreement itself is the valuable output.

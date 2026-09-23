@@ -4,7 +4,7 @@ description: Review code following project standards (manual fallback/audit path
 disable-model-invocation: true
 argument-hint: "version or feature to review"
 metadata:
-  trip-version: "2.8.1"
+  trip-version: "2.8.2"
 ---
 
 # Review Mode

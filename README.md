@@ -1,6 +1,6 @@
 ![TRIP Workflow Banner](assets/trip-workflow-banner2.png)
 
-![Version](https://img.shields.io/badge/version-2.8.1-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
+![Version](https://img.shields.io/badge/version-2.8.2-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
 
 ## What is TRIP?
 
@@ -153,7 +153,7 @@ Session 1 with Fable for planning, Session 2 with Opus for implementation (or sw
 
 ```mermaid
 flowchart TD
-    A["<b>/TRIP-1-plan</b> · Fable<br/>Discovery and plan draft"] --> B{"ChatGPT Sol<br/>plan review"}
+    A["<b>/TRIP-1-plan</b> · Fable<br/>Discovery and plan draft"] --> B{"ChatGPT Astra<br/>plan review"}
     B -->|"REQUEST_CHANGES"| Bf["Fable fixes the plan"]
     Bf -->|"re-review"| B
     B -->|"APPROVED"| D["<b>/TRIP-2-implement</b> · Opus<br/>Branch + split<br/>to-dos into batches"]
@@ -169,7 +169,7 @@ flowchart TD
     Hf ~~~ K
 ```
 
-As of mid september 2026, this Fable + Opus + GPT5.6 harness combo is absolute peak.  
+As of late September 2026, this Fable + Opus + GPT-6 harness combo is absolute peak.  
 Recommended plans: Claude Max 5x ($100) + ChatGPT Plus ($20). The compute value you get out of those 2 is still unmatched, no chinese API can compete with those subsidized subs. Enjoy while it lasts.
 
 ## MCP Servers: Less Is More
