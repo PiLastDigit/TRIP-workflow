@@ -46,10 +46,10 @@ Since v2.8.1 every `SKILL.md` carries `metadata.trip-version` in its frontmatter
 
 ```bash
 # Installed (one line per distinct version; more than one line = a mixed install)
-grep -h "trip-version" .claude/skills/*/SKILL.md | sort | uniq -c
+grep -h "^  trip-version" .claude/skills/*/SKILL.md | sort | uniq -c
 
 # Staged
-grep -h "trip-version" <staging-path>/*/SKILL.md | sort -u
+grep -h "^  trip-version" <staging-path>/*/SKILL.md | sort -u
 ```
 
 - **Field present on both sides**: report `installed X → staged Y`. If X equals Y, tell the user the project is already on this version and stop unless they want to force a re-merge.
@@ -305,7 +305,9 @@ After writing all files, run a validation pass.
 Scan all upgraded skill files for leftover placeholders:
 
 ```bash
-grep -rn '\[ADAPT_TO_PROJECT\|\[PROJECT_NAME\]\|\[VERSION_FILE\]\|\[WEEK_ANCHOR_DATE\]\|\[TEST_COMMAND\]\|\[LINT_COMMAND\]\|\[TYPECHECK_COMMAND\]\|\[TUTORIAL_STEP\]\|\[MAIN_BRANCH\]' .claude/skills/TRIP-*/
+grep -rn --exclude-dir=TRIP-init --exclude-dir=TRIP-upgrade '\[ADAPT_TO_PROJECT\|\[PROJECT_NAME\]\|\[VERSION_FILE\]\|\[WEEK_ANCHOR_DATE\]\|\[TEST_COMMAND\]\|\[LINT_COMMAND\]\|\[TYPECHECK_COMMAND\]\|\[TUTORIAL_STEP\]\|\[MAIN_BRANCH\]' .claude/skills/TRIP-*/
+
+(`TRIP-init` and `TRIP-upgrade` mention every placeholder by name in their own instructions, so they are excluded.)
 ```
 
 If any are found, fill them from context or ask the user.
@@ -356,7 +358,7 @@ After user confirms:
 The YAML frontmatter of every merged `SKILL.md` (`name`, `description`, `argument-hint`, `disable-model-invocation`, `metadata.trip-version`) is **pure workflow**: take it verbatim from the staged file, never from the installed copy. After the merge, verify every skill reports the staged version:
 
 ```bash
-grep -h "trip-version" .claude/skills/*/SKILL.md | sort | uniq -c
+grep -h "^  trip-version" .claude/skills/*/SKILL.md | sort | uniq -c
 ```
 
 Exactly one line must come back, matching the staged version. Any other line means a skill was skipped or merged from the old frontmatter — fix it before reporting completion.

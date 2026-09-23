@@ -124,7 +124,7 @@ Upgrades an existing project's TRIP skills to a newer version without losing pro
 Not sure which TRIP version a project runs? Every skill carries it in its frontmatter (`metadata.trip-version`, since v2.8.1):
 
 ```bash
-grep -h "trip-version" .claude/skills/*/SKILL.md | sort | uniq -c
+grep -h "^  trip-version" .claude/skills/*/SKILL.md | sort | uniq -c
 ```
 
 One line back means a clean install; several lines mean some skills were skipped in a past upgrade. No output means a pre-2.8.1 install.
