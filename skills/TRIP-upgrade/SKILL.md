@@ -17,7 +17,7 @@ Each project's TRIP skills have two interleaved layers:
 1. **Workflow skeleton** — steps, Codex integration, file structure, process flow
 2. **Project customizations** — test commands, checklist sections, version file, technical considerations, guidance sections
 
-A naive copy would destroy layer 2. This skill recovers the **generic template the project was installed from**, computes the project's customizations as a diff against it, and replays that diff onto the new template with a git three-way merge — one command per file, exact, and verifiable. Manual extraction of the customizations remains as a fallback for installs whose base template cannot be recovered.
+A naive copy would destroy layer 2. This skill recovers the **generic template the project was installed from**, computes the project's customizations as a diff against it, and replays that diff onto the new template with a git three-way merge — one command per file, exact, and verifiable. Manual extraction of the customizations remains as the path for pre-2.8.1 installs, which carry no version stamp.
 
 ## Prerequisites
 
@@ -53,7 +53,7 @@ grep -h "^  trip-version" <staging-path>/*/SKILL.md | sort -u
 ```
 
 - **Field present on both sides**: report `installed X → staged Y`. If X equals Y, tell the user the project is already on this version and stop unless they want to force a re-merge.
-- **Field missing in the installed copy**: the install predates v2.8.1. Fall back to structural fingerprints — `--speedrun` in TRIP-1-plan = 2.7.x, `checklist.md` + `TRIP-3-release` present = v2, `codex-*` skills absent = v1 — and report the estimate as such.
+- **Field missing in the installed copy**: the install predates v2.8.1. Describe it from structural hints — `--speedrun` in TRIP-1-plan = 2.7.x, `checklist.md` + `TRIP-3-release` present = v2, `codex-*` skills absent = v1 — and plan on the **Fallback: Manual Extraction** path, since no base template can be fetched.
 - **Mixed versions**: list the outliers; they are usually skills skipped in a previous upgrade and should be merged like any other.
 
 ### 1.3 Categorize Skills
@@ -146,31 +146,16 @@ If the clone fails (offline, no access), skip to **Fallback: Manual Extraction**
 
 ### 2.2 Identify the Base Tag
 
-- **Stamp present** (Phase 1.2 found `metadata.trip-version: "X.Y.Z"`): the base tag is `vX.Y.Z`. Done.
-- **No stamp** (pre-2.8.1 install): fingerprint. For each candidate tag, extract its skills and count how many files differ from the installed **pure-workflow** skills (state folders excluded). The tag with the fewest differing files is the base:
+The base tag is `v<installed trip-version>` from Phase 1.2. **No stamp means a pre-2.8.1 install**: the base cannot be named with certainty, so skip to **Fallback: Manual Extraction** below. This happens once per project — every install from 2.8.1 on carries the stamp.
 
 ```bash
 BASE=$(mktemp -d)
-for t in $(git -C "$TRIP_SRC" tag --sort=-v:refname); do
-  find "$BASE" -mindepth 1 -delete && git -C "$TRIP_SRC" archive "$t" skills | tar -x -C "$BASE" --strip-components=1
-  n=0; for s in TRIP-compact TRIP-hotfix TRIP-research TRIP-init TRIP-upgrade codex-ask codex-implement codex-code-review codex-plan-review; do
-    [ -d "$BASE/$s" ] && [ -d ".claude/skills/$s" ] || continue
-    n=$((n + $(diff -rq -x state "$BASE/$s" ".claude/skills/$s" | wc -l)))
-  done; echo "$t $n"
-done | sort -k2 -n | head -3
-```
-
-**Ties** are common when consecutive releases did not touch the pure skills. Break them with the same count over the customized skills (`TRIP-1-plan`, `TRIP-2-implement`, `TRIP-3-release`, `TRIP-review`, `TRIP-test`), measured in differing **lines** (`diff "$BASE/$s/SKILL.md" ".claude/skills/$s/SKILL.md" | wc -l`, summed): the tag whose templates are closest to the installed files is the one the project was customized from.
-
-Accept the best match when it differs in **at most 2 files** (a project sometimes tweaks a "pure" skill by a line — that tweak is a customization and the merge will carry it). A best match above that means the install is a hand-modified or unknown build: skip to **Fallback: Manual Extraction**. Report the identified base as an estimate when it came from fingerprinting.
-
-```bash
-git -C "$TRIP_SRC" archive "$BASE_TAG" skills | tar -x -C "$BASE" --strip-components=1
+git -C "$TRIP_SRC" archive "v$INSTALLED_VERSION" skills | tar -x -C "$BASE" --strip-components=1
 ```
 
 ### 2.3 Report
 
-> "Base template: v2.7.4 (fingerprint: 1 differing file, `TRIP-hotfix/SKILL.md` — a project tweak, will be carried over). Upgrading v2.7.4 → v2.8.2."
+> "Base template v2.8.2 fetched. Upgrading v2.8.2 → v2.9.0."
 
 ---
 
@@ -220,7 +205,7 @@ diff "$S/$f" "$MERGED/$f"
 diff "$I/$f" "$MERGED/$f"
 ```
 
-Read both for every customized skill (`TRIP-1-plan`, `TRIP-2-implement`, `TRIP-3-release`, `TRIP-review/*`, `TRIP-test`) and for any pure skill the fingerprint flagged. A customization appearing in the second diff as a removal, or workflow text appearing in the first diff, means the merge went wrong for that file — fix it before continuing.
+Read both for every customized skill (`TRIP-1-plan`, `TRIP-2-implement`, `TRIP-3-release`, `TRIP-review/*`, `TRIP-test`) and for any pure skill whose first diff is not empty — a project sometimes tweaks a "pure" skill by a line, and the merge carries that over. A customization appearing in the second diff as a removal, or workflow text appearing in the first diff, means the merge went wrong for that file — fix it before continuing.
 
 ### 4.2 Placeholder Check
 
@@ -282,7 +267,7 @@ Report:
 
 ## Fallback: Manual Extraction
 
-Use this path only when Phase 2 could not recover the base template (offline, or no tag within 2 differing files). It rebuilds each customized skill from the new template by hand.
+Use this path when the installed skills carry no `metadata.trip-version` (pre-2.8.1 install) or when the TRIP-workflow repository could not be cloned. It rebuilds each customized skill from the new template by hand.
 
 ### F.1 Extract Project Context
 
@@ -447,7 +432,7 @@ Exactly one line must come back, matching the staged version. Any other line mea
 ## Edge Cases
 
 ### Installed skills have no `metadata.trip-version`
-Pre-2.8.1 install. Phase 2.2 fingerprints the base tag; say it is an estimate. The merge stamps the field everywhere.
+Pre-2.8.1 install. Use the structural hints from Phase 1.2 to describe the version, then take the Fallback path. The rebuilt files carry the stamp, so the next upgrade uses the merge.
 
 ### Old version has no Codex skills at all
 This is the most common upgrade path. The Codex skills are "New" — copy directly. The Codex integration in TRIP-1-plan and TRIP-2-implement comes from the new template and needs no project-specific content except test commands.
