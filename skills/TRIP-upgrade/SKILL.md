@@ -4,7 +4,7 @@ description: Upgrade TRIP workflow skills to a newer version while preserving pr
 disable-model-invocation: true
 argument-hint: "[version, e.g. 2.9.0 | path to a local skills folder]"
 metadata:
-  trip-version: "2.8.3"
+  trip-version: "2.8.4"
 ---
 
 # TRIP Upgrade Mode
