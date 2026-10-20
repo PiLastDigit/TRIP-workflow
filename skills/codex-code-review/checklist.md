@@ -1,6 +1,6 @@
 # Code Review Checklist
 
-This file is the **single source of truth** for code-review criteria. Both human-driven reviews via `.claude/skills/TRIP-review` and Codex-driven reviews via `.claude/skills/codex-code-review` apply the criteria below — referenced, not copied — so the two review surfaces cannot drift.
+This file is the **single source of truth** for code-review criteria. The Codex code review loop (`codex-code-review`) applies the criteria below — referenced, not copied — and so does the requester when that loop is skipped. It is adapted to the project during `TRIP-init`.
 
 ## Systematic Review Checklist
 

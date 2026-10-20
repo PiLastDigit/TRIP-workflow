@@ -4,7 +4,7 @@ description: Initialize TRIP workflow in a new project (creates docs structure a
 disable-model-invocation: true
 argument-hint: "name of the project to initialize"
 metadata:
-  trip-version: "2.8.4"
+  trip-version: "2.9.0"
 ---
 
 # TRIP Initialization Mode
@@ -44,8 +44,6 @@ docs/
 ├── 4-unit-tests/         # Unit testing documentation
 └── 6-memo/               # Miscellaneous notes and memos
 ```
-
-Note: `5-tuto/` folder is created conditionally in Phase 6 only if the user wants tutorial generation.
 
 Files (`ARCHI.md`, `ARCHI-rules.md`, `changelog_table.md`, `TESTING.md`) will be created in later phases after codebase analysis.
 
@@ -473,9 +471,8 @@ After user validation, update the other TRIP skill files based on the **actual c
 
 1. **`TRIP-1-plan`** - Technical considerations, guidance sections, documentation impact candidates
 2. **`TRIP-2-implement`** - Testing gate commands
-3. **`TRIP-3-release`** - Version file, week offset, tutorials
-4. **`TRIP-review`** - `checklist.md` and `cr-template.md` adapted to actual architecture
-5. **`TRIP-test`** - Test commands, structure, priorities
+3. **`TRIP-3-release`** - Version file, main branch
+4. **`codex-code-review`** - `checklist.md` and `cr-template.md` adapted to actual architecture
 
 ---
 
@@ -647,7 +644,7 @@ If the user selects "Yes" or provides custom input, add the specified sections t
 
 ### 6.3 Update `TRIP-2-implement` and `TRIP-3-release`
 
-The testing gate in `TRIP-2-implement` and the standalone-verification block in `TRIP-3-release` share the same command placeholders. The release ceremony customizations (version, week, tutorials) live in `TRIP-3-release`:
+The testing gate in `TRIP-2-implement` and the standalone-verification block in `TRIP-3-release` share the same command placeholders. The release ceremony customizations (version file, main branch) live in `TRIP-3-release`:
 
 **A. Version File Location**
 
@@ -659,19 +656,7 @@ Update Step 2 to reference the actual version file:
 - `CMakeLists.txt` or `version.h` for C/C++
 - Or other location identified in Phase 2
 
-**B. Week Anchor**
-
-The week Init is run becomes **Week 1** of the project. Capture the anchor date (Monday of the current week) and update the week formula in `TRIP-3-release`.
-
-Run this to get the anchor date:
-
-```bash
-python3 -c "from datetime import date, timedelta; t = date.today(); print(t - timedelta(days=t.weekday()))"
-```
-
-Then replace the `[WEEK_ANCHOR_DATE]` placeholder in `TRIP-3-release` Step 1 with the actual date (ISO format, `YYYY-MM-DD` — the formula parses it with `date.fromisoformat`). The formula counts elapsed weeks from that fixed date, so it works across year boundaries indefinitely, and both this command and the formula use Python instead of `date -d`, so they run identically on GNU/Linux and macOS (BSD `date`). If `python3` is not on PATH — e.g. Git Bash on Windows — use `python` instead.
-
-**C. Main Branch**
+**B. Main Branch**
 
 Replace the `[MAIN_BRANCH]` placeholder in `TRIP-3-release` (the Documentation Sync diff command and the fast-forward merge step) with the repo's default branch name. Detect it with:
 
@@ -681,63 +666,7 @@ basename "$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null || git branch 
 
 (The fallback covers repos without a remote — there, the branch Init runs on is the main branch.)
 
-**D. Tutorial Generation**
-
-**Use the `AskUserQuestion` tool** to ask:
-
-- **Question**: "Do you want the Implement command to generate tutorials after each implementation (learn by doing)?"
-- **Options**:
-  1. **"Yes"** — Generate tutorials after each implementation
-  2. **"No"** — Skip tutorial generation
-
-**If "No"**:
-
-- Remove the `[TUTORIAL_STEP]` block entirely from `TRIP-3-release`
-- Do NOT create the `docs/5-tuto/` folder
-- No renumbering needed — the existing step numbers are already correct for this case
-
-**If "Yes"**:
-
-- Create the `docs/5-tuto/` folder
-- **Use the `AskUserQuestion` tool** with multiple questions to customize tutorial generation:
-
-  **Question 1** (header: "Level"): "What is your current programming level?"
-  - **Options**: "Beginner" (learning fundamentals), "Intermediate" (comfortable with basics, learning advanced), "Advanced" (experienced, deep dives and edge cases)
-
-  **Question 2** (header: "Focus", multiSelect: true): "What do you want to learn from these tutorials?"
-  - **Options**: "Language fundamentals" (syntax, idioms, patterns), "Framework specifics" (React, Rust, etc.), "Architecture & patterns" (design patterns, system design), "Performance & optimization" (profiling, caching, efficiency)
-
-  **Question 3** (header: "Style"): "What tutorial style do you prefer?"
-  - **Options**: "Concise" (key points, minimal explanation), "Balanced" (explanations with examples), "Verbose" (detailed explanations, multiple examples, diagrams)
-
-Then update the `[TUTORIAL_STEP]` block in `TRIP-3-release` with the user's context:
-
-```markdown
-### Step 8: Tutorial
-
-Create `docs/5-tuto/tuto_x.y.z.md` explaining the core principle.
-
-**User context for tutorials**:
-
-- Level: [user's level]
-- Learning focus: [user's interests]
-- Style: [user's preferred style]
-
-[Add any specific instructions based on their choices]
-```
-
-**IMPORTANT — Renumber subsequent steps**: After uncommenting the Tutorial as Step 8, renumber the steps that follow:
-
-- Step 8: README Update → **Step 9**: README Update
-- Step 9: Documentation Sync → **Step 10**: Documentation Sync
-- Step 10: Commit → **Step 11**: Commit
-- Step 11: Tag → **Step 12**: Tag
-- Step 12: Merge (fast-forward) → **Step 13**: Merge (fast-forward)
-- Step 13: Push → **Step 14**: Push
-
-Also update the cross-reference inside Documentation Sync — "included in the release commit (Step 10)" becomes "(Step 11)".
-
-**E. Codex Review Test Commands**
+**C. Codex Review Test Commands**
 
 Replace the `[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, and `[TEST_COMMAND]` placeholders in the TRIP-2 Testing Gate AND the TRIP-3-release standalone-verification block with the **actual commands** for this project (from ARCHI.md or discovered during exploration). For example:
 
@@ -750,9 +679,9 @@ If the project doesn't have a lint or typecheck step, remove the corresponding l
 
 ---
 
-### 6.4 Update `TRIP-review`
+### 6.4 Adapt the Code Review Checklist (`codex-code-review`)
 
-The review skill uses three files: `SKILL.md` (orchestration), `checklist.md` (criteria — single source of truth), and `cr-template.md` (output skeleton). During Init, update **`checklist.md`** and **`cr-template.md`** — leave `SKILL.md` as-is.
+The Codex code review reads two project-adapted files in `.claude/skills/codex-code-review/`: `checklist.md` (criteria — single source of truth) and `cr-template.md` (output skeleton). During Init, update both — leave the skill's `SKILL.md`, prompts and scripts as-is.
 
 **A. Adapt `checklist.md`**
 
@@ -816,96 +745,6 @@ If the project has specific build/test commands, update the "Review Completion C
 
 ---
 
-### 6.5 Update `TRIP-test`
-
-**A. Test Commands**
-
-Replace the `[TEST_COMMAND_*]` placeholders with the **actual test commands** used in this project (from ARCHI.md or discovered during exploration):
-
-```markdown
-### Commands
-
-\`\`\`bash
-
-# Run all tests
-
-[actual command, e.g., npm test, cargo test, pytest, make test]
-
-# Run specific test
-
-[actual command for single test]
-
-# With coverage
-
-[actual coverage command]
-\`\`\`
-```
-
-**B. Test Structure**
-
-Replace the `[ADAPT_TO_PROJECT]` marker with actual test organization:
-
-- Where tests are located
-- Naming conventions
-- Test file patterns
-
-**C. Testing Priorities**
-
-Adapt based on **what's actually tested in this project** and what the ARCHI.md documents about testing strategy. Examples:
-
-**For Embedded:**
-
-```markdown
-### Testing Priorities
-
-**Unit Tests**:
-
-- HAL mock testing
-- Protocol parsers
-- State machines
-- Utility functions
-
-**Hardware-in-Loop Tests**:
-
-- Peripheral initialization
-- Communication protocols
-- Interrupt handling
-
-**What to Test**:
-
-- Normal operation paths
-- Error conditions
-- Boundary values
-- Timing constraints
-```
-
-**For CLI:**
-
-```markdown
-### Testing Priorities
-
-**Unit Tests**:
-
-- Argument parsing
-- Configuration loading
-- Core logic functions
-
-**Integration Tests**:
-
-- Command execution end-to-end
-- File I/O operations
-- Error scenarios
-
-**What to Test**:
-
-- Valid inputs
-- Invalid inputs (edge cases)
-- Missing files/permissions
-- Exit codes
-```
-
----
-
 ## Phase 7: Create Supporting Files
 
 Now that ARCHI.md is validated, create the supporting documentation files adapted to the project.
@@ -918,40 +757,26 @@ Now that ARCHI.md is validated, create the supporting documentation files adapte
 - Current `0.5.0` → First entry `0.5.1`
 - No version found → First entry `0.1.0`
 
-This file has two sections:
-
-**Section 1: Quick Reference Table**
+It is a one-line-per-release index; each release's detail lives in its own `docs/2-changelog/vx.y.z.md` file.
 
 ```markdown
 # Changelog Table
 
-| Version   | Week | Commit Message                  |
-| --------- | ---- | ------------------------------- |
-| `X.Y.Z+1` | 1    | chore: initialize TRIP workflow |
+| Version   | Commit Message                  |
+| --------- | ------------------------------- |
+| `X.Y.Z+1` | chore: initialize TRIP workflow |
 ```
 
 - **Version**: SemVer format in backticks (e.g., `1.0.0`, `0.2.1`)
-- **Week**: Project week number. Week 1 = the week when TRIP Init was run.
 - **Commit Message**: One-line description of the change
 
-**Section 2: Detailed Changelog Summary**
-
-```markdown
-# Changelog Summary
-
-- **vX.Y.Z+1 (TRIP Initialization - Week 1, DD-MM-YYYY)**:
-  - **Setup**: Initialized TRIP workflow with docs structure
-  - **Documentation**: Generated ARCHI.md with [project type] architecture
-  - **Files Added**: docs/ARCHI.md, docs/ARCHI-rules.md, docs/2-changelog/changelog_table.md, docs/4-unit-tests/TESTING.md
-```
-
-The summary provides context that the table cannot capture: rationale, impact, technical decisions, and file-level details. New entries are added at the **top** of each section.
+New rows are added at the **top** of the table.
 
 ---
 
 ### 2. `docs/4-unit-tests/TESTING.md` - Testing Guidelines
 
-**Adapt based on the validated ARCHI.md** - use the actual test framework, commands, and conventions discovered during codebase exploration:
+**Adapt based on the validated ARCHI.md** - use the actual test framework, commands, and conventions discovered during codebase exploration. This file is the project's testing guide: `TRIP-2-implement` sends the agent here when it writes tests.
 
 ```markdown
 # Testing Guidelines
@@ -963,16 +788,33 @@ The summary provides context that the table cannot capture: rationale, impact, t
 ## Running Tests
 
 \`\`\`bash
-[From ARCHI: actual test commands]
+# All tests
+[actual command]
+
+# One file or one test
+[actual command]
+
+# With coverage
+[actual command]
 \`\`\`
 
 ## Test Organization
 
-[From ARCHI: actual test file locations and patterns]
+[From ARCHI: where tests live, naming conventions, file patterns]
+
+## Testing Priorities
+
+[What is worth testing in this project — e.g. parsers and state machines for firmware, endpoints and data access for a backend, argument parsing and exit codes for a CLI. Unit targets first, then the integration paths that matter.]
 
 ## Writing Tests
 
 [Project-specific conventions observed in the codebase]
+
+## Hard-to-Test Code
+
+Seam ladder, cheapest first: exported pure helper → injectable client/adapter → module mock → integration/emulator test. Take the first rung that works; refactor for a seam only if the refactor is smaller than the feature being shipped. Before refactoring legacy code, pin it with characterization tests.
+
+Uncovered risky paths: one line each in `docs/4-unit-tests/COVERAGE-DEBT.md` (`path | why hard | escape plan`). Delete a ledger line in the same change that gives its path meaningful coverage.
 
 ## Coverage Requirements
 
@@ -1047,16 +889,12 @@ Update: Technology Stack, and any affected architectural sections
   - [ ] `TRIP-1-plan`: Custom plan sections added (if user requested)
   - [ ] `TRIP-2-implement`: Testing gate commands (`[LINT_COMMAND]`, `[TYPECHECK_COMMAND]`, `[TEST_COMMAND]`) replaced with actual commands
   - [ ] `TRIP-3-release`: `[VERSION_FILE]` placeholder replaced
-  - [ ] `TRIP-3-release`: `[WEEK_ANCHOR_DATE]` placeholder replaced
   - [ ] `TRIP-3-release`: `[MAIN_BRANCH]` placeholder replaced
   - [ ] `TRIP-3-release`: Standalone-verification commands replaced with actual commands
-  - [ ] `TRIP-3-release`: Tutorial preference configured (if enabled: 5-tuto/ folder created + user context; if disabled: `[TUTORIAL_STEP]` block removed)
-  - [ ] `TRIP-review/checklist.md`: `[ADAPT_TO_PROJECT]` markers replaced with project-specific checklist sections
-  - [ ] `TRIP-review/cr-template.md`: Checklist section names updated to match adapted `checklist.md`
-  - [ ] `TRIP-test`: `[TEST_COMMAND_*]` placeholders replaced with actual commands
-  - [ ] `TRIP-test`: `[ADAPT_TO_PROJECT]` markers replaced with actual test structure/priorities
+  - [ ] `codex-code-review/checklist.md`: `[ADAPT_TO_PROJECT]` markers replaced with project-specific checklist sections
+  - [ ] `codex-code-review/cr-template.md`: Checklist section names updated to match adapted `checklist.md`
 - [ ] changelog_table.md initialized with version+1 (Phase 7)
-- [ ] TESTING.md created, adapted to actual test setup (Phase 7)
+- [ ] TESTING.md created with the project's test commands, organization and priorities (Phase 7)
 - [ ] ARCHI-rules.md created, referencing actual ARCHI sections (Phase 7)
 
 ---

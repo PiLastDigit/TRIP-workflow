@@ -26,7 +26,7 @@ instruction block at the bottom of this prompt.
   fix your own failures before finishing.
 - Do NOT write tests unless the instruction block explicitly asks — the requester owns the
   testing gate that follows.
-- Do NOT commit, tag, bump versions, or touch changelogs/README/tutorials — the requester owns
+- Do NOT commit, tag, bump versions, or touch changelogs/README — the requester owns
   everything after implementation.
 
 ## Report (your final message)

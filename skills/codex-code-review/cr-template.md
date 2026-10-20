@@ -1,9 +1,6 @@
 # Code Review Output Template
 
-This file is the **single source of truth** for the markdown skeleton of a code review record. Both review surfaces produce output that conforms to this skeleton:
-
-- The human-driven `/TRIP-review` flow renders this skeleton into `docs/3-code-review/CR_wa_vx.y.z.md` as the final committed review.
-- The Codex iteration loop's `synthesize.tpl` step renders the same skeleton, which the requester then promotes to the same path.
+This file is the **single source of truth** for the markdown skeleton of a code review record. The Codex loop's `synthesize.tpl` step renders it, and `TRIP-3-release` promotes the result to `docs/3-code-review/CR_vx.y.z.md` (or renders it by hand when the Codex loop was skipped).
 
 Anything review-surface-specific (file naming, save location, iteration-loop sentinels, "where do findings come from") lives in the consuming SKILL.md / prompt, **not here**.
 
@@ -55,7 +52,7 @@ Angle-bracket placeholders (`<like this>`) are filling-in instructions for the r
 
 ## Checklist
 
-State each section's outcome (passed / passed with caveats / not applicable). One line per section, no expanded prose unless a caveat needs explanation. The section names match the criteria headings in `.claude/skills/TRIP-review/checklist.md` so a reader can cross-reference what was checked.
+State each section's outcome (passed / passed with caveats / not applicable). One line per section, no expanded prose unless a caveat needs explanation. The section names match the criteria headings in `.claude/skills/codex-code-review/checklist.md` so a reader can cross-reference what was checked.
 
 - [ ] 1. Functional Requirements — <outcome>
 - [ ] 2. Code Quality — <outcome>

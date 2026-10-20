@@ -1,9 +1,9 @@
 ---
 name: TRIP-1-plan
 description: Plan a new feature following project standards
-argument-hint: "describe the feature you want to build (add --yolo to chain straight into implementation)"
+argument-hint: "describe the feature you want to build (add --review to approve the plan before implementation starts)"
 metadata:
-  trip-version: "2.8.4"
+  trip-version: "2.9.0"
 ---
 
 # Planning Mode
@@ -21,7 +21,11 @@ Before creating any plan, you MUST read ALL THE LINES of:
 
 Plan the following feature: $ARGUMENTS
 
-**YOLO**: if the arguments contain `--yolo`, strip the flag from the feature description and run in YOLO mode — Step 4's approval question is skipped and the plan chains directly into `TRIP-2-implement` once Codex returns `APPROVED`. `NEEDS_REWORK` always cancels YOLO and falls back to the normal Step 4 question. Discovery questions (Step 1) still run — YOLO removes the end gate, not the understanding phase.
+**Default — plan, then implement.** Once Codex returns `APPROVED`, the plan chains straight into `TRIP-2-implement` with no approval question. Discovery (Step 1) is where the user and you align; it runs in every mode.
+
+- `--review`: strip the flag from the feature description and stop at Step 4 for the user's approval instead of chaining.
+- A Codex `NEEDS_REWORK` always stops and asks, whatever the flags.
+- `--yolo` (the pre-2.9 opt-in for chaining) is accepted and ignored — chaining is now the default.
 
 ---
 
@@ -178,7 +182,7 @@ Depending on the feature (major, minor, patch), propose a new version using SemV
 
 ## Step 3: Codex Second-Opinion Review
 
-Before the user sees the plan, run the Codex plan review loop. **Always run it — no confirmation question.** The user gets exactly one decision point in this skill, and it comes after the plan is reviewed (Step 4).
+Run the Codex plan review loop on every plan. **Always run it — no confirmation question.** It is the plan's only gate in the default flow, so the plan must converge here before any code is written.
 
 ### Loop
 
@@ -200,32 +204,31 @@ Surface Codex reviews verbatim. Keep edits scoped to findings. Reset thread (`re
 
 ---
 
-## Step 4: User Review
+## Step 4: Hand-off to Implementation
 
-After the Codex review converges, present a summary:
+After the Codex review converges, present a summary — it is the record of what is about to be built:
 
 - **Feature**: [name]
 - **Approach**: [1-2 sentences]
+- **Plan**: `docs/1-plans/F_x.y.z_feature-name.plan.md`
 - **Files affected**: [count] files ([list key ones])
 - **Estimated complexity**: [simple/moderate/complex]
 - **Codex status**: [APPROVED after N rounds / NEEDS_REWORK surfaced to you]
 
-**YOLO mode**: present the summary above (so the record exists), then skip the question and proceed directly into `TRIP-2-implement` as if the user had answered "Approved — implement now". (A `NEEDS_REWORK` Codex status always cancels YOLO — ask the question normally.)
+**Default**: proceed directly into implementation — read `.claude/skills/TRIP-2-implement/SKILL.md` and follow it in this session, passing the plan path.
 
-Otherwise, **one `AskUserQuestion`** — the single decision point of this skill:
+**With `--review`, or when Codex returned `NEEDS_REWORK`**: one `AskUserQuestion` instead:
 
 - **Question**: "Review the plan at `docs/1-plans/F_x.y.z_feature-name.plan.md`. How to proceed?"
 - **Options**:
-  - "Approved — implement now" → continue straight into `TRIP-2-implement` with this plan
-  - "Approved — stop here" → plan saved, no implementation
+  - "Approved — implement now" → continue into `TRIP-2-implement` as in the default flow
+  - "Approved — stop here" → plan saved, no implementation (run `/TRIP-2-implement <plan>` later, e.g. in another session or with another model)
   - "Rework" → the user provides feedback as text
 
 Handle the answer:
 
 - **Rework**: update the plan from the user's feedback, then re-present. Run another Codex pass if the changes are substantive.
 - **Other (custom input)**: handle accordingly.
-
-Approval and the implement-now decision are one question on purpose — approving a plan and choosing when to build it is a single thought, and splitting it into two prompts buys nothing.
 
 ---
 
@@ -244,7 +247,7 @@ But NOT:
 - Actual code implementations
 - Detailed algorithm code
 
-Keep it architectural and descriptive. Code comes in the `TRIP-2-implement` phase.
+Keep it architectural and descriptive. Code comes in the `TRIP-2-implement` phase, which starts only after Step 4.
 
 ## [ADAPT_TO_PROJECT: Guidance Sections]
 

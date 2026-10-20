@@ -3,7 +3,7 @@ name: codex-plan-review
 description: Iterative Codex CLI review of a planning document
 argument-hint: "<plan-path> [extra context] | reset <plan-path> | show <plan-path>"
 metadata:
-  trip-version: "2.8.4"
+  trip-version: "2.9.0"
 ---
 
 # Codex Plan Review

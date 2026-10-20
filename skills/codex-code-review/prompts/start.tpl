@@ -14,7 +14,7 @@ If `git diff HEAD` returns nothing (already committed), use `git diff @{u}...HEA
 ## Prerequisites — read first
 
 1. `docs/ARCHI.md`
-2. `.claude/skills/TRIP-review/checklist.md` — single source of truth for the review checklist, severity classification, and approval gate. Do NOT read `.claude/skills/TRIP-review/SKILL.md`.
+2. `.claude/skills/codex-code-review/checklist.md` — single source of truth for the review checklist, severity classification, and approval gate. Do NOT read `.claude/skills/codex-code-review/SKILL.md`.
 3. Plan file `{{TARGET}}` if it's a path.
 4. Corresponding changelog in `docs/2-changelog/` if present.
 

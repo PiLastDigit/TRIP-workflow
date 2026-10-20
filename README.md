@@ -1,6 +1,6 @@
 ![TRIP Workflow Banner](assets/trip-workflow-banner2.png)
 
-![Version](https://img.shields.io/badge/version-2.8.4-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
+![Version](https://img.shields.io/badge/version-2.9.0-blue) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/PiLastDigit/TRIP-workflow/blob/master/LICENSE) ![Works with](https://img.shields.io/badge/Works_with-grey) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-10A37F)](https://developers.openai.com/codex/cli/) [![OpenCode](https://img.shields.io/badge/OpenCode-1a3a5c)](https://github.com/sst/opencode) [![Mistral Vibe](https://img.shields.io/badge/Mistral_Vibe-F7D046)](https://github.com/mistralai/mistral-vibe)
 
 ## What is TRIP?
 
@@ -49,7 +49,7 @@ Also copy `AskUserQuestion/` to your agent `/skills/`, it provides the `AskUserQ
 
 Et voila ! Start using the skills like `/TRIP-1-plan auth for this webapp`, `/TRIP-2-implement @auth-plan.md`, etc.
 
-Feeling confident? `/TRIP-1-plan <feature> --yolo` skips the plan-approval question: answer the discovery questions, walk away, and come back to an implemented feature.
+By default `/TRIP-1-plan` chains straight into implementation once the Codex plan review approves: answer the discovery questions, walk away, and come back to an implemented feature. Want to read the plan before any code is written? Add `--review`. `/TRIP-2-implement` still runs on its own for a plan written earlier or a resumed session.
 
 https://github.com/user-attachments/assets/d37bbc60-1868-4fa8-9be6-083b60d6a53d
 
@@ -107,21 +107,17 @@ Implementation delegated to Codex CLI in a workspace-write sandbox.
 
 ### `/codex-plan-review` & `/codex-code-review`
 
-Iterative review loops powered by Codex CLI.
+Iterative review loops powered by Codex CLI. The code review checklist and the code-review record template live in `codex-code-review/` and are adapted to your project by init.
 
 ### `/codex-ask`
 
 A grounded second opinion on **anything**. TRIP-research uses it to brainstorm findings before presenting them.
 
-### `/TRIP-review` & `/TRIP-test`
-
-The former steps 3 and 4, reborn as on-demand support skills.
-
 ### `/TRIP-upgrade`
 
 Upgrades an existing project's TRIP skills to the latest release without losing project customizations. Run `/TRIP-upgrade`, done: it fetches this repository itself (pass a version to pin one, or a local folder to upgrade from a fork). Under the hood it recovers the generic template you installed from, computes your customizations as a diff, and replays them onto the new version with a git three-way merge, so the result is exact and every change is shown as a diff before it lands.
 
-**Coming from a version before 2.8.4** (no self-fetching upgrade skill yet)? One-time bootstrap: copy this repo's `skills/TRIP-upgrade/` over your `.claude/skills/TRIP-upgrade/`, then run `/TRIP-upgrade`. Installs older than 2.8.1 carry no version stamp, so that first run rebuilds the customized skills from the new templates instead of merging; every run after that merges.
+**Coming from a version before 2.8.4** (no self-fetching upgrade skill yet)? One-time bootstrap: copy this repo's `skills/TRIP-upgrade/` over your `.claude/skills/TRIP-upgrade/`, then run `/TRIP-upgrade`. Installs older than 2.8.1 carry no version stamp, so that first run brings them to 2.8.4 by hand, then merges them to the latest release; every run after that merges directly.
 
 Not sure which TRIP version a project runs? Every skill carries it in its frontmatter (`metadata.trip-version`, since v2.8.1):
 
@@ -152,6 +148,7 @@ Just like you wouldn't smell your own fart, an LLM is unlikely to catch bugs in 
 As of v2.0.0, this multi-agent approach is **the default workflow**.  
 Considering Claude Code as your main agent and Codex as the copilot, the recommended approach to save tokens is to split in two sessions.  
 Session 1 with Fable for planning, Session 2 with Opus for implementation (or switch model mid-session).  
+A default `/TRIP-1-plan` run implements on the same model that planned. To split, run `/TRIP-1-plan <feature> --review`, pick "Approved — stop here", then `/TRIP-2-implement <plan>` in the Opus session.  
 
 ```mermaid
 flowchart TD

@@ -3,7 +3,7 @@ name: TRIP-hotfix
 description: Urgent fix bypassing full TRIP workflow
 argument-hint: "what is broken in production?"
 metadata:
-  trip-version: "2.8.4"
+  trip-version: "2.9.0"
 ---
 
 # Hotfix Mode
@@ -80,19 +80,20 @@ Increment **patch** version only (x.y.Z+1) in version file.
 
 ### Minimal Changelog Entry
 
-Add to top of `docs/2-changelog/changelog_table.md`:
+Add a row at the top of the table in `docs/2-changelog/changelog_table.md`:
 
 ```markdown
-| `x.y.z` | W | hotfix: [brief description] |
+| `x.y.z` | hotfix: [brief description] |
 ```
 
-Add to Changelog Summary:
+Create `docs/2-changelog/vx.y.z.md`:
 
 ```markdown
-- **vX.Y.Z (Hotfix - Week W, DD-MM-YYYY)**:
-  - **Issue**: [What was broken]
-  - **Fix**: [What was done]
-  - **Root Cause**: [Brief explanation]
+# Changelog vx.y.z (DD-MM-YYYY) — Hotfix
+
+- **Issue**: [What was broken]
+- **Fix**: [What was done]
+- **Root Cause**: [Brief explanation]
 ```
 
 ---
@@ -134,7 +135,6 @@ Compared to full TRIP:
 - No interactive discovery questions
 - No formal plan document
 - No full code review checklist
-- No tutorial generation
 - No ARCHI.md update (unless architecture changed)
 - No README update (unless relevant)
 

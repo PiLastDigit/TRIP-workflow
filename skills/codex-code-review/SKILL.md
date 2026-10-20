@@ -3,14 +3,14 @@ name: codex-code-review
 description: Iterative Codex CLI code review against an implementation plan
 argument-hint: "<plan-path> [extra context] | reset <plan-path> | show <plan-path>"
 metadata:
-  trip-version: "2.8.4"
+  trip-version: "2.9.0"
 ---
 
 # Codex Code Review
 
 Iterative code review via Codex CLI on uncommitted changes. Codex reads the plan and runs `git status -s` / `git diff HEAD` to inspect the change set.
 
-Review output stays in `state/<key>.review.txt` — not `docs/3-code-review/`. Promotion to `docs/3-code-review/CR_wa_vx.y.z.md` happens after convergence, not per-turn.
+Review output stays in `state/<key>.review.txt` — not `docs/3-code-review/`. Promotion to `docs/3-code-review/CR_vx.y.z.md` happens after convergence, not per-turn.
 
 State persisted under `.claude/skills/codex-code-review/state/<sanitized-target>.{thread,review.txt,events.ndjson}`. Invoke this skill's own wrapper scripts under `.claude/skills/codex-code-review/scripts/` — they pin the correct `STATE_DIR` and delegate to the shared `codex-plan-review` implementation, so there is no `export` to remember (a forgotten export would silently operate on the plan-review thread for the same target).
 
@@ -45,7 +45,7 @@ Codex uses `git status -s` / `git diff HEAD` in read-only sandbox. If those fail
 
 ## After Convergence
 
-1. Promote `state/<key>.review.txt` to `docs/3-code-review/CR_wa_vx.y.z.md` using `.claude/skills/TRIP-review/cr-template.md`.
+1. Promote `state/<key>.review.txt` to `docs/3-code-review/CR_vx.y.z.md` using `.claude/skills/codex-code-review/cr-template.md`.
 2. Continue with `TRIP-3-release`.
 
 ## Notes

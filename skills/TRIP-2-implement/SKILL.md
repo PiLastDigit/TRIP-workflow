@@ -3,7 +3,7 @@ name: TRIP-2-implement
 description: Implement a feature following TRIP plan
 argument-hint: "plan file or feature to implement"
 metadata:
-  trip-version: "2.8.4"
+  trip-version: "2.9.0"
 ---
 
 # Implementation Mode
@@ -122,7 +122,7 @@ If the change modifies an externally observable contract (API shape, UI selector
 
 ### 4. Author missing tests
 
-If the change adds new logic, write its tests **now**, guided by the plan's **Test Impact** section and the project's testing guide (see `TRIP-test`). If no new logic was added, skip this step.
+If the change adds new logic, write its tests **now**, guided by the plan's **Test Impact** section and the project's testing guide (`docs/4-unit-tests/TESTING.md`). If no new logic was added, skip this step.
 
 **Hard-to-cover code policy:**
 
@@ -197,13 +197,8 @@ Surface reviews verbatim. Keep edits scoped. If Codex repeats a finding, re-read
 
 ## Handoff to Release
 
-After Codex converges (or is skipped):
+After Codex converges (or is skipped), no question — the code review approval is the gate:
 
-- Cross the corresponding checkboxes in the plan todo list (if any)
-- Then **use the `AskUserQuestion` tool** to ask:
-  - **Question**: "Is the implementation complete?"
-  - **Options**: "Yes, everything is complete" (proceed to release), "No, there are remaining items" (continue working)
-
-**If "Yes"**: proceed directly into the release — read `.claude/skills/TRIP-3-release/SKILL.md` and follow it in this session, passing the same plan path (or feature label). The release skill owns everything from version bump to the fast-forward merge and push.
-
-**If "No"**: continue working, then repeat the sequence: testing gate → Codex review → this question.
+1. Cross the corresponding checkboxes in the plan to-do list (if any).
+2. If unchecked to-dos remain that the plan does not mark as deferred, finish them, then repeat the sequence: testing gate → Codex review → this handoff.
+3. Otherwise proceed directly into the release — read `.claude/skills/TRIP-3-release/SKILL.md` and follow it in this session, passing the same plan path (or feature label). The release skill owns everything from version bump to the fast-forward merge, and asks once, before pushing.
